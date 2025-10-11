@@ -1,0 +1,45 @@
+# Orbia API 配置文件
+
+# 服务配置
+server:
+  host: 0.0.0.0
+  port: 8888
+  read_timeout: 30s
+  write_timeout: 30s
+
+# 数据库配置
+database:
+  mysql:
+    host: 127.0.0.1
+    port: 3306
+    database: orbia
+    username: root
+    password: root123
+    charset: utf8mb4
+    parse_time: true
+    loc: Local
+    max_idle_conns: 10
+    max_open_conns: 100
+    conn_max_lifetime: 3600
+
+# Redis 配置
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+# JWT 配置
+jwt:
+  secret: orbia_secret_key_change_in_production
+  expire_hours: 24
+
+# 日志配置
+log:
+  level: info
+  file_path: ./logs/app.log
+  max_size: 100
+  max_backups: 7
+  max_age: 30
+
