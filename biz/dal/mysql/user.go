@@ -2,97 +2,90 @@ package mysql
 
 import (
 	"time"
-
 	"gorm.io/gorm"
 )
 
 // User 用户模型
 type User struct {
-	ID        uint           `gorm:"primaryKey" json:"id"`
-	Name      string         `gorm:"size:100;not null" json:"name"`
-	Email     string         `gorm:"size:100;uniqueIndex;not null" json:"email"`
-	Phone     string         `gorm:"size:20" json:"phone"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID               int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	WalletAddress    *string        `gorm:"uniqueIndex;column:wallet_address;size:42" json:"wallet_address"`
+	Email            *string        `gorm:"uniqueIndex;column:email;size:255" json:"email"`
+	PasswordHash     *string        `gorm:"column:password_hash;size:255" json:"-"`
+	VerificationCode *string        `gorm:"column:verification_code;size:10" json:"-"`
+	CodeExpiry       *time.Time     `gorm:"column:code_expiry" json:"-"`
+	Nickname         *string        `gorm:"column:nickname;size:100" json:"nickname"`
+	AvatarURL        *string        `gorm:"column:avatar_url;size:500" json:"avatar_url"`
+	CreatedAt        time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
+	UpdatedAt        time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
+	DeletedAt        gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`
 }
 
 // TableName 指定表名
 func (User) TableName() string {
-	return "users"
+	return "orbia_user"
 }
 
-// UserDAO 用户数据访问对象
-type UserDAO struct {
+// UserRepository 用户仓储接口
+type UserRepository interface {
+	CreateUser(user *User) error
+	GetUserByWalletAddress(walletAddress string) (*User, error)
+	GetUserByEmail(email string) (*User, error)
+	GetUserByID(id int64) (*User, error)
+	UpdateUser(user *User) error
+	DeleteUser(id int64) error
+}
+
+// userRepository 用户仓储实现
+type userRepository struct {
 	db *gorm.DB
 }
 
-// NewUserDAO 创建用户 DAO
-func NewUserDAO() *UserDAO {
-	return &UserDAO{db: DB}
+// NewUserRepository 创建用户仓储实例
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{db: db}
 }
 
-// Create 创建用户
-func (dao *UserDAO) Create(user *User) error {
-	return dao.db.Create(user).Error
+// CreateUser 创建用户
+func (r *userRepository) CreateUser(user *User) error {
+	return r.db.Create(user).Error
 }
 
-// GetByID 根据 ID 获取用户
-func (dao *UserDAO) GetByID(id uint) (*User, error) {
+// GetUserByWalletAddress 根据钱包地址获取用户
+func (r *userRepository) GetUserByWalletAddress(walletAddress string) (*User, error) {
 	var user User
-	err := dao.db.First(&user, id).Error
+	err := r.db.Where("wallet_address = ?", walletAddress).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// GetByEmail 根据邮箱获取用户
-func (dao *UserDAO) GetByEmail(email string) (*User, error) {
+// GetUserByEmail 根据邮箱获取用户
+func (r *userRepository) GetUserByEmail(email string) (*User, error) {
 	var user User
-	err := dao.db.Where("email = ?", email).First(&user).Error
+	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// List 获取用户列表
-func (dao *UserDAO) List(page, pageSize int) ([]*User, int64, error) {
-	var users []*User
-	var total int64
-
-	// 计算总数
-	if err := dao.db.Model(&User{}).Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	// 分页查询
-	offset := (page - 1) * pageSize
-	err := dao.db.Offset(offset).Limit(pageSize).Order("id DESC").Find(&users).Error
+// GetUserByID 根据ID获取用户
+func (r *userRepository) GetUserByID(id int64) (*User, error) {
+	var user User
+	err := r.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-
-	return users, total, nil
+	return &user, nil
 }
 
-// Update 更新用户
-func (dao *UserDAO) Update(user *User) error {
-	return dao.db.Save(user).Error
+// UpdateUser 更新用户信息
+func (r *userRepository) UpdateUser(user *User) error {
+	return r.db.Save(user).Error
 }
 
-// Delete 删除用户（软删除）
-func (dao *UserDAO) Delete(id uint) error {
-	return dao.db.Delete(&User{}, id).Error
-}
-
-// ExistsByEmail 检查邮箱是否已存在
-func (dao *UserDAO) ExistsByEmail(email string) (bool, error) {
-	var count int64
-	err := dao.db.Model(&User{}).Where("email = ?", email).Count(&count).Error
-	if err != nil {
-		return false, err
-	}
-	return count > 0, nil
+// DeleteUser 删除用户（软删除）
+func (r *userRepository) DeleteUser(id int64) error {
+	return r.db.Delete(&User{}, id).Error
 }

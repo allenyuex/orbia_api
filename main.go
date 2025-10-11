@@ -15,6 +15,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"orbia_api/biz/dal/mysql"
+	"orbia_api/biz/handler/auth"
+	"orbia_api/biz/handler/user"
 	"orbia_api/biz/infra/config"
 	"orbia_api/biz/mw"
 )
@@ -38,7 +40,12 @@ func main() {
 	}
 	defer mysql.Close()
 
-	// 3. 创建 Hertz 服务器
+	// 3. 初始化服务
+	auth.InitAuthService()
+	user.InitUserService()
+	log.Println("✅ Services initialized successfully")
+
+	// 4. 创建 Hertz 服务器
 	addr := fmt.Sprintf("%s:%d",
 		config.GlobalConfig.Server.Host,
 		config.GlobalConfig.Server.Port,
@@ -47,12 +54,12 @@ func main() {
 		server.WithHostPorts(addr),
 	)
 
-	// 4. 注册全局中间件
+	// 5. 注册全局中间件
 	h.Use(mw.Recovery()) // 恢复中间件，必须放在最前面
 	h.Use(mw.CORS())     // 跨域中间件
 	h.Use(mw.Logger())   // 日志中间件
 
-	// 5. 健康检查
+	// 6. 健康检查
 	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, map[string]interface{}{
 			"status":  "ok",
@@ -60,37 +67,38 @@ func main() {
 		})
 	})
 
-	// 6. 欢迎页面
+	// 7. 欢迎页面
 	h.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, map[string]interface{}{
 			"message": "Welcome to Orbia API",
 			"version": "1.0.0",
-			"docs":    "/api/v1/demo/hello",
+			"docs":    "/api/v1/auth/wallet-login",
 		})
 	})
 
-	// 7. 注册业务路由（由 hz 生成）
+	// 8. 注册业务路由（由 hz 生成）
 	register(h)
 
-	// 8. 打印启动信息
+	// 9. 打印启动信息
 	log.Printf("✨ Server is running on http://%s", addr)
 	log.Println("📚 API Endpoints:")
-	log.Println("   GET  /                      - Welcome message")
-	log.Println("   GET  /health                - Health check")
-	log.Println("   GET  /api/v1/demo/hello     - Hello demo")
-	log.Println("   POST /api/v1/users          - Create user")
-	log.Println("   GET  /api/v1/users/:user_id - Get user")
-	log.Println("   GET  /api/v1/users          - List users")
+	log.Println("   GET  /                              - Welcome message")
+	log.Println("   GET  /health                        - Health check")
+	log.Println("   POST /api/v1/auth/wallet-login      - Wallet login")
+	log.Println("   POST /api/v1/auth/email-login       - Email login")
+	log.Println("   POST /api/v1/user/profile           - Get user profile (requires JWT)")
+	log.Println("   POST /api/v1/user/update-profile    - Update user profile (requires JWT)")
+	log.Println("   POST /api/v1/user/:user_id          - Get user by ID")
 	log.Println("")
 	log.Println("💡 Test commands:")
 	log.Printf("   curl http://localhost:%d/health\n", config.GlobalConfig.Server.Port)
-	log.Printf("   curl \"http://localhost:%d/api/v1/demo/hello?name=Orbia\"\n", config.GlobalConfig.Server.Port)
+	log.Printf("   curl -X POST http://localhost:%d/api/v1/auth/wallet-login -H \"Content-Type: application/json\" -d '{\"wallet_address\":\"0x...\",\"signature\":\"0x...\"}'\n", config.GlobalConfig.Server.Port)
 	log.Println("")
 
-	// 9. 优雅关闭
+	// 10. 优雅关闭
 	go handleShutdown()
 
-	// 10. 启动服务器
+	// 11. 启动服务器
 	h.Spin()
 }
 

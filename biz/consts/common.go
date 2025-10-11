@@ -13,3 +13,8 @@ const (
 	DateFormat     = "2006-01-02"
 	TimeFormat     = "15:04:05"
 )
+
+// 用户默认配置
+const (
+	DefaultAvatarURL = "https://pub-7fecd33efbfc4271b901992eefd6a9ba.r2.dev/imgs/avatar.png"
+)
