@@ -80,6 +80,7 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 		Email:         userInfo.Email,
 		Nickname:      userInfo.Nickname,
 		AvatarURL:     userInfo.AvatarURL,
+		Role:          userInfo.Role,
 		CreatedAt:     userInfo.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     userInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
@@ -211,6 +212,7 @@ func GetUserById(ctx context.Context, c *app.RequestContext) {
 		Email:         userInfo.Email,
 		Nickname:      userInfo.Nickname,
 		AvatarURL:     userInfo.AvatarURL,
+		Role:          userInfo.Role,
 		CreatedAt:     userInfo.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     userInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}

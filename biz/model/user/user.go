@@ -12,14 +12,16 @@ import (
 
 // 用户信息
 type UserInfo struct {
-	ID            int64      `thrift:"id,1" form:"id" json:"id" query:"id"`
-	WalletAddress *string    `thrift:"wallet_address,2,optional" form:"wallet_address" json:"wallet_address,omitempty" query:"wallet_address"`
-	Email         *string    `thrift:"email,3,optional" form:"email" json:"email,omitempty" query:"email"`
-	Nickname      *string    `thrift:"nickname,4,optional" form:"nickname" json:"nickname,omitempty" query:"nickname"`
-	AvatarURL     *string    `thrift:"avatar_url,5,optional" form:"avatar_url" json:"avatar_url,omitempty" query:"avatar_url"`
-	CreatedAt     string     `thrift:"created_at,6" form:"created_at" json:"created_at" query:"created_at"`
-	UpdatedAt     string     `thrift:"updated_at,7" form:"updated_at" json:"updated_at" query:"updated_at"`
-	CurrentTeam   *team.Team `thrift:"current_team,8,optional" form:"current_team" json:"current_team,omitempty" query:"current_team"`
+	ID            int64   `thrift:"id,1" form:"id" json:"id" query:"id"`
+	WalletAddress *string `thrift:"wallet_address,2,optional" form:"wallet_address" json:"wallet_address,omitempty" query:"wallet_address"`
+	Email         *string `thrift:"email,3,optional" form:"email" json:"email,omitempty" query:"email"`
+	Nickname      *string `thrift:"nickname,4,optional" form:"nickname" json:"nickname,omitempty" query:"nickname"`
+	AvatarURL     *string `thrift:"avatar_url,5,optional" form:"avatar_url" json:"avatar_url,omitempty" query:"avatar_url"`
+	// 用户角色：user-普通用户，admin-管理员
+	Role        string     `thrift:"role,6" form:"role" json:"role" query:"role"`
+	CreatedAt   string     `thrift:"created_at,7" form:"created_at" json:"created_at" query:"created_at"`
+	UpdatedAt   string     `thrift:"updated_at,8" form:"updated_at" json:"updated_at" query:"updated_at"`
+	CurrentTeam *team.Team `thrift:"current_team,9,optional" form:"current_team" json:"current_team,omitempty" query:"current_team"`
 }
 
 func NewUserInfo() *UserInfo {
@@ -69,6 +71,10 @@ func (p *UserInfo) GetAvatarURL() (v string) {
 	return *p.AvatarURL
 }
 
+func (p *UserInfo) GetRole() (v string) {
+	return p.Role
+}
+
 func (p *UserInfo) GetCreatedAt() (v string) {
 	return p.CreatedAt
 }
@@ -92,9 +98,10 @@ var fieldIDToName_UserInfo = map[int16]string{
 	3: "email",
 	4: "nickname",
 	5: "avatar_url",
-	6: "created_at",
-	7: "updated_at",
-	8: "current_team",
+	6: "role",
+	7: "created_at",
+	8: "updated_at",
+	9: "current_team",
 }
 
 func (p *UserInfo) IsSetWalletAddress() bool {
@@ -192,8 +199,16 @@ func (p *UserInfo) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 8:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField8(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 9:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField9(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -291,7 +306,7 @@ func (p *UserInfo) ReadField6(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.CreatedAt = _field
+	p.Role = _field
 	return nil
 }
 func (p *UserInfo) ReadField7(iprot thrift.TProtocol) error {
@@ -302,10 +317,21 @@ func (p *UserInfo) ReadField7(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.UpdatedAt = _field
+	p.CreatedAt = _field
 	return nil
 }
 func (p *UserInfo) ReadField8(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.UpdatedAt = _field
+	return nil
+}
+func (p *UserInfo) ReadField9(iprot thrift.TProtocol) error {
 	_field := team.NewTeam()
 	if err := _field.Read(iprot); err != nil {
 		return err
@@ -350,6 +376,10 @@ func (p *UserInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField8(oprot); err != nil {
 			fieldId = 8
+			goto WriteFieldError
+		}
+		if err = p.writeField9(oprot); err != nil {
+			fieldId = 9
 			goto WriteFieldError
 		}
 	}
@@ -459,10 +489,10 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 func (p *UserInfo) writeField6(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 6); err != nil {
+	if err = oprot.WriteFieldBegin("role", thrift.STRING, 6); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.CreatedAt); err != nil {
+	if err := oprot.WriteString(p.Role); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -475,10 +505,10 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
 }
 func (p *UserInfo) writeField7(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 7); err != nil {
+	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 7); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.UpdatedAt); err != nil {
+	if err := oprot.WriteString(p.CreatedAt); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -491,8 +521,24 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
 }
 func (p *UserInfo) writeField8(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 8); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.UpdatedAt); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
+}
+func (p *UserInfo) writeField9(oprot thrift.TProtocol) (err error) {
 	if p.IsSetCurrentTeam() {
-		if err = oprot.WriteFieldBegin("current_team", thrift.STRUCT, 8); err != nil {
+		if err = oprot.WriteFieldBegin("current_team", thrift.STRUCT, 9); err != nil {
 			goto WriteFieldBeginError
 		}
 		if err := p.CurrentTeam.Write(oprot); err != nil {
@@ -504,9 +550,9 @@ func (p *UserInfo) writeField8(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
 }
 
 func (p *UserInfo) String() string {

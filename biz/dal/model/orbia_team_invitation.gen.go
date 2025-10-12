@@ -6,23 +6,26 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const TableNameOrbiaTeamInvitation = "orbia_team_invitation"
 
 // OrbiaTeamInvitation 团队邀请表
 type OrbiaTeamInvitation struct {
-	ID             int64      `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:邀请ID" json:"id"`                                             // 邀请ID
-	TeamID         int64      `gorm:"column:team_id;type:bigint;not null;comment:团队ID" json:"team_id"`                                                        // 团队ID
-	InviterID      int64      `gorm:"column:inviter_id;type:bigint;not null;comment:邀请者ID" json:"inviter_id"`                                                 // 邀请者ID
-	InviteeEmail   *string    `gorm:"column:invitee_email;type:varchar(255);comment:被邀请者邮箱" json:"invitee_email"`                                             // 被邀请者邮箱
-	InviteeWallet  *string    `gorm:"column:invitee_wallet;type:varchar(42);comment:被邀请者钱包地址" json:"invitee_wallet"`                                          // 被邀请者钱包地址
-	Role           string     `gorm:"column:role;type:enum('owner','member');not null;default:member;comment:邀请角色" json:"role"`                               // 邀请角色
-	Status         string     `gorm:"column:status;type:enum('pending','accepted','rejected','expired');not null;default:pending;comment:邀请状态" json:"status"` // 邀请状态
-	InvitationCode string     `gorm:"column:invitation_code;type:varchar(32);not null;comment:邀请码" json:"invitation_code"`                                    // 邀请码
-	ExpiresAt      time.Time  `gorm:"column:expires_at;type:timestamp;not null;comment:过期时间" json:"expires_at"`                                               // 过期时间
-	CreatedAt      *time.Time `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"`                              // 创建时间
-	UpdatedAt      *time.Time `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updated_at"`                              // 更新时间
+	ID             int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:邀请ID" json:"id"`                                             // 邀请ID
+	TeamID         int64          `gorm:"column:team_id;type:bigint;not null;comment:团队ID" json:"team_id"`                                                        // 团队ID
+	InviterID      int64          `gorm:"column:inviter_id;type:bigint;not null;comment:邀请者ID" json:"inviter_id"`                                                 // 邀请者ID
+	InviteeEmail   *string        `gorm:"column:invitee_email;type:varchar(255);comment:被邀请者邮箱" json:"invitee_email"`                                             // 被邀请者邮箱
+	InviteeWallet  *string        `gorm:"column:invitee_wallet;type:varchar(42);comment:被邀请者钱包地址" json:"invitee_wallet"`                                          // 被邀请者钱包地址
+	Role           string         `gorm:"column:role;type:enum('owner','member');not null;default:member;comment:邀请角色" json:"role"`                               // 邀请角色
+	Status         string         `gorm:"column:status;type:enum('pending','accepted','rejected','expired');not null;default:pending;comment:邀请状态" json:"status"` // 邀请状态
+	InvitationCode string         `gorm:"column:invitation_code;type:varchar(32);not null;comment:邀请码" json:"invitation_code"`                                    // 邀请码
+	ExpiresAt      time.Time      `gorm:"column:expires_at;type:timestamp;not null;comment:过期时间" json:"expires_at"`                                               // 过期时间
+	CreatedAt      *time.Time     `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"`                              // 创建时间
+	UpdatedAt      *time.Time     `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updated_at"`                              // 更新时间
+	DeletedAt      gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp;comment:软删除时间" json:"deleted_at"`                                                       // 软删除时间
 }
 
 // TableName OrbiaTeamInvitation's table name

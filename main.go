@@ -15,6 +15,7 @@ import (
 
 	"orbia_api/biz/dal/mysql"
 	"orbia_api/biz/handler/auth"
+	"orbia_api/biz/handler/kol"
 	"orbia_api/biz/handler/team"
 	"orbia_api/biz/handler/user"
 	"orbia_api/biz/infra/config"
@@ -45,13 +46,19 @@ func main() {
 	}
 	defer mysql.Close()
 
-	// 3. 初始化服务
+	// 3. 初始化认证中间件（需要在服务之前初始化）
+	userRepo := mysql.NewUserRepository(mysql.DB)
+	mw.InitAuthMiddleware(userRepo)
+	utils.LogInfo("✅ Auth middleware initialized successfully")
+
+	// 4. 初始化服务
 	auth.InitAuthService()
 	user.InitUserService()
 	team.InitTeamService()
+	kol.InitKolService()
 	utils.LogInfo("✅ Services initialized successfully")
 
-	// 4. 创建 Hertz 服务器
+	// 5. 创建 Hertz 服务器
 	addr := fmt.Sprintf("%s:%d",
 		config.GlobalConfig.Server.Host,
 		config.GlobalConfig.Server.Port,
@@ -60,12 +67,12 @@ func main() {
 		server.WithHostPorts(addr),
 	)
 
-	// 5. 注册全局中间件
+	// 6. 注册全局中间件
 	h.Use(mw.Recovery()) // 恢复中间件，必须放在最前面
 	h.Use(mw.CORS())     // 跨域中间件
 	h.Use(mw.Logger())   // 日志中间件
 
-	// 6. 健康检查
+	// 7. 健康检查
 	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, map[string]interface{}{
 			"status":  "ok",
@@ -73,7 +80,7 @@ func main() {
 		})
 	})
 
-	// 7. 欢迎页面
+	// 8. 欢迎页面
 	h.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, map[string]interface{}{
 			"message": "Welcome to Orbia API",
@@ -82,10 +89,10 @@ func main() {
 		})
 	})
 
-	// 8. 注册业务路由（由 hz 生成）
+	// 9. 注册业务路由（由 hz 生成）
 	register(h)
 
-	// 9. 打印启动信息
+	// 10. 打印启动信息
 	utils.LogInfo(fmt.Sprintf("✨ Server is running on http://%s", addr))
 	utils.LogInfo("📚 API Endpoints:")
 	utils.LogInfo("   GET  /                              - Welcome message")
@@ -101,10 +108,10 @@ func main() {
 	utils.LogInfo(fmt.Sprintf("   curl -X POST http://localhost:%d/api/v1/auth/wallet-login -H \"Content-Type: application/json\" -d '{\"wallet_address\":\"0x...\",\"signature\":\"0x...\"}'", config.GlobalConfig.Server.Port))
 	utils.LogInfo("")
 
-	// 10. 优雅关闭
+	// 11. 优雅关闭
 	go handleShutdown()
 
-	// 11. 启动服务器
+	// 12. 启动服务器
 	h.Spin()
 }
 

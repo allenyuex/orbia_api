@@ -10,9 +10,10 @@ struct UserInfo {
     3: optional string email
     4: optional string nickname
     5: optional string avatar_url
-    6: string created_at
-    7: string updated_at
-    8: optional team.Team current_team
+    6: string role // 用户角色：user-普通用户，admin-管理员
+    7: string created_at
+    8: string updated_at
+    9: optional team.Team current_team
 }
 
 // 获取用户信息请求

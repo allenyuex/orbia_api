@@ -6,18 +6,21 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const TableNameOrbiaTeam = "orbia_team"
 
 // OrbiaTeam 团队表
 type OrbiaTeam struct {
-	ID        int64      `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:团队ID" json:"id"`                // 团队ID
-	Name      string     `gorm:"column:name;type:varchar(20);not null;comment:团队名称" json:"name"`                            // 团队名称
-	IconURL   *string    `gorm:"column:icon_url;type:varchar(500);comment:团队图标URL" json:"icon_url"`                         // 团队图标URL
-	CreatorID int64      `gorm:"column:creator_id;type:bigint;not null;comment:创建者ID" json:"creator_id"`                    // 创建者ID
-	CreatedAt *time.Time `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"` // 创建时间
-	UpdatedAt *time.Time `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updated_at"` // 更新时间
+	ID        int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:团队ID" json:"id"`                // 团队ID
+	Name      string         `gorm:"column:name;type:varchar(20);not null;comment:团队名称" json:"name"`                            // 团队名称
+	IconURL   *string        `gorm:"column:icon_url;type:varchar(500);comment:团队图标URL" json:"icon_url"`                         // 团队图标URL
+	CreatorID int64          `gorm:"column:creator_id;type:bigint;not null;comment:创建者ID" json:"creator_id"`                    // 创建者ID
+	CreatedAt *time.Time     `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"` // 创建时间
+	UpdatedAt *time.Time     `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updated_at"` // 更新时间
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp;comment:软删除时间" json:"deleted_at"`                          // 软删除时间
 }
 
 // TableName OrbiaTeam's table name
