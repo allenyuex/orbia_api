@@ -43,3 +43,13 @@ log:
   max_backups: 7
   max_age: 30
 
+# Cloudflare R2 配置
+r2:
+  endpoint: "https://5133106b5806397669e2897825b57d81.r2.cloudflarestorage.com"
+  access_key: "e37979d3a17e64041ffd833beee6d90c"
+  secret_key: "4fedacceaef6285a0330d586142c15ace48280acbcd7a6f1400c92271a2e2d37"
+  bucket: "orbia"
+  public_url: "https://pub-7fecd33efbfc4271b901992eefd6a9ba.r2.dev"
+  upload_token_expire_minutes: 30  # 上传token过期时间（分钟）
+  max_file_size: 10485760          # 最大文件大小（10MB）
+

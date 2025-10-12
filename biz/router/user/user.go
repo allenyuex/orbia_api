@@ -24,6 +24,7 @@ func Register(r *server.Hertz) {
 			{
 				_user := _v1.Group("/user", _userMw()...)
 				_user.POST("/profile", append(_getprofileMw(), user.GetProfile)...)
+				_user.POST("/switch-team", append(_switchcurrentteamMw(), user.SwitchCurrentTeam)...)
 				_user.POST("/update-profile", append(_updateprofileMw(), user.UpdateProfile)...)
 				_user.POST("/:user_id", append(_getuserbyidMw(), user.GetUserById)...)
 			}

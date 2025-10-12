@@ -23,7 +23,8 @@ var (
 // InitAuthService 初始化认证服务
 func InitAuthService() {
 	userRepo := mysql.NewUserRepository(mysql.DB)
-	authSvc = authService.NewAuthService(userRepo)
+	teamRepo := mysql.NewTeamRepository(mysql.DB)
+	authSvc = authService.NewAuthService(userRepo, teamRepo)
 }
 
 // WalletLogin 钱包登录

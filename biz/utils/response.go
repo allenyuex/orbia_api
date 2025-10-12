@@ -43,3 +43,11 @@ func ParamError(c *app.RequestContext, message string) {
 func SystemError(c *app.RequestContext) {
 	Error(c, apiconsts.SystemErrorCode, apiconsts.SystemErrorMsg)
 }
+
+// ErrorResponse 创建错误响应结构
+func ErrorResponse(code int, message string) Response {
+	return Response{
+		Code:    code,
+		Message: message,
+	}
+}

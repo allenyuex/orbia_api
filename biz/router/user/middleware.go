@@ -3,8 +3,9 @@
 package user
 
 import (
-	"github.com/cloudwego/hertz/pkg/app"
 	"orbia_api/biz/mw"
+
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func rootMw() []app.HandlerFunc {
@@ -40,4 +41,10 @@ func _updateprofileMw() []app.HandlerFunc {
 func _getuserbyidMw() []app.HandlerFunc {
 	// 公开接口，不需要认证
 	return nil
+}
+
+func _switchcurrentteamMw() []app.HandlerFunc {
+	// your code...
+	return []app.HandlerFunc{mw.AuthMiddleware()}
+
 }

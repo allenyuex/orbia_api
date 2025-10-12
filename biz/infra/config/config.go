@@ -15,6 +15,7 @@ type Config struct {
 	Redis    RedisConfig    `yaml:"redis"`
 	JWT      JWTConfig      `yaml:"jwt"`
 	Log      LogConfig      `yaml:"log"`
+	R2       R2Config       `yaml:"r2"`
 }
 
 type ServerConfig struct {
@@ -61,6 +62,16 @@ type LogConfig struct {
 	MaxSize    int    `yaml:"max_size"`
 	MaxBackups int    `yaml:"max_backups"`
 	MaxAge     int    `yaml:"max_age"`
+}
+
+type R2Config struct {
+	Endpoint                 string `yaml:"endpoint"`
+	AccessKey                string `yaml:"access_key"`
+	SecretKey                string `yaml:"secret_key"`
+	Bucket                   string `yaml:"bucket"`
+	PublicURL                string `yaml:"public_url"`
+	UploadTokenExpireMinutes int    `yaml:"upload_token_expire_minutes"`
+	MaxFileSize              int64  `yaml:"max_file_size"`
 }
 
 // LoadConfig 加载配置文件

@@ -1,6 +1,7 @@
 namespace go user
 
 include "common.thrift"
+include "team.thrift"
 
 // 用户信息
 struct UserInfo {
@@ -11,6 +12,7 @@ struct UserInfo {
     5: optional string avatar_url
     6: string created_at
     7: string updated_at
+    8: optional team.Team current_team
 }
 
 // 获取用户信息请求
@@ -35,6 +37,17 @@ struct UpdateProfileResp {
     1: common.BaseResp base_resp
 }
 
+// 切换当前团队请求
+struct SwitchCurrentTeamReq {
+    1: required i64 team_id (api.body="team_id")
+}
+
+// 切换当前团队响应
+struct SwitchCurrentTeamResp {
+    1: common.BaseResp base_resp
+    2: optional team.Team current_team
+}
+
 // 根据ID获取用户请求
 struct GetUserByIdReq {
     1: required i64 user_id (api.path="user_id")
@@ -50,5 +63,6 @@ struct GetUserByIdResp {
 service UserService {
     GetProfileResp GetProfile(1: GetProfileReq req) (api.post="/api/v1/user/profile")
     UpdateProfileResp UpdateProfile(1: UpdateProfileReq req) (api.post="/api/v1/user/update-profile")
+    SwitchCurrentTeamResp SwitchCurrentTeam(1: SwitchCurrentTeamReq req) (api.post="/api/v1/user/switch-team")
     GetUserByIdResp GetUserById(1: GetUserByIdReq req) (api.post="/api/v1/user/:user_id")
 }

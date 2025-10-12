@@ -13,6 +13,7 @@ import (
 
 	"orbia_api/biz/dal/mysql"
 	"orbia_api/biz/model/common"
+	"orbia_api/biz/model/team"
 	user "orbia_api/biz/model/user"
 	"orbia_api/biz/mw"
 	userService "orbia_api/biz/service/user"
@@ -25,7 +26,8 @@ var (
 // InitUserService 初始化用户服务
 func InitUserService() {
 	userRepo := mysql.NewUserRepository(mysql.DB)
-	userSvc = userService.NewUserService(userRepo)
+	teamRepo := mysql.NewTeamRepository(mysql.DB)
+	userSvc = userService.NewUserService(userRepo, teamRepo)
 }
 
 // GetProfile 获取用户资料
@@ -59,7 +61,7 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层获取用户信息
-	userInfo, err := userSvc.GetProfile(userID)
+	userInfo, currentTeam, err := userSvc.GetProfile(userID)
 	if err != nil {
 		hlog.Errorf("GetProfile service error: %v", err)
 		c.JSON(http.StatusNotFound, &user.GetProfileResp{
@@ -80,6 +82,18 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 		AvatarURL:     userInfo.AvatarURL,
 		CreatedAt:     userInfo.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     userInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+
+	// 如果有当前团队信息，添加到响应中
+	if currentTeam != nil {
+		userResp.CurrentTeam = &team.Team{
+			ID:        currentTeam.ID,
+			Name:      currentTeam.Name,
+			IconURL:   currentTeam.IconURL,
+			CreatorID: currentTeam.CreatorID,
+			CreatedAt: currentTeam.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: currentTeam.UpdatedAt.Format("2006-01-02 15:04:05"),
+		}
 	}
 
 	resp := &user.GetProfileResp{
@@ -206,6 +220,60 @@ func GetUserById(ctx context.Context, c *app.RequestContext) {
 		BaseResp: &common.BaseResp{
 			Code:    200,
 			Message: "Success",
+		},
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// SwitchCurrentTeam .
+// @router /api/v1/user/switch-team [POST]
+func SwitchCurrentTeam(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req user.SwitchCurrentTeamReq
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 获取用户ID
+	userID, exists := c.Get(mw.AuthUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, &user.SwitchCurrentTeamResp{
+			BaseResp: &common.BaseResp{
+				Code:    401,
+				Message: "User not authenticated",
+			},
+		})
+		return
+	}
+
+	// 调用服务层切换团队
+	switchedTeam, err := userSvc.SwitchCurrentTeam(userID.(int64), req.TeamID)
+	if err != nil {
+		hlog.Errorf("SwitchCurrentTeam service error: %v", err)
+		c.JSON(http.StatusBadRequest, &user.SwitchCurrentTeamResp{
+			BaseResp: &common.BaseResp{
+				Code:    400,
+				Message: err.Error(),
+			},
+		})
+		return
+	}
+
+	resp := &user.SwitchCurrentTeamResp{
+		BaseResp: &common.BaseResp{
+			Code:    200,
+			Message: "Team switched successfully",
+		},
+		CurrentTeam: &team.Team{
+			ID:        switchedTeam.ID,
+			Name:      switchedTeam.Name,
+			IconURL:   switchedTeam.IconURL,
+			CreatorID: switchedTeam.CreatorID,
+			CreatedAt: switchedTeam.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: switchedTeam.UpdatedAt.Format("2006-01-02 15:04:05"),
 		},
 	}
 

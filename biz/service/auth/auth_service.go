@@ -20,12 +20,14 @@ type AuthService interface {
 // authService 认证服务实现
 type authService struct {
 	userRepo mysql.UserRepository
+	teamRepo mysql.TeamRepository
 }
 
 // NewAuthService 创建认证服务实例
-func NewAuthService(userRepo mysql.UserRepository) AuthService {
+func NewAuthService(userRepo mysql.UserRepository, teamRepo mysql.TeamRepository) AuthService {
 	return &authService{
 		userRepo: userRepo,
+		teamRepo: teamRepo,
 	}
 }
 
@@ -54,12 +56,18 @@ func (s *authService) WalletLogin(walletAddress, signature, message string) (str
 			defaultAvatar := consts.DefaultAvatarURL
 			user = &mysql.User{
 				WalletAddress: &walletAddress,
+				Nickname:      &walletAddress, // 使用钱包地址作为 nickname
 				AvatarURL:     &defaultAvatar, // 设置默认头像
 			}
 			
 			if err := s.userRepo.CreateUser(user); err != nil {
 				return "", 0, fmt.Errorf("failed to create user: %v", err)
 			}
+
+			// 为新用户创建默认项目
+			if err := s.createDefaultTeam(user.ID); err != nil {
+		return "", 0, fmt.Errorf("failed to create default team: %v", err)
+	}
 		} else {
 			return "", 0, fmt.Errorf("failed to query user: %v", err)
 		}
@@ -74,24 +82,87 @@ func (s *authService) WalletLogin(walletAddress, signature, message string) (str
 	return token, expiresIn, nil
 }
 
-// EmailLogin 邮箱登录（预留实现）
+// createDefaultTeam 为新用户创建默认团队
+func (s *authService) createDefaultTeam(userID int64) error {
+	defaultTeamName := "default team"
+	defaultTeamIcon := "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Star.png"
+	
+	// 创建默认团队
+	team := &mysql.Team{
+		Name:      defaultTeamName,
+		IconURL:   &defaultTeamIcon,
+		CreatorID: userID,
+	}
+	
+	if err := s.teamRepo.CreateTeam(team); err != nil {
+		return fmt.Errorf("failed to create default team: %v", err)
+	}
+	
+	// 创建团队成员关系，设置用户为创建者
+	member := &mysql.TeamMember{
+		TeamID: team.ID,
+		UserID:    userID,
+		Role:      "creator",
+	}
+	
+	if err := s.teamRepo.AddTeamMember(member); err != nil {
+		return fmt.Errorf("failed to create team member: %v", err)
+	}
+	
+	// 更新用户的当前团队ID
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %v", err)
+	}
+	
+	user.CurrentTeamID = &team.ID
+	if err := s.userRepo.UpdateUser(user); err != nil {
+		return fmt.Errorf("failed to update user current team: %v", err)
+	}
+	
+	return nil
+}
+
+// EmailLogin 邮箱登录
 func (s *authService) EmailLogin(email, password string) (string, int64, error) {
 	// 查找用户
 	user, err := s.userRepo.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", 0, errors.New("user not found")
+			// 用户不存在，自动注册
+			passwordHash, err := utils.HashPassword(password)
+			if err != nil {
+				return "", 0, fmt.Errorf("failed to hash password: %v", err)
+			}
+			
+			defaultAvatar := consts.DefaultAvatarURL
+			user = &mysql.User{
+				Email:        &email,
+				PasswordHash: &passwordHash,
+				Nickname:     &email, // 使用邮箱作为 nickname
+				AvatarURL:    &defaultAvatar, // 设置默认头像
+			}
+			
+			if err := s.userRepo.CreateUser(user); err != nil {
+				return "", 0, fmt.Errorf("failed to create user: %v", err)
+			}
+
+			// 为新用户创建默认项目
+			if err := s.createDefaultTeam(user.ID); err != nil {
+			return "", 0, fmt.Errorf("failed to create default team: %v", err)
 		}
-		return "", 0, fmt.Errorf("failed to query user: %v", err)
-	}
+		} else {
+			return "", 0, fmt.Errorf("failed to query user: %v", err)
+		}
+	} else {
+		// 用户存在，验证密码
+		if user.PasswordHash == nil {
+			return "", 0, errors.New("password not set for this user")
+		}
 
-	// 验证密码
-	if user.PasswordHash == nil {
-		return "", 0, errors.New("password not set for this user")
-	}
-
-	if !utils.CheckPasswordHash(password, *user.PasswordHash) {
-		return "", 0, errors.New("invalid password")
+		if !utils.CheckPasswordHash(password, *user.PasswordHash) {
+			return "", 0, errors.New("invalid password")
+		}
 	}
 
 	// 生成JWT token

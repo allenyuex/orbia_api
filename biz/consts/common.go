@@ -16,5 +16,5 @@ const (
 
 // 用户默认配置
 const (
-	DefaultAvatarURL = "https://pub-7fecd33efbfc4271b901992eefd6a9ba.r2.dev/imgs/avatar.png"
+	DefaultAvatarURL = "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Grinning%20Face%20with%20Big%20Eyes.png"
 )

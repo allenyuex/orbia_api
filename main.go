@@ -5,7 +5,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,13 +15,17 @@ import (
 
 	"orbia_api/biz/dal/mysql"
 	"orbia_api/biz/handler/auth"
+	"orbia_api/biz/handler/team"
 	"orbia_api/biz/handler/user"
 	"orbia_api/biz/infra/config"
 	"orbia_api/biz/mw"
+	"orbia_api/biz/utils"
 )
 
 func main() {
-	log.Println("🚀 Starting Orbia API Server...")
+	// 初始化日志器
+	utils.InitLogger()
+	utils.LogInfo("🚀 Starting Orbia API Server...")
 
 	// 1. 加载配置
 	configPath := os.Getenv("CONFIG_PATH")
@@ -30,20 +33,23 @@ func main() {
 		configPath = "./conf/config.yaml"
 	}
 	if err := config.LoadConfig(configPath); err != nil {
-		log.Fatalf("❌ Failed to load config: %v", err)
+		utils.LogError(err, "❌ Failed to load config")
+		os.Exit(1)
 	}
-	log.Println("✅ Config loaded successfully")
+	utils.LogInfo("✅ Config loaded successfully")
 
 	// 2. 初始化数据库
 	if err := mysql.Init(); err != nil {
-		log.Fatalf("❌ Failed to initialize MySQL: %v", err)
+		utils.LogError(err, "❌ Failed to initialize MySQL")
+		os.Exit(1)
 	}
 	defer mysql.Close()
 
 	// 3. 初始化服务
 	auth.InitAuthService()
 	user.InitUserService()
-	log.Println("✅ Services initialized successfully")
+	team.InitTeamService()
+	utils.LogInfo("✅ Services initialized successfully")
 
 	// 4. 创建 Hertz 服务器
 	addr := fmt.Sprintf("%s:%d",
@@ -80,20 +86,20 @@ func main() {
 	register(h)
 
 	// 9. 打印启动信息
-	log.Printf("✨ Server is running on http://%s", addr)
-	log.Println("📚 API Endpoints:")
-	log.Println("   GET  /                              - Welcome message")
-	log.Println("   GET  /health                        - Health check")
-	log.Println("   POST /api/v1/auth/wallet-login      - Wallet login")
-	log.Println("   POST /api/v1/auth/email-login       - Email login")
-	log.Println("   POST /api/v1/user/profile           - Get user profile (requires JWT)")
-	log.Println("   POST /api/v1/user/update-profile    - Update user profile (requires JWT)")
-	log.Println("   POST /api/v1/user/:user_id          - Get user by ID")
-	log.Println("")
-	log.Println("💡 Test commands:")
-	log.Printf("   curl http://localhost:%d/health\n", config.GlobalConfig.Server.Port)
-	log.Printf("   curl -X POST http://localhost:%d/api/v1/auth/wallet-login -H \"Content-Type: application/json\" -d '{\"wallet_address\":\"0x...\",\"signature\":\"0x...\"}'\n", config.GlobalConfig.Server.Port)
-	log.Println("")
+	utils.LogInfo(fmt.Sprintf("✨ Server is running on http://%s", addr))
+	utils.LogInfo("📚 API Endpoints:")
+	utils.LogInfo("   GET  /                              - Welcome message")
+	utils.LogInfo("   GET  /health                        - Health check")
+	utils.LogInfo("   POST /api/v1/auth/wallet-login      - Wallet login")
+	utils.LogInfo("   POST /api/v1/auth/email-login       - Email login")
+	utils.LogInfo("   POST /api/v1/user/profile           - Get user profile (requires JWT)")
+	utils.LogInfo("   POST /api/v1/user/update-profile    - Update user profile (requires JWT)")
+	utils.LogInfo("   POST /api/v1/user/:user_id          - Get user by ID")
+	utils.LogInfo("")
+	utils.LogInfo("💡 Test commands:")
+	utils.LogInfo(fmt.Sprintf("   curl http://localhost:%d/health", config.GlobalConfig.Server.Port))
+	utils.LogInfo(fmt.Sprintf("   curl -X POST http://localhost:%d/api/v1/auth/wallet-login -H \"Content-Type: application/json\" -d '{\"wallet_address\":\"0x...\",\"signature\":\"0x...\"}'", config.GlobalConfig.Server.Port))
+	utils.LogInfo("")
 
 	// 10. 优雅关闭
 	go handleShutdown()
@@ -106,7 +112,7 @@ func handleShutdown() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
-	log.Println("\n🛑 Shutting down server...")
+	utils.LogInfo("\n🛑 Shutting down server...")
 	mysql.Close()
 	os.Exit(0)
 }
