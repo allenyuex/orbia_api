@@ -11,3 +11,4 @@ alwaysApply: true
 - 遇到数据库结构的任何问题，应以sql/init.sql 为准，通过执行 script/init_db.sh 来更新数据库。
 - dal/mysql 目录下的代码是数据库的模型
 - biz/model 目录下的代码是 api 的模型
+- hz 的生成命令可以参考如：hz update -idl idl/user.thrift -module orbia_api

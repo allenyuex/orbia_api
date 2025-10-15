@@ -2,6 +2,7 @@ namespace go user
 
 include "common.thrift"
 include "team.thrift"
+include "kol.thrift"
 
 // 用户信息
 struct UserInfo {
@@ -14,6 +15,8 @@ struct UserInfo {
     7: string created_at
     8: string updated_at
     9: optional team.Team current_team
+    10: optional i64 kol_id // 关联的KOL ID
+    11: optional kol.KolInfo kol_info // KOL详细信息
 }
 
 // 获取用户信息请求

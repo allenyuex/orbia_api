@@ -4,7 +4,7 @@ package kol
 
 import (
 	"github.com/cloudwego/hertz/pkg/app/server"
-	kol "orbia_api/biz/handler/kol"
+	kol "orbia_api/biz/handler/order/kol"
 )
 
 /*

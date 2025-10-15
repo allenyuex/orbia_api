@@ -17,6 +17,7 @@ type User struct {
 	Nickname         *string        `gorm:"column:nickname;size:100" json:"nickname"`
 	AvatarURL        *string        `gorm:"column:avatar_url;size:500" json:"avatar_url"`
 	Role             string         `gorm:"column:role;type:enum('user','admin');default:'user';not null" json:"role"`
+	KolID            *int64         `gorm:"column:kol_id" json:"kol_id"`
 	CurrentTeamID    *int64         `gorm:"column:current_team_id" json:"current_team_id"`
 	CreatedAt        time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
 	UpdatedAt        time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"time"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
@@ -23,12 +25,22 @@ func Success(c *app.RequestContext, data interface{}) {
 	})
 }
 
+// SuccessResponse 成功响应（另一种写法）
+func SuccessResponse(c *app.RequestContext, data interface{}) {
+	Success(c, data)
+}
+
 // Error 错误响应
 func Error(c *app.RequestContext, code int, message string) {
 	c.JSON(consts.StatusOK, Response{
 		Code:    code,
 		Message: message,
 	})
+}
+
+// ErrorResponse 错误响应（另一种写法）
+func ErrorResponse(c *app.RequestContext, code int, message string) {
+	Error(c, code, message)
 }
 
 // ParamError 参数错误响应
@@ -44,10 +56,10 @@ func SystemError(c *app.RequestContext) {
 	Error(c, apiconsts.SystemErrorCode, apiconsts.SystemErrorMsg)
 }
 
-// ErrorResponse 创建错误响应结构
-func ErrorResponse(code int, message string) Response {
-	return Response{
-		Code:    code,
-		Message: message,
+// FormatTime 格式化时间
+func FormatTime(t *time.Time) string {
+	if t == nil {
+		return ""
 	}
+	return t.Format(apiconsts.DateTimeFormat)
 }

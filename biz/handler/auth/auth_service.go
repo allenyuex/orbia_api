@@ -14,6 +14,7 @@ import (
 	auth "orbia_api/biz/model/auth"
 	"orbia_api/biz/model/common"
 	authService "orbia_api/biz/service/auth"
+	walletService "orbia_api/biz/service/wallet"
 )
 
 var (
@@ -22,9 +23,13 @@ var (
 
 // InitAuthService 初始化认证服务
 func InitAuthService() {
-	userRepo := mysql.NewUserRepository(mysql.DB)
-	teamRepo := mysql.NewTeamRepository(mysql.DB)
-	authSvc = authService.NewAuthService(userRepo, teamRepo)
+	db := mysql.DB
+	userRepo := mysql.NewUserRepository(db)
+	teamRepo := mysql.NewTeamRepository(db)
+	walletRepo := mysql.NewWalletRepository(db)
+	txRepo := mysql.NewTransactionRepository(db)
+	walletSvc := walletService.NewWalletService(db, walletRepo, txRepo)
+	authSvc = authService.NewAuthService(userRepo, teamRepo, walletSvc)
 }
 
 // WalletLogin 钱包登录

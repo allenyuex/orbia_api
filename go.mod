@@ -8,18 +8,20 @@ replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
 require (
 	github.com/apache/thrift v0.0.0-00010101000000-000000000000
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/cloudwego/hertz v0.10.2
 	github.com/ethereum/go-ethereum v1.16.4
 	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.43.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.6
+	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.25.11
 )
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/aws/aws-sdk-go v1.55.8 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
@@ -37,7 +39,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
@@ -50,7 +51,6 @@ require (
 	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gorm.io/datatypes v1.2.4 // indirect
-	gorm.io/gen v0.3.27 // indirect
 	gorm.io/hints v1.1.0 // indirect
 	gorm.io/plugin/dbresolver v1.5.0 // indirect
 )

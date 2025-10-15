@@ -13,6 +13,7 @@ import (
 
 	"orbia_api/biz/dal/mysql"
 	"orbia_api/biz/model/common"
+	"orbia_api/biz/model/kol"
 	"orbia_api/biz/model/team"
 	user "orbia_api/biz/model/user"
 	"orbia_api/biz/mw"
@@ -27,7 +28,8 @@ var (
 func InitUserService() {
 	userRepo := mysql.NewUserRepository(mysql.DB)
 	teamRepo := mysql.NewTeamRepository(mysql.DB)
-	userSvc = userService.NewUserService(userRepo, teamRepo)
+	kolRepo := mysql.NewKolRepository(mysql.DB)
+	userSvc = userService.NewUserService(userRepo, teamRepo, kolRepo)
 }
 
 // GetProfile 获取用户资料
@@ -61,7 +63,7 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层获取用户信息
-	userInfo, currentTeam, err := userSvc.GetProfile(userID)
+	userInfo, currentTeam, kolInfo, err := userSvc.GetProfile(userID)
 	if err != nil {
 		hlog.Errorf("GetProfile service error: %v", err)
 		c.JSON(http.StatusNotFound, &user.GetProfileResp{
@@ -81,6 +83,7 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 		Nickname:      userInfo.Nickname,
 		AvatarURL:     userInfo.AvatarURL,
 		Role:          userInfo.Role,
+		KolID:         userInfo.KolID,
 		CreatedAt:     userInfo.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     userInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
@@ -95,6 +98,11 @@ func GetProfile(ctx context.Context, c *app.RequestContext) {
 			CreatedAt: currentTeam.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt: currentTeam.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}
+	}
+
+	// 如果有KOL信息，添加到响应中
+	if kolInfo != nil && kolInfo.Kol != nil {
+		userResp.KolInfo = convertKolInfo(kolInfo)
 	}
 
 	resp := &user.GetProfileResp{
@@ -213,6 +221,7 @@ func GetUserById(ctx context.Context, c *app.RequestContext) {
 		Nickname:      userInfo.Nickname,
 		AvatarURL:     userInfo.AvatarURL,
 		Role:          userInfo.Role,
+		KolID:         userInfo.KolID,
 		CreatedAt:     userInfo.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     userInfo.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
@@ -280,4 +289,84 @@ func SwitchCurrentTeam(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(consts.StatusOK, resp)
+}
+
+// convertKolInfo 将 KOL 信息转换为响应格式
+func convertKolInfo(kolInfo *userService.KolInfo) *kol.KolInfo {
+	if kolInfo == nil || kolInfo.Kol == nil {
+		return nil
+	}
+
+	// 辅助函数：将指针字符串转换为字符串
+	ptrToStr := func(s *string) string {
+		if s != nil {
+			return *s
+		}
+		return ""
+	}
+
+	kolResp := &kol.KolInfo{
+		ID:           kolInfo.Kol.ID,
+		UserID:       kolInfo.Kol.UserID,
+		AvatarURL:    ptrToStr(kolInfo.Kol.AvatarURL),
+		DisplayName:  ptrToStr(kolInfo.Kol.DisplayName),
+		Description:  ptrToStr(kolInfo.Kol.Description),
+		Country:      ptrToStr(kolInfo.Kol.Country),
+		TiktokURL:    ptrToStr(kolInfo.Kol.TiktokURL),
+		YoutubeURL:   ptrToStr(kolInfo.Kol.YoutubeURL),
+		XURL:         ptrToStr(kolInfo.Kol.XURL),
+		DiscordURL:   ptrToStr(kolInfo.Kol.DiscordURL),
+		Status:       kolInfo.Kol.Status,
+		RejectReason: ptrToStr(kolInfo.Kol.RejectReason),
+		CreatedAt:    kolInfo.Kol.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:    kolInfo.Kol.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+
+	if kolInfo.Kol.ApprovedAt != nil {
+		approvedAt := kolInfo.Kol.ApprovedAt.Format("2006-01-02 15:04:05")
+		kolResp.ApprovedAt = approvedAt
+	}
+
+	// 添加语言列表
+	kolResp.Languages = make([]*kol.KolLanguage, 0, len(kolInfo.Languages))
+	for _, lang := range kolInfo.Languages {
+		kolResp.Languages = append(kolResp.Languages, &kol.KolLanguage{
+			LanguageCode: lang.LanguageCode,
+			LanguageName: lang.LanguageName,
+		})
+	}
+
+	// 添加标签列表
+	kolResp.Tags = make([]*kol.KolTag, 0, len(kolInfo.Tags))
+	for _, tag := range kolInfo.Tags {
+		kolResp.Tags = append(kolResp.Tags, &kol.KolTag{
+			Tag: tag.Tag,
+		})
+	}
+
+	// 添加统计数据
+	if kolInfo.Stats != nil {
+		kolResp.Stats = &kol.KolStats{
+			TotalFollowers:     kolInfo.Stats.TotalFollowers,
+			TiktokFollowers:    kolInfo.Stats.TiktokFollowers,
+			YoutubeSubscribers: kolInfo.Stats.YoutubeSubscribers,
+			XFollowers:         kolInfo.Stats.XFollowers,
+			DiscordMembers:     kolInfo.Stats.DiscordMembers,
+			TiktokAvgViews:     kolInfo.Stats.TiktokAvgViews,
+			EngagementRate:     kolInfo.Stats.EngagementRate,
+		}
+	} else {
+		// 返回默认的统计数据
+		kolResp.Stats = &kol.KolStats{
+			TotalFollowers:     0,
+			TiktokFollowers:    0,
+			YoutubeSubscribers: 0,
+			XFollowers:         0,
+			DiscordMembers:     0,
+			TiktokAvgViews:     0,
+			EngagementRate:     0,
+		}
+	}
+
+	return kolResp
 }

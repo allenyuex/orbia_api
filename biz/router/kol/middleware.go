@@ -40,7 +40,7 @@ func _getkolinfoMw() []app.HandlerFunc {
 
 func _getkollistMw() []app.HandlerFunc {
 	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	return nil
 }
 
 func _getkolplansMw() []app.HandlerFunc {

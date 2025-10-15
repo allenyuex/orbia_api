@@ -5,11 +5,12 @@ package upload
 import (
 	"context"
 
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	upload "orbia_api/biz/model/upload"
 	uploadService "orbia_api/biz/service/upload"
 	"orbia_api/biz/utils"
+
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 // GenerateUploadToken .
@@ -26,7 +27,7 @@ func GenerateUploadToken(ctx context.Context, c *app.RequestContext) {
 	// 从JWT中获取用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(consts.StatusUnauthorized, utils.ErrorResponse(401, "unauthorized"))
+		utils.Error(c, 401, "unauthorized")
 		return
 	}
 
@@ -34,7 +35,7 @@ func GenerateUploadToken(ctx context.Context, c *app.RequestContext) {
 	service := uploadService.NewUploadService()
 	resp, err := service.GenerateUploadToken(userID.(int64), &req)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.ErrorResponse(500, err.Error()))
+		utils.Error(c, 500, err.Error())
 		return
 	}
 
@@ -55,7 +56,7 @@ func ValidateImageURL(ctx context.Context, c *app.RequestContext) {
 	// 从JWT中获取用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(consts.StatusUnauthorized, utils.ErrorResponse(401, "unauthorized"))
+		utils.Error(c, 401, "unauthorized")
 		return
 	}
 
@@ -63,7 +64,7 @@ func ValidateImageURL(ctx context.Context, c *app.RequestContext) {
 	service := uploadService.NewUploadService()
 	resp, err := service.ValidateImageURL(userID.(int64), &req)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, utils.ErrorResponse(500, err.Error()))
+		utils.Error(c, 500, err.Error())
 		return
 	}
 

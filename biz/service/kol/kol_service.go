@@ -122,6 +122,16 @@ func (s *kolService) ApplyKol(userID int64, displayName, description, country st
 		return 0, fmt.Errorf("failed to create KOL stats: %v", err)
 	}
 
+	// 更新用户表中的 kol_id
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get user: %v", err)
+	}
+	user.KolID = &kol.ID
+	if err := s.userRepo.UpdateUser(user); err != nil {
+		return 0, fmt.Errorf("failed to update user kol_id: %v", err)
+	}
+
 	return kol.ID, nil
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"orbia_api/biz/consts"
 	"orbia_api/biz/dal/mysql"
+	walletService "orbia_api/biz/service/wallet"
 	"orbia_api/biz/utils"
 
 	"gorm.io/gorm"
@@ -20,15 +21,17 @@ type AuthService interface {
 
 // authService 认证服务实现
 type authService struct {
-	userRepo mysql.UserRepository
-	teamRepo mysql.TeamRepository
+	userRepo  mysql.UserRepository
+	teamRepo  mysql.TeamRepository
+	walletSvc walletService.WalletService
 }
 
 // NewAuthService 创建认证服务实例
-func NewAuthService(userRepo mysql.UserRepository, teamRepo mysql.TeamRepository) AuthService {
+func NewAuthService(userRepo mysql.UserRepository, teamRepo mysql.TeamRepository, walletSvc walletService.WalletService) AuthService {
 	return &authService{
-		userRepo: userRepo,
-		teamRepo: teamRepo,
+		userRepo:  userRepo,
+		teamRepo:  teamRepo,
+		walletSvc: walletSvc,
 	}
 }
 
@@ -69,6 +72,11 @@ func (s *authService) WalletLogin(walletAddress, signature, message string) (str
 			// 为新用户创建默认项目
 			if err := s.createDefaultTeam(user.ID); err != nil {
 				return "", 0, fmt.Errorf("failed to create default team: %v", err)
+			}
+
+			// 为新用户创建钱包
+			if err := s.walletSvc.CreateWallet(user.ID); err != nil {
+				return "", 0, fmt.Errorf("failed to create wallet: %v", err)
 			}
 		} else {
 			return "", 0, fmt.Errorf("failed to query user: %v", err)
@@ -153,6 +161,11 @@ func (s *authService) EmailLogin(email, password string) (string, int64, error) 
 			// 为新用户创建默认项目
 			if err := s.createDefaultTeam(user.ID); err != nil {
 				return "", 0, fmt.Errorf("failed to create default team: %v", err)
+			}
+
+			// 为新用户创建钱包
+			if err := s.walletSvc.CreateWallet(user.ID); err != nil {
+				return "", 0, fmt.Errorf("failed to create wallet: %v", err)
 			}
 		} else {
 			return "", 0, fmt.Errorf("failed to query user: %v", err)

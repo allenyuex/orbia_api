@@ -77,7 +77,7 @@ func ApplyKol(ctx context.Context, c *app.RequestContext) {
 		KolID: &kolID,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "KOL application submitted successfully",
+			Message: "success",
 		},
 	}
 
@@ -168,23 +168,26 @@ func GetKolInfo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 添加语言列表
-	kolInfo.Languages = make([]*kolModel.KolLanguage, len(languages))
-	for i, lang := range languages {
-		kolInfo.Languages[i] = &kolModel.KolLanguage{
+	// 确保即使没有数据也返回空数组而不是 null
+	kolInfo.Languages = make([]*kolModel.KolLanguage, 0, len(languages))
+	for _, lang := range languages {
+		kolInfo.Languages = append(kolInfo.Languages, &kolModel.KolLanguage{
 			LanguageCode: lang.LanguageCode,
 			LanguageName: lang.LanguageName,
-		}
+		})
 	}
 
 	// 添加标签列表
-	kolInfo.Tags = make([]*kolModel.KolTag, len(tags))
-	for i, tag := range tags {
-		kolInfo.Tags[i] = &kolModel.KolTag{
+	// 确保即使没有数据也返回空数组而不是 null
+	kolInfo.Tags = make([]*kolModel.KolTag, 0, len(tags))
+	for _, tag := range tags {
+		kolInfo.Tags = append(kolInfo.Tags, &kolModel.KolTag{
 			Tag: tag.Tag,
-		}
+		})
 	}
 
 	// 添加统计数据
+	// 确保即使没有统计数据也返回默认值而不是 null
 	if stats != nil {
 		kolInfo.Stats = &kolModel.KolStats{
 			TotalFollowers:     stats.TotalFollowers,
@@ -195,13 +198,24 @@ func GetKolInfo(ctx context.Context, c *app.RequestContext) {
 			TiktokAvgViews:     stats.TiktokAvgViews,
 			EngagementRate:     stats.EngagementRate,
 		}
+	} else {
+		// 返回默认的统计数据
+		kolInfo.Stats = &kolModel.KolStats{
+			TotalFollowers:     0,
+			TiktokFollowers:    0,
+			YoutubeSubscribers: 0,
+			XFollowers:         0,
+			DiscordMembers:     0,
+			TiktokAvgViews:     0,
+			EngagementRate:     0,
+		}
 	}
 
 	resp := &kolModel.GetKolInfoResp{
 		KolInfo: kolInfo,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Success",
+			Message: "success",
 		},
 	}
 
@@ -256,7 +270,7 @@ func UpdateKolInfo(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.UpdateKolInfoResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "KOL information updated successfully",
+			Message: "success",
 		},
 	}
 
@@ -315,7 +329,7 @@ func ReviewKol(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.ReviewKolResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "KOL review completed successfully",
+			Message: "success",
 		},
 	}
 
@@ -331,6 +345,8 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolList bind error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.GetKolListResp{
+			KolList: make([]*kolModel.KolInfo, 0),
+			Total:   0,
 			BaseResp: &common.BaseResp{
 				Code:    400,
 				Message: "Invalid request parameters: " + err.Error(),
@@ -339,18 +355,8 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 从JWT中间件获取用户ID（确保用户已登录）
-	_, exists := mw.GetAuthUserID(c)
-	if !exists {
-		hlog.Error("GetKolList: user ID not found in context")
-		c.JSON(http.StatusUnauthorized, &kolModel.GetKolListResp{
-			BaseResp: &common.BaseResp{
-				Code:    401,
-				Message: "User not authenticated",
-			},
-		})
-		return
-	}
+	// 获取KOL列表不强制要求认证，但如果有JWT则可以使用
+	// 这里不检查用户是否已登录，允许游客访问
 
 	page := 1
 	pageSize := 10
@@ -366,6 +372,8 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolList service error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.GetKolListResp{
+			KolList: make([]*kolModel.KolInfo, 0),
+			Total:   0,
 			BaseResp: &common.BaseResp{
 				Code:    400,
 				Message: err.Error(),
@@ -383,8 +391,9 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 转换为响应格式
-	kolList := make([]*kolModel.KolInfo, len(kols))
-	for i, kol := range kols {
+	// 确保即使没有数据也返回空数组而不是 null
+	kolList := make([]*kolModel.KolInfo, 0, len(kols))
+	for _, kol := range kols {
 		kolInfo := &kolModel.KolInfo{
 			ID:          kol.ID,
 			UserID:      kol.UserID,
@@ -404,7 +413,7 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 			approvedAt := kol.ApprovedAt.Format("2006-01-02 15:04:05")
 			kolInfo.ApprovedAt = approvedAt
 		}
-		kolList[i] = kolInfo
+		kolList = append(kolList, kolInfo)
 	}
 
 	resp := &kolModel.GetKolListResp{
@@ -412,7 +421,7 @@ func GetKolList(ctx context.Context, c *app.RequestContext) {
 		Total:   total,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Success",
+			Message: "success",
 		},
 	}
 
@@ -466,7 +475,7 @@ func UpdateKolStats(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.UpdateKolStatsResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "KOL stats updated successfully",
+			Message: "success",
 		},
 	}
 
@@ -520,7 +529,7 @@ func SaveKolPlan(ctx context.Context, c *app.RequestContext) {
 		PlanID: &planID,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Plan saved successfully",
+			Message: "success",
 		},
 	}
 
@@ -573,7 +582,7 @@ func DeleteKolPlan(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.DeleteKolPlanResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Plan deleted successfully",
+			Message: "success",
 		},
 	}
 
@@ -589,6 +598,7 @@ func GetKolPlans(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolPlans bind error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.GetKolPlansResp{
+			Plans: make([]*kolModel.KolPlan, 0),
 			BaseResp: &common.BaseResp{
 				Code:    400,
 				Message: "Invalid request parameters: " + err.Error(),
@@ -602,6 +612,7 @@ func GetKolPlans(ctx context.Context, c *app.RequestContext) {
 	if !exists {
 		hlog.Error("GetKolPlans: user ID not found in context")
 		c.JSON(http.StatusUnauthorized, &kolModel.GetKolPlansResp{
+			Plans: make([]*kolModel.KolPlan, 0),
 			BaseResp: &common.BaseResp{
 				Code:    401,
 				Message: "User not authenticated",
@@ -624,6 +635,7 @@ func GetKolPlans(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolPlans service error: %v", err)
 		c.JSON(http.StatusNotFound, &kolModel.GetKolPlansResp{
+			Plans: make([]*kolModel.KolPlan, 0),
 			BaseResp: &common.BaseResp{
 				Code:    404,
 				Message: err.Error(),
@@ -641,9 +653,10 @@ func GetKolPlans(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 转换为响应格式
-	planList := make([]*kolModel.KolPlan, len(plans))
-	for i, plan := range plans {
-		planList[i] = &kolModel.KolPlan{
+	// 确保即使没有数据也返回空数组而不是 null
+	planList := make([]*kolModel.KolPlan, 0, len(plans))
+	for _, plan := range plans {
+		planList = append(planList, &kolModel.KolPlan{
 			ID:          plan.ID,
 			Title:       plan.Title,
 			Description: ptrToStr(plan.Description),
@@ -651,14 +664,14 @@ func GetKolPlans(ctx context.Context, c *app.RequestContext) {
 			PlanType:    plan.PlanType,
 			CreatedAt:   plan.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:   plan.UpdatedAt.Format("2006-01-02 15:04:05"),
-		}
+		})
 	}
 
 	resp := &kolModel.GetKolPlansResp{
 		Plans: planList,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Success",
+			Message: "success",
 		},
 	}
 
@@ -714,7 +727,7 @@ func CreateKolVideo(ctx context.Context, c *app.RequestContext) {
 		VideoID: &videoID,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Video created successfully",
+			Message: "success",
 		},
 	}
 
@@ -768,7 +781,7 @@ func UpdateKolVideo(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.UpdateKolVideoResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Video updated successfully",
+			Message: "success",
 		},
 	}
 
@@ -821,7 +834,7 @@ func DeleteKolVideo(ctx context.Context, c *app.RequestContext) {
 	resp := &kolModel.DeleteKolVideoResp{
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Video deleted successfully",
+			Message: "success",
 		},
 	}
 
@@ -837,6 +850,8 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolVideos bind error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.GetKolVideosResp{
+			Videos: make([]*kolModel.KolVideo, 0),
+			Total:  0,
 			BaseResp: &common.BaseResp{
 				Code:    400,
 				Message: "Invalid request parameters: " + err.Error(),
@@ -850,6 +865,8 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 	if !exists {
 		hlog.Error("GetKolVideos: user ID not found in context")
 		c.JSON(http.StatusUnauthorized, &kolModel.GetKolVideosResp{
+			Videos: make([]*kolModel.KolVideo, 0),
+			Total:  0,
 			BaseResp: &common.BaseResp{
 				Code:    401,
 				Message: "User not authenticated",
@@ -881,6 +898,8 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		hlog.Errorf("GetKolVideos service error: %v", err)
 		c.JSON(http.StatusNotFound, &kolModel.GetKolVideosResp{
+			Videos: make([]*kolModel.KolVideo, 0),
+			Total:  0,
 			BaseResp: &common.BaseResp{
 				Code:    404,
 				Message: err.Error(),
@@ -898,8 +917,9 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 转换为响应格式
-	videoList := make([]*kolModel.KolVideo, len(videos))
-	for i, video := range videos {
+	// 确保即使没有数据也返回空数组而不是 null
+	videoList := make([]*kolModel.KolVideo, 0, len(videos))
+	for _, video := range videos {
 		videoInfo := &kolModel.KolVideo{
 			ID:              video.ID,
 			Title:           video.Title,
@@ -918,7 +938,7 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 			publishedAt := video.PublishedAt.Format("2006-01-02 15:04:05")
 			videoInfo.PublishedAt = publishedAt
 		}
-		videoList[i] = videoInfo
+		videoList = append(videoList, videoInfo)
 	}
 
 	resp := &kolModel.GetKolVideosResp{
@@ -926,7 +946,7 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 		Total:  total,
 		BaseResp: &common.BaseResp{
 			Code:    200,
-			Message: "Success",
+			Message: "success",
 		},
 	}
 

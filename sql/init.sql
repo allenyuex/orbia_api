@@ -14,12 +14,14 @@ CREATE TABLE IF NOT EXISTS orbia_user (
     nickname VARCHAR(100) COMMENT '昵称',
     avatar_url VARCHAR(500) COMMENT '头像URL',
     role ENUM('user', 'admin') NOT NULL DEFAULT 'user' COMMENT '用户角色：user-普通用户，admin-管理员',
+    kol_id BIGINT COMMENT '关联的KOL ID',
     current_team_id BIGINT COMMENT '当前团队ID',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_wallet_address (wallet_address),
     INDEX idx_email (email),
     INDEX idx_role (role),
+    INDEX idx_kol_id (kol_id),
     INDEX idx_current_team_id (current_team_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
@@ -188,3 +190,88 @@ CREATE TABLE IF NOT EXISTS orbia_kol_video (
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (kol_id) REFERENCES orbia_kol(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL视频表';
+
+-- KOL订单表
+CREATE TABLE IF NOT EXISTS orbia_kol_order (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    order_id VARCHAR(64) NOT NULL UNIQUE COMMENT '订单ID（业务唯一ID，格式：ORD{snowflake_id}）',
+    user_id BIGINT NOT NULL COMMENT '下单用户ID',
+    team_id BIGINT COMMENT '下单团队ID（如果是团队下单）',
+    kol_id BIGINT NOT NULL COMMENT 'KOL ID',
+    plan_id BIGINT NOT NULL COMMENT 'KOL报价Plan ID',
+    plan_title VARCHAR(200) NOT NULL COMMENT 'Plan标题（快照）',
+    plan_description TEXT COMMENT 'Plan描述（快照）',
+    plan_price DECIMAL(10, 2) NOT NULL COMMENT 'Plan价格（快照，美元）',
+    plan_type VARCHAR(20) NOT NULL COMMENT 'Plan类型（快照）：basic, standard, premium',
+    description TEXT NOT NULL COMMENT '订单描述（用户下单时输入）',
+    status ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending' COMMENT '订单状态：pending-待确认，confirmed-已确认，in_progress-进行中，completed-已完成，cancelled-已取消，refunded-已退款',
+    reject_reason TEXT COMMENT '拒绝/取消原因',
+    confirmed_at TIMESTAMP NULL COMMENT '确认时间',
+    completed_at TIMESTAMP NULL COMMENT '完成时间',
+    cancelled_at TIMESTAMP NULL COMMENT '取消时间',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_order_id (order_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_team_id (team_id),
+    INDEX idx_kol_id (kol_id),
+    INDEX idx_plan_id (plan_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES orbia_team(id) ON DELETE SET NULL,
+    FOREIGN KEY (kol_id) REFERENCES orbia_kol(id) ON DELETE CASCADE,
+    FOREIGN KEY (plan_id) REFERENCES orbia_kol_plan(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL订单表';
+
+-- 用户钱包表
+CREATE TABLE IF NOT EXISTS orbia_wallet (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '钱包ID',
+    user_id BIGINT NOT NULL UNIQUE COMMENT '用户ID',
+    balance DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT '余额（美元）',
+    frozen_balance DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT '冻结余额（美元）',
+    total_recharge DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT '累计充值金额（美元）',
+    total_consume DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT '累计消费金额（美元）',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_balance (balance),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户钱包表';
+
+-- 交易记录表
+CREATE TABLE IF NOT EXISTS orbia_transaction (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    transaction_id VARCHAR(64) NOT NULL UNIQUE COMMENT '交易ID（业务唯一ID，格式：TXN{snowflake_id}）',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    type ENUM('recharge', 'consume', 'refund', 'freeze', 'unfreeze') NOT NULL COMMENT '交易类型：recharge-充值，consume-消费，refund-退款，freeze-冻结，unfreeze-解冻',
+    amount DECIMAL(12, 2) NOT NULL COMMENT '交易金额（美元）',
+    balance_before DECIMAL(12, 2) NOT NULL COMMENT '交易前余额（美元）',
+    balance_after DECIMAL(12, 2) NOT NULL COMMENT '交易后余额（美元）',
+    status ENUM('pending', 'processing', 'completed', 'failed', 'cancelled') NOT NULL DEFAULT 'pending' COMMENT '交易状态：pending-待处理，processing-处理中，completed-已完成，failed-失败，cancelled-已取消',
+    payment_method ENUM('crypto', 'online') COMMENT '支付方式：crypto-加密货币，online-在线支付',
+    crypto_currency VARCHAR(20) COMMENT '加密货币类型：USDT, USDC',
+    crypto_chain VARCHAR(50) COMMENT '加密货币链：ETH, BSC, POLYGON, TRON, ARBITRUM, OPTIMISM',
+    crypto_address VARCHAR(500) COMMENT '加密货币支付地址',
+    crypto_tx_hash VARCHAR(500) COMMENT '加密货币交易哈希',
+    online_payment_platform VARCHAR(50) COMMENT '在线支付平台：stripe, paypal',
+    online_payment_order_id VARCHAR(200) COMMENT '在线支付平台订单ID',
+    online_payment_url TEXT COMMENT '在线支付URL',
+    related_order_id VARCHAR(64) COMMENT '关联订单ID（如果是消费/退款类型）',
+    remark TEXT COMMENT '备注说明',
+    failed_reason TEXT COMMENT '失败原因',
+    completed_at TIMESTAMP NULL COMMENT '完成时间',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_transaction_id (transaction_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_type (type),
+    INDEX idx_status (status),
+    INDEX idx_payment_method (payment_method),
+    INDEX idx_related_order_id (related_order_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_crypto_tx_hash (crypto_tx_hash),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易记录表';

@@ -3,123 +3,12 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
-
-	"orbia_api/biz/dal/mysql"
-	"orbia_api/biz/handler/auth"
-	"orbia_api/biz/handler/kol"
-	"orbia_api/biz/handler/team"
-	"orbia_api/biz/handler/user"
-	"orbia_api/biz/infra/config"
-	"orbia_api/biz/mw"
-	"orbia_api/biz/utils"
 )
 
 func main() {
-	// 初始化日志器
-	utils.InitLogger()
-	utils.LogInfo("🚀 Starting Orbia API Server...")
+	h := server.Default()
 
-	// 1. 加载配置
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "./conf/config.yaml"
-	}
-	if err := config.LoadConfig(configPath); err != nil {
-		utils.LogError(err, "❌ Failed to load config")
-		os.Exit(1)
-	}
-	utils.LogInfo("✅ Config loaded successfully")
-
-	// 2. 初始化数据库
-	if err := mysql.Init(); err != nil {
-		utils.LogError(err, "❌ Failed to initialize MySQL")
-		os.Exit(1)
-	}
-	defer mysql.Close()
-
-	// 3. 初始化认证中间件（需要在服务之前初始化）
-	userRepo := mysql.NewUserRepository(mysql.DB)
-	mw.InitAuthMiddleware(userRepo)
-	utils.LogInfo("✅ Auth middleware initialized successfully")
-
-	// 4. 初始化服务
-	auth.InitAuthService()
-	user.InitUserService()
-	team.InitTeamService()
-	kol.InitKolService()
-	utils.LogInfo("✅ Services initialized successfully")
-
-	// 5. 创建 Hertz 服务器
-	addr := fmt.Sprintf("%s:%d",
-		config.GlobalConfig.Server.Host,
-		config.GlobalConfig.Server.Port,
-	)
-	h := server.Default(
-		server.WithHostPorts(addr),
-	)
-
-	// 6. 注册全局中间件
-	h.Use(mw.Recovery()) // 恢复中间件，必须放在最前面
-	h.Use(mw.CORS())     // 跨域中间件
-	h.Use(mw.Logger())   // 日志中间件
-
-	// 7. 健康检查
-	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(consts.StatusOK, map[string]interface{}{
-			"status":  "ok",
-			"message": "Orbia API is running",
-		})
-	})
-
-	// 8. 欢迎页面
-	h.GET("/", func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(consts.StatusOK, map[string]interface{}{
-			"message": "Welcome to Orbia API",
-			"version": "1.0.0",
-			"docs":    "/api/v1/auth/wallet-login",
-		})
-	})
-
-	// 9. 注册业务路由（由 hz 生成）
 	register(h)
-
-	// 10. 打印启动信息
-	utils.LogInfo(fmt.Sprintf("✨ Server is running on http://%s", addr))
-	utils.LogInfo("📚 API Endpoints:")
-	utils.LogInfo("   GET  /                              - Welcome message")
-	utils.LogInfo("   GET  /health                        - Health check")
-	utils.LogInfo("   POST /api/v1/auth/wallet-login      - Wallet login")
-	utils.LogInfo("   POST /api/v1/auth/email-login       - Email login")
-	utils.LogInfo("   POST /api/v1/user/profile           - Get user profile (requires JWT)")
-	utils.LogInfo("   POST /api/v1/user/update-profile    - Update user profile (requires JWT)")
-	utils.LogInfo("   POST /api/v1/user/:user_id          - Get user by ID")
-	utils.LogInfo("")
-	utils.LogInfo("💡 Test commands:")
-	utils.LogInfo(fmt.Sprintf("   curl http://localhost:%d/health", config.GlobalConfig.Server.Port))
-	utils.LogInfo(fmt.Sprintf("   curl -X POST http://localhost:%d/api/v1/auth/wallet-login -H \"Content-Type: application/json\" -d '{\"wallet_address\":\"0x...\",\"signature\":\"0x...\"}'", config.GlobalConfig.Server.Port))
-	utils.LogInfo("")
-
-	// 11. 优雅关闭
-	go handleShutdown()
-
-	// 12. 启动服务器
 	h.Spin()
-}
-
-func handleShutdown() {
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	<-sigCh
-	utils.LogInfo("\n🛑 Shutting down server...")
-	mysql.Close()
-	os.Exit(0)
 }
