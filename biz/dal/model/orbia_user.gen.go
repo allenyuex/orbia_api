@@ -28,6 +28,7 @@ type OrbiaUser struct {
 	UpdatedAt        *time.Time     `gorm:"column:updated_at;type:datetime(3)" json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"column:deleted_at;type:datetime(3)" json:"deleted_at"`
 	KolID            *int64         `gorm:"column:kol_id;type:bigint" json:"kol_id"`
+	Status           string         `gorm:"column:status;type:enum('normal','disabled','deleted');not null;default:normal" json:"status"`
 }
 
 // TableName OrbiaUser's table name

@@ -28,8 +28,8 @@ type KolService interface {
 	GetKolPlans(kolID *int64, userID *int64) ([]*mysql.KolPlan, error)
 
 	// KOL视频管理
-	CreateKolVideo(userID int64, title, content, coverURL, videoURL, platform string, platformVideoID *string, likesCount, viewsCount, commentsCount, sharesCount *int64, publishedAt *string) (int64, error)
-	UpdateKolVideo(userID, videoID int64, title, content, coverURL, videoURL *string, likesCount, viewsCount, commentsCount, sharesCount *int64) error
+	CreateKolVideo(userID int64, embedCode string) (int64, error)
+	UpdateKolVideo(userID, videoID int64, embedCode string) error
 	DeleteKolVideo(userID, videoID int64) error
 	GetKolVideos(kolID *int64, userID *int64, page, pageSize int) ([]*mysql.KolVideo, int64, error)
 }
@@ -498,12 +498,7 @@ func (s *kolService) GetKolPlans(kolID *int64, userID *int64) ([]*mysql.KolPlan,
 }
 
 // CreateKolVideo 创建KOL视频
-func (s *kolService) CreateKolVideo(userID int64, title, content, coverURL, videoURL, platform string, platformVideoID *string, likesCount, viewsCount, commentsCount, sharesCount *int64, publishedAt *string) (int64, error) {
-	// 验证平台
-	if platform != "tiktok" && platform != "youtube" {
-		return 0, errors.New("invalid platform, must be tiktok or youtube")
-	}
-
+func (s *kolService) CreateKolVideo(userID int64, embedCode string) (int64, error) {
 	// 获取KOL信息
 	kol, err := s.kolRepo.GetKolByUserID(userID)
 	if err != nil {
@@ -513,39 +508,10 @@ func (s *kolService) CreateKolVideo(userID int64, title, content, coverURL, vide
 		return 0, fmt.Errorf("failed to get KOL: %v", err)
 	}
 
-	// 解析发布时间
-	var publishedTime *time.Time
-	if publishedAt != nil && *publishedAt != "" {
-		t, err := time.Parse(time.RFC3339, *publishedAt)
-		if err != nil {
-			return 0, fmt.Errorf("invalid published_at format, must be RFC3339: %v", err)
-		}
-		publishedTime = &t
-	}
-
 	// 创建视频记录
 	video := &mysql.KolVideo{
-		KolID:           kol.ID,
-		Title:           title,
-		Content:         &content,
-		CoverURL:        &coverURL,
-		VideoURL:        &videoURL,
-		Platform:        platform,
-		PlatformVideoID: platformVideoID,
-		PublishedAt:     publishedTime,
-	}
-
-	if likesCount != nil {
-		video.LikesCount = *likesCount
-	}
-	if viewsCount != nil {
-		video.ViewsCount = *viewsCount
-	}
-	if commentsCount != nil {
-		video.CommentsCount = *commentsCount
-	}
-	if sharesCount != nil {
-		video.SharesCount = *sharesCount
+		KolID:     kol.ID,
+		EmbedCode: embedCode,
 	}
 
 	if err := s.kolRepo.CreateKolVideo(video); err != nil {
@@ -556,7 +522,7 @@ func (s *kolService) CreateKolVideo(userID int64, title, content, coverURL, vide
 }
 
 // UpdateKolVideo 更新KOL视频
-func (s *kolService) UpdateKolVideo(userID, videoID int64, title, content, coverURL, videoURL *string, likesCount, viewsCount, commentsCount, sharesCount *int64) error {
+func (s *kolService) UpdateKolVideo(userID, videoID int64, embedCode string) error {
 	// 获取KOL信息
 	kol, err := s.kolRepo.GetKolByUserID(userID)
 	if err != nil {
@@ -581,30 +547,7 @@ func (s *kolService) UpdateKolVideo(userID, videoID int64, title, content, cover
 	}
 
 	// 更新视频信息
-	if title != nil {
-		video.Title = *title
-	}
-	if content != nil {
-		video.Content = content
-	}
-	if coverURL != nil {
-		video.CoverURL = coverURL
-	}
-	if videoURL != nil {
-		video.VideoURL = videoURL
-	}
-	if likesCount != nil {
-		video.LikesCount = *likesCount
-	}
-	if viewsCount != nil {
-		video.ViewsCount = *viewsCount
-	}
-	if commentsCount != nil {
-		video.CommentsCount = *commentsCount
-	}
-	if sharesCount != nil {
-		video.SharesCount = *sharesCount
-	}
+	video.EmbedCode = embedCode
 
 	if err := s.kolRepo.UpdateKolVideo(video); err != nil {
 		return fmt.Errorf("failed to update video: %v", err)

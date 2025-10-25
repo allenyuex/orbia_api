@@ -38,18 +38,9 @@ struct KolPlan {
 // KOL视频
 struct KolVideo {
     1: i64 id
-    2: string title
-    3: string content
-    4: string cover_url
-    5: string video_url
-    6: string platform  // tiktok, youtube
-    7: string platform_video_id
-    8: i64 likes_count
-    9: i64 views_count
-    10: i64 comments_count
-    11: i64 shares_count
-    12: string published_at
-    13: string created_at
+    2: string embed_code
+    3: string created_at
+    4: string updated_at
 }
 
 // KOL详细信息
@@ -192,17 +183,7 @@ struct GetKolPlansResp {
 
 // 创建KOL视频请求
 struct CreateKolVideoReq {
-    1: string title (api.body="title")
-    2: string content (api.body="content")
-    3: string cover_url (api.body="cover_url")
-    4: string video_url (api.body="video_url")
-    5: string platform (api.body="platform")  // tiktok, youtube
-    6: optional string platform_video_id (api.body="platform_video_id")
-    7: optional i64 likes_count (api.body="likes_count")
-    8: optional i64 views_count (api.body="views_count")
-    9: optional i64 comments_count (api.body="comments_count")
-    10: optional i64 shares_count (api.body="shares_count")
-    11: optional string published_at (api.body="published_at")
+    1: string embed_code (api.body="embed_code")
 }
 
 // 创建KOL视频响应
@@ -214,14 +195,7 @@ struct CreateKolVideoResp {
 // 更新KOL视频请求
 struct UpdateKolVideoReq {
     1: i64 video_id (api.body="video_id")
-    2: optional string title (api.body="title")
-    3: optional string content (api.body="content")
-    4: optional string cover_url (api.body="cover_url")
-    5: optional string video_url (api.body="video_url")
-    6: optional i64 likes_count (api.body="likes_count")
-    7: optional i64 views_count (api.body="views_count")
-    8: optional i64 comments_count (api.body="comments_count")
-    9: optional i64 shares_count (api.body="shares_count")
+    2: string embed_code (api.body="embed_code")
 }
 
 // 更新KOL视频响应

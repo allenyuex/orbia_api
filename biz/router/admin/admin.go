@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"orbia_api/biz/consts"
 	"orbia_api/biz/handler/admin"
 	"orbia_api/biz/mw"
 
@@ -11,9 +12,8 @@ import (
 func Register(h *server.Hertz) {
 	adminGroup := h.Group("/api/v1/admin")
 
-	// 应用鉴权中间件和管理员角色中间件
-	adminGroup.Use(mw.AuthMiddleware())
-	adminGroup.Use(mw.AdminOnlyMiddleware())
+	// 应用鉴权中间件，仅管理员可访问
+	adminGroup.Use(mw.AuthMiddleware(consts.RoleAdmin))
 
 	// 用户管理
 	adminGroup.POST("/users", admin.GetAllUsers)

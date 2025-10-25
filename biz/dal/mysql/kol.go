@@ -98,22 +98,12 @@ func (KolPlan) TableName() string {
 
 // KolVideo KOL视频模型
 type KolVideo struct {
-	ID              int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	KolID           int64          `gorm:"column:kol_id;not null" json:"kol_id"`
-	Title           string         `gorm:"column:title;size:500;not null" json:"title"`
-	Content         *string        `gorm:"column:content;type:text" json:"content"`
-	CoverURL        *string        `gorm:"column:cover_url;size:500" json:"cover_url"`
-	VideoURL        *string        `gorm:"column:video_url;size:500" json:"video_url"`
-	Platform        string         `gorm:"column:platform;size:50;not null" json:"platform"`
-	PlatformVideoID *string        `gorm:"column:platform_video_id;size:200" json:"platform_video_id"`
-	LikesCount      int64          `gorm:"column:likes_count;default:0" json:"likes_count"`
-	ViewsCount      int64          `gorm:"column:views_count;default:0" json:"views_count"`
-	CommentsCount   int64          `gorm:"column:comments_count;default:0" json:"comments_count"`
-	SharesCount     int64          `gorm:"column:shares_count;default:0" json:"shares_count"`
-	PublishedAt     *time.Time     `gorm:"column:published_at" json:"published_at"`
-	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
-	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
-	DeletedAt       gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`
+	ID        int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	KolID     int64          `gorm:"column:kol_id;not null" json:"kol_id"`
+	EmbedCode string         `gorm:"column:embed_code;type:text;not null" json:"embed_code"`
+	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`
 }
 
 // TableName 指定表名
@@ -365,9 +355,9 @@ func (r *kolRepository) GetKolVideos(kolID int64, offset, limit int) ([]*KolVide
 		return nil, 0, err
 	}
 
-	// 获取列表，按发布时间倒序
+	// 获取列表，按创建时间倒序
 	if err := r.db.Where("kol_id = ?", kolID).
-		Order("published_at DESC").
+		Order("created_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&videos).Error; err != nil {

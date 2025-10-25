@@ -3,8 +3,10 @@
 package upload
 
 import (
-	"github.com/cloudwego/hertz/pkg/app"
+	"orbia_api/biz/consts"
 	"orbia_api/biz/mw"
+
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func rootMw() []app.HandlerFunc {
@@ -23,9 +25,9 @@ func _v1Mw() []app.HandlerFunc {
 }
 
 func _uploadMw() []app.HandlerFunc {
-	// 上传相关接口需要JWT认证
+	// 上传相关接口需要JWT认证，普通用户和管理员都可访问
 	return []app.HandlerFunc{
-		mw.AuthMiddleware(),
+		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
 	}
 }
 

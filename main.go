@@ -29,9 +29,13 @@ func main() {
 	defer mysql.Close()
 	log.Println("✅ Database initialized successfully")
 
+	// 初始化认证中间件
+	userRepo := mysql.NewUserRepository(mysql.DB)
+	mw.InitAuthMiddleware(userRepo)
+	log.Println("✅ Auth middleware initialized successfully")
+
 	// 初始化所有 handler 服务
 	handler.InitAllServices()
-
 	h := server.Default()
 
 	// 注册全局 CORS 中间件

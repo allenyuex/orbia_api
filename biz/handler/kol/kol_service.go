@@ -709,9 +709,7 @@ func CreateKolVideo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层创建视频
-	videoID, err := kolSvc.CreateKolVideo(userID, req.Title, req.Content, req.CoverURL,
-		req.VideoURL, req.Platform, req.PlatformVideoID, req.LikesCount, req.ViewsCount,
-		req.CommentsCount, req.SharesCount, req.PublishedAt)
+	videoID, err := kolSvc.CreateKolVideo(userID, req.EmbedCode)
 	if err != nil {
 		hlog.Errorf("CreateKolVideo service error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.CreateKolVideoResp{
@@ -765,8 +763,7 @@ func UpdateKolVideo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层更新视频
-	err = kolSvc.UpdateKolVideo(userID, req.VideoID, req.Title, req.Content, req.CoverURL,
-		req.VideoURL, req.LikesCount, req.ViewsCount, req.CommentsCount, req.SharesCount)
+	err = kolSvc.UpdateKolVideo(userID, req.VideoID, req.EmbedCode)
 	if err != nil {
 		hlog.Errorf("UpdateKolVideo service error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.UpdateKolVideoResp{
@@ -908,35 +905,15 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 辅助函数：将指针字符串转换为字符串
-	ptrToStr := func(s *string) string {
-		if s != nil {
-			return *s
-		}
-		return ""
-	}
-
 	// 转换为响应格式
 	// 确保即使没有数据也返回空数组而不是 null
 	videoList := make([]*kolModel.KolVideo, 0, len(videos))
 	for _, video := range videos {
 		videoInfo := &kolModel.KolVideo{
-			ID:              video.ID,
-			Title:           video.Title,
-			Content:         ptrToStr(video.Content),
-			CoverURL:        ptrToStr(video.CoverURL),
-			VideoURL:        ptrToStr(video.VideoURL),
-			Platform:        video.Platform,
-			PlatformVideoID: ptrToStr(video.PlatformVideoID),
-			LikesCount:      video.LikesCount,
-			ViewsCount:      video.ViewsCount,
-			CommentsCount:   video.CommentsCount,
-			SharesCount:     video.SharesCount,
-			CreatedAt:       video.CreatedAt.Format("2006-01-02 15:04:05"),
-		}
-		if video.PublishedAt != nil {
-			publishedAt := video.PublishedAt.Format("2006-01-02 15:04:05")
-			videoInfo.PublishedAt = publishedAt
+			ID:        video.ID,
+			EmbedCode: video.EmbedCode,
+			CreatedAt: video.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: video.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}
 		videoList = append(videoList, videoInfo)
 	}

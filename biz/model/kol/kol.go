@@ -1174,20 +1174,10 @@ func (p *KolPlan) String() string {
 
 // KOL视频
 type KolVideo struct {
-	ID       int64  `thrift:"id,1" form:"id" json:"id" query:"id"`
-	Title    string `thrift:"title,2" form:"title" json:"title" query:"title"`
-	Content  string `thrift:"content,3" form:"content" json:"content" query:"content"`
-	CoverURL string `thrift:"cover_url,4" form:"cover_url" json:"cover_url" query:"cover_url"`
-	VideoURL string `thrift:"video_url,5" form:"video_url" json:"video_url" query:"video_url"`
-	// tiktok, youtube
-	Platform        string `thrift:"platform,6" form:"platform" json:"platform" query:"platform"`
-	PlatformVideoID string `thrift:"platform_video_id,7" form:"platform_video_id" json:"platform_video_id" query:"platform_video_id"`
-	LikesCount      int64  `thrift:"likes_count,8" form:"likes_count" json:"likes_count" query:"likes_count"`
-	ViewsCount      int64  `thrift:"views_count,9" form:"views_count" json:"views_count" query:"views_count"`
-	CommentsCount   int64  `thrift:"comments_count,10" form:"comments_count" json:"comments_count" query:"comments_count"`
-	SharesCount     int64  `thrift:"shares_count,11" form:"shares_count" json:"shares_count" query:"shares_count"`
-	PublishedAt     string `thrift:"published_at,12" form:"published_at" json:"published_at" query:"published_at"`
-	CreatedAt       string `thrift:"created_at,13" form:"created_at" json:"created_at" query:"created_at"`
+	ID        int64  `thrift:"id,1" form:"id" json:"id" query:"id"`
+	EmbedCode string `thrift:"embed_code,2" form:"embed_code" json:"embed_code" query:"embed_code"`
+	CreatedAt string `thrift:"created_at,3" form:"created_at" json:"created_at" query:"created_at"`
+	UpdatedAt string `thrift:"updated_at,4" form:"updated_at" json:"updated_at" query:"updated_at"`
 }
 
 func NewKolVideo() *KolVideo {
@@ -1201,68 +1191,23 @@ func (p *KolVideo) GetID() (v int64) {
 	return p.ID
 }
 
-func (p *KolVideo) GetTitle() (v string) {
-	return p.Title
-}
-
-func (p *KolVideo) GetContent() (v string) {
-	return p.Content
-}
-
-func (p *KolVideo) GetCoverURL() (v string) {
-	return p.CoverURL
-}
-
-func (p *KolVideo) GetVideoURL() (v string) {
-	return p.VideoURL
-}
-
-func (p *KolVideo) GetPlatform() (v string) {
-	return p.Platform
-}
-
-func (p *KolVideo) GetPlatformVideoID() (v string) {
-	return p.PlatformVideoID
-}
-
-func (p *KolVideo) GetLikesCount() (v int64) {
-	return p.LikesCount
-}
-
-func (p *KolVideo) GetViewsCount() (v int64) {
-	return p.ViewsCount
-}
-
-func (p *KolVideo) GetCommentsCount() (v int64) {
-	return p.CommentsCount
-}
-
-func (p *KolVideo) GetSharesCount() (v int64) {
-	return p.SharesCount
-}
-
-func (p *KolVideo) GetPublishedAt() (v string) {
-	return p.PublishedAt
+func (p *KolVideo) GetEmbedCode() (v string) {
+	return p.EmbedCode
 }
 
 func (p *KolVideo) GetCreatedAt() (v string) {
 	return p.CreatedAt
 }
 
+func (p *KolVideo) GetUpdatedAt() (v string) {
+	return p.UpdatedAt
+}
+
 var fieldIDToName_KolVideo = map[int16]string{
-	1:  "id",
-	2:  "title",
-	3:  "content",
-	4:  "cover_url",
-	5:  "video_url",
-	6:  "platform",
-	7:  "platform_video_id",
-	8:  "likes_count",
-	9:  "views_count",
-	10: "comments_count",
-	11: "shares_count",
-	12: "published_at",
-	13: "created_at",
+	1: "id",
+	2: "embed_code",
+	3: "created_at",
+	4: "updated_at",
 }
 
 func (p *KolVideo) Read(iprot thrift.TProtocol) (err error) {
@@ -1316,78 +1261,6 @@ func (p *KolVideo) Read(iprot thrift.TProtocol) (err error) {
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 5:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField5(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 6:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField6(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 7:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField7(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 8:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField8(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 9:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField9(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 10:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField10(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 11:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField11(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 12:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField12(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 13:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField13(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -1436,7 +1309,7 @@ func (p *KolVideo) ReadField2(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.Title = _field
+	p.EmbedCode = _field
 	return nil
 }
 func (p *KolVideo) ReadField3(iprot thrift.TProtocol) error {
@@ -1447,7 +1320,7 @@ func (p *KolVideo) ReadField3(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.Content = _field
+	p.CreatedAt = _field
 	return nil
 }
 func (p *KolVideo) ReadField4(iprot thrift.TProtocol) error {
@@ -1458,106 +1331,7 @@ func (p *KolVideo) ReadField4(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.CoverURL = _field
-	return nil
-}
-func (p *KolVideo) ReadField5(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.VideoURL = _field
-	return nil
-}
-func (p *KolVideo) ReadField6(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.Platform = _field
-	return nil
-}
-func (p *KolVideo) ReadField7(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.PlatformVideoID = _field
-	return nil
-}
-func (p *KolVideo) ReadField8(iprot thrift.TProtocol) error {
-
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.LikesCount = _field
-	return nil
-}
-func (p *KolVideo) ReadField9(iprot thrift.TProtocol) error {
-
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.ViewsCount = _field
-	return nil
-}
-func (p *KolVideo) ReadField10(iprot thrift.TProtocol) error {
-
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.CommentsCount = _field
-	return nil
-}
-func (p *KolVideo) ReadField11(iprot thrift.TProtocol) error {
-
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.SharesCount = _field
-	return nil
-}
-func (p *KolVideo) ReadField12(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.PublishedAt = _field
-	return nil
-}
-func (p *KolVideo) ReadField13(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.CreatedAt = _field
+	p.UpdatedAt = _field
 	return nil
 }
 
@@ -1581,42 +1355,6 @@ func (p *KolVideo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
-			goto WriteFieldError
-		}
-		if err = p.writeField5(oprot); err != nil {
-			fieldId = 5
-			goto WriteFieldError
-		}
-		if err = p.writeField6(oprot); err != nil {
-			fieldId = 6
-			goto WriteFieldError
-		}
-		if err = p.writeField7(oprot); err != nil {
-			fieldId = 7
-			goto WriteFieldError
-		}
-		if err = p.writeField8(oprot); err != nil {
-			fieldId = 8
-			goto WriteFieldError
-		}
-		if err = p.writeField9(oprot); err != nil {
-			fieldId = 9
-			goto WriteFieldError
-		}
-		if err = p.writeField10(oprot); err != nil {
-			fieldId = 10
-			goto WriteFieldError
-		}
-		if err = p.writeField11(oprot); err != nil {
-			fieldId = 11
-			goto WriteFieldError
-		}
-		if err = p.writeField12(oprot); err != nil {
-			fieldId = 12
-			goto WriteFieldError
-		}
-		if err = p.writeField13(oprot); err != nil {
-			fieldId = 13
 			goto WriteFieldError
 		}
 	}
@@ -1655,10 +1393,10 @@ WriteFieldEndError:
 }
 
 func (p *KolVideo) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("title", thrift.STRING, 2); err != nil {
+	if err = oprot.WriteFieldBegin("embed_code", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Title); err != nil {
+	if err := oprot.WriteString(p.EmbedCode); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1672,10 +1410,10 @@ WriteFieldEndError:
 }
 
 func (p *KolVideo) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("content", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Content); err != nil {
+	if err := oprot.WriteString(p.CreatedAt); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1689,10 +1427,10 @@ WriteFieldEndError:
 }
 
 func (p *KolVideo) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 4); err != nil {
+	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 4); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.CoverURL); err != nil {
+	if err := oprot.WriteString(p.UpdatedAt); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1703,159 +1441,6 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField5(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("video_url", thrift.STRING, 5); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.VideoURL); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField6(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("platform", thrift.STRING, 6); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.Platform); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField7(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("platform_video_id", thrift.STRING, 7); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.PlatformVideoID); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField8(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("likes_count", thrift.I64, 8); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.LikesCount); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField9(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("views_count", thrift.I64, 9); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.ViewsCount); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField10(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("comments_count", thrift.I64, 10); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.CommentsCount); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField11(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("shares_count", thrift.I64, 11); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.SharesCount); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 11 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 11 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField12(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("published_at", thrift.STRING, 12); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.PublishedAt); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 12 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 12 end error: ", p), err)
-}
-
-func (p *KolVideo) writeField13(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 13); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.CreatedAt); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 13 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 13 end error: ", p), err)
 }
 
 func (p *KolVideo) String() string {
@@ -7273,18 +6858,7 @@ func (p *GetKolPlansResp) String() string {
 
 // 创建KOL视频请求
 type CreateKolVideoReq struct {
-	Title    string `thrift:"title,1" form:"title" json:"title"`
-	Content  string `thrift:"content,2" form:"content" json:"content"`
-	CoverURL string `thrift:"cover_url,3" form:"cover_url" json:"cover_url"`
-	VideoURL string `thrift:"video_url,4" form:"video_url" json:"video_url"`
-	// tiktok, youtube
-	Platform        string  `thrift:"platform,5" form:"platform" json:"platform"`
-	PlatformVideoID *string `thrift:"platform_video_id,6,optional" form:"platform_video_id" json:"platform_video_id,omitempty"`
-	LikesCount      *int64  `thrift:"likes_count,7,optional" form:"likes_count" json:"likes_count,omitempty"`
-	ViewsCount      *int64  `thrift:"views_count,8,optional" form:"views_count" json:"views_count,omitempty"`
-	CommentsCount   *int64  `thrift:"comments_count,9,optional" form:"comments_count" json:"comments_count,omitempty"`
-	SharesCount     *int64  `thrift:"shares_count,10,optional" form:"shares_count" json:"shares_count,omitempty"`
-	PublishedAt     *string `thrift:"published_at,11,optional" form:"published_at" json:"published_at,omitempty"`
+	EmbedCode string `thrift:"embed_code,1" form:"embed_code" json:"embed_code"`
 }
 
 func NewCreateKolVideoReq() *CreateKolVideoReq {
@@ -7294,116 +6868,12 @@ func NewCreateKolVideoReq() *CreateKolVideoReq {
 func (p *CreateKolVideoReq) InitDefault() {
 }
 
-func (p *CreateKolVideoReq) GetTitle() (v string) {
-	return p.Title
-}
-
-func (p *CreateKolVideoReq) GetContent() (v string) {
-	return p.Content
-}
-
-func (p *CreateKolVideoReq) GetCoverURL() (v string) {
-	return p.CoverURL
-}
-
-func (p *CreateKolVideoReq) GetVideoURL() (v string) {
-	return p.VideoURL
-}
-
-func (p *CreateKolVideoReq) GetPlatform() (v string) {
-	return p.Platform
-}
-
-var CreateKolVideoReq_PlatformVideoID_DEFAULT string
-
-func (p *CreateKolVideoReq) GetPlatformVideoID() (v string) {
-	if !p.IsSetPlatformVideoID() {
-		return CreateKolVideoReq_PlatformVideoID_DEFAULT
-	}
-	return *p.PlatformVideoID
-}
-
-var CreateKolVideoReq_LikesCount_DEFAULT int64
-
-func (p *CreateKolVideoReq) GetLikesCount() (v int64) {
-	if !p.IsSetLikesCount() {
-		return CreateKolVideoReq_LikesCount_DEFAULT
-	}
-	return *p.LikesCount
-}
-
-var CreateKolVideoReq_ViewsCount_DEFAULT int64
-
-func (p *CreateKolVideoReq) GetViewsCount() (v int64) {
-	if !p.IsSetViewsCount() {
-		return CreateKolVideoReq_ViewsCount_DEFAULT
-	}
-	return *p.ViewsCount
-}
-
-var CreateKolVideoReq_CommentsCount_DEFAULT int64
-
-func (p *CreateKolVideoReq) GetCommentsCount() (v int64) {
-	if !p.IsSetCommentsCount() {
-		return CreateKolVideoReq_CommentsCount_DEFAULT
-	}
-	return *p.CommentsCount
-}
-
-var CreateKolVideoReq_SharesCount_DEFAULT int64
-
-func (p *CreateKolVideoReq) GetSharesCount() (v int64) {
-	if !p.IsSetSharesCount() {
-		return CreateKolVideoReq_SharesCount_DEFAULT
-	}
-	return *p.SharesCount
-}
-
-var CreateKolVideoReq_PublishedAt_DEFAULT string
-
-func (p *CreateKolVideoReq) GetPublishedAt() (v string) {
-	if !p.IsSetPublishedAt() {
-		return CreateKolVideoReq_PublishedAt_DEFAULT
-	}
-	return *p.PublishedAt
+func (p *CreateKolVideoReq) GetEmbedCode() (v string) {
+	return p.EmbedCode
 }
 
 var fieldIDToName_CreateKolVideoReq = map[int16]string{
-	1:  "title",
-	2:  "content",
-	3:  "cover_url",
-	4:  "video_url",
-	5:  "platform",
-	6:  "platform_video_id",
-	7:  "likes_count",
-	8:  "views_count",
-	9:  "comments_count",
-	10: "shares_count",
-	11: "published_at",
-}
-
-func (p *CreateKolVideoReq) IsSetPlatformVideoID() bool {
-	return p.PlatformVideoID != nil
-}
-
-func (p *CreateKolVideoReq) IsSetLikesCount() bool {
-	return p.LikesCount != nil
-}
-
-func (p *CreateKolVideoReq) IsSetViewsCount() bool {
-	return p.ViewsCount != nil
-}
-
-func (p *CreateKolVideoReq) IsSetCommentsCount() bool {
-	return p.CommentsCount != nil
-}
-
-func (p *CreateKolVideoReq) IsSetSharesCount() bool {
-	return p.SharesCount != nil
-}
-
-func (p *CreateKolVideoReq) IsSetPublishedAt() bool {
-	return p.PublishedAt != nil
+	1: "embed_code",
 }
 
 func (p *CreateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
@@ -7428,86 +6898,6 @@ func (p *CreateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
 		case 1:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 2:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 3:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField3(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 4:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField4(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 5:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField5(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 6:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField6(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 7:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField7(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 8:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField8(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 9:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField9(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 10:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField10(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 11:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField11(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -7550,117 +6940,7 @@ func (p *CreateKolVideoReq) ReadField1(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.Title = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField2(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.Content = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField3(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.CoverURL = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField4(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.VideoURL = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField5(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.Platform = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField6(iprot thrift.TProtocol) error {
-
-	var _field *string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.PlatformVideoID = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField7(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.LikesCount = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField8(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.ViewsCount = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField9(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.CommentsCount = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField10(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.SharesCount = _field
-	return nil
-}
-func (p *CreateKolVideoReq) ReadField11(iprot thrift.TProtocol) error {
-
-	var _field *string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.PublishedAt = _field
+	p.EmbedCode = _field
 	return nil
 }
 
@@ -7672,46 +6952,6 @@ func (p *CreateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 	if p != nil {
 		if err = p.writeField1(oprot); err != nil {
 			fieldId = 1
-			goto WriteFieldError
-		}
-		if err = p.writeField2(oprot); err != nil {
-			fieldId = 2
-			goto WriteFieldError
-		}
-		if err = p.writeField3(oprot); err != nil {
-			fieldId = 3
-			goto WriteFieldError
-		}
-		if err = p.writeField4(oprot); err != nil {
-			fieldId = 4
-			goto WriteFieldError
-		}
-		if err = p.writeField5(oprot); err != nil {
-			fieldId = 5
-			goto WriteFieldError
-		}
-		if err = p.writeField6(oprot); err != nil {
-			fieldId = 6
-			goto WriteFieldError
-		}
-		if err = p.writeField7(oprot); err != nil {
-			fieldId = 7
-			goto WriteFieldError
-		}
-		if err = p.writeField8(oprot); err != nil {
-			fieldId = 8
-			goto WriteFieldError
-		}
-		if err = p.writeField9(oprot); err != nil {
-			fieldId = 9
-			goto WriteFieldError
-		}
-		if err = p.writeField10(oprot); err != nil {
-			fieldId = 10
-			goto WriteFieldError
-		}
-		if err = p.writeField11(oprot); err != nil {
-			fieldId = 11
 			goto WriteFieldError
 		}
 	}
@@ -7733,10 +6973,10 @@ WriteStructEndError:
 }
 
 func (p *CreateKolVideoReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("title", thrift.STRING, 1); err != nil {
+	if err = oprot.WriteFieldBegin("embed_code", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Title); err != nil {
+	if err := oprot.WriteString(p.EmbedCode); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -7747,188 +6987,6 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("content", thrift.STRING, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.Content); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 3); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.CoverURL); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("video_url", thrift.STRING, 4); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.VideoURL); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField5(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("platform", thrift.STRING, 5); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.Platform); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField6(oprot thrift.TProtocol) (err error) {
-	if p.IsSetPlatformVideoID() {
-		if err = oprot.WriteFieldBegin("platform_video_id", thrift.STRING, 6); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.PlatformVideoID); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField7(oprot thrift.TProtocol) (err error) {
-	if p.IsSetLikesCount() {
-		if err = oprot.WriteFieldBegin("likes_count", thrift.I64, 7); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.LikesCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField8(oprot thrift.TProtocol) (err error) {
-	if p.IsSetViewsCount() {
-		if err = oprot.WriteFieldBegin("views_count", thrift.I64, 8); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.ViewsCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField9(oprot thrift.TProtocol) (err error) {
-	if p.IsSetCommentsCount() {
-		if err = oprot.WriteFieldBegin("comments_count", thrift.I64, 9); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.CommentsCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField10(oprot thrift.TProtocol) (err error) {
-	if p.IsSetSharesCount() {
-		if err = oprot.WriteFieldBegin("shares_count", thrift.I64, 10); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.SharesCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 10 end error: ", p), err)
-}
-
-func (p *CreateKolVideoReq) writeField11(oprot thrift.TProtocol) (err error) {
-	if p.IsSetPublishedAt() {
-		if err = oprot.WriteFieldBegin("published_at", thrift.STRING, 11); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.PublishedAt); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 11 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 11 end error: ", p), err)
 }
 
 func (p *CreateKolVideoReq) String() string {
@@ -8145,15 +7203,8 @@ func (p *CreateKolVideoResp) String() string {
 
 // 更新KOL视频请求
 type UpdateKolVideoReq struct {
-	VideoID       int64   `thrift:"video_id,1" form:"video_id" json:"video_id"`
-	Title         *string `thrift:"title,2,optional" form:"title" json:"title,omitempty"`
-	Content       *string `thrift:"content,3,optional" form:"content" json:"content,omitempty"`
-	CoverURL      *string `thrift:"cover_url,4,optional" form:"cover_url" json:"cover_url,omitempty"`
-	VideoURL      *string `thrift:"video_url,5,optional" form:"video_url" json:"video_url,omitempty"`
-	LikesCount    *int64  `thrift:"likes_count,6,optional" form:"likes_count" json:"likes_count,omitempty"`
-	ViewsCount    *int64  `thrift:"views_count,7,optional" form:"views_count" json:"views_count,omitempty"`
-	CommentsCount *int64  `thrift:"comments_count,8,optional" form:"comments_count" json:"comments_count,omitempty"`
-	SharesCount   *int64  `thrift:"shares_count,9,optional" form:"shares_count" json:"shares_count,omitempty"`
+	VideoID   int64  `thrift:"video_id,1" form:"video_id" json:"video_id"`
+	EmbedCode string `thrift:"embed_code,2" form:"embed_code" json:"embed_code"`
 }
 
 func NewUpdateKolVideoReq() *UpdateKolVideoReq {
@@ -8167,120 +7218,13 @@ func (p *UpdateKolVideoReq) GetVideoID() (v int64) {
 	return p.VideoID
 }
 
-var UpdateKolVideoReq_Title_DEFAULT string
-
-func (p *UpdateKolVideoReq) GetTitle() (v string) {
-	if !p.IsSetTitle() {
-		return UpdateKolVideoReq_Title_DEFAULT
-	}
-	return *p.Title
-}
-
-var UpdateKolVideoReq_Content_DEFAULT string
-
-func (p *UpdateKolVideoReq) GetContent() (v string) {
-	if !p.IsSetContent() {
-		return UpdateKolVideoReq_Content_DEFAULT
-	}
-	return *p.Content
-}
-
-var UpdateKolVideoReq_CoverURL_DEFAULT string
-
-func (p *UpdateKolVideoReq) GetCoverURL() (v string) {
-	if !p.IsSetCoverURL() {
-		return UpdateKolVideoReq_CoverURL_DEFAULT
-	}
-	return *p.CoverURL
-}
-
-var UpdateKolVideoReq_VideoURL_DEFAULT string
-
-func (p *UpdateKolVideoReq) GetVideoURL() (v string) {
-	if !p.IsSetVideoURL() {
-		return UpdateKolVideoReq_VideoURL_DEFAULT
-	}
-	return *p.VideoURL
-}
-
-var UpdateKolVideoReq_LikesCount_DEFAULT int64
-
-func (p *UpdateKolVideoReq) GetLikesCount() (v int64) {
-	if !p.IsSetLikesCount() {
-		return UpdateKolVideoReq_LikesCount_DEFAULT
-	}
-	return *p.LikesCount
-}
-
-var UpdateKolVideoReq_ViewsCount_DEFAULT int64
-
-func (p *UpdateKolVideoReq) GetViewsCount() (v int64) {
-	if !p.IsSetViewsCount() {
-		return UpdateKolVideoReq_ViewsCount_DEFAULT
-	}
-	return *p.ViewsCount
-}
-
-var UpdateKolVideoReq_CommentsCount_DEFAULT int64
-
-func (p *UpdateKolVideoReq) GetCommentsCount() (v int64) {
-	if !p.IsSetCommentsCount() {
-		return UpdateKolVideoReq_CommentsCount_DEFAULT
-	}
-	return *p.CommentsCount
-}
-
-var UpdateKolVideoReq_SharesCount_DEFAULT int64
-
-func (p *UpdateKolVideoReq) GetSharesCount() (v int64) {
-	if !p.IsSetSharesCount() {
-		return UpdateKolVideoReq_SharesCount_DEFAULT
-	}
-	return *p.SharesCount
+func (p *UpdateKolVideoReq) GetEmbedCode() (v string) {
+	return p.EmbedCode
 }
 
 var fieldIDToName_UpdateKolVideoReq = map[int16]string{
 	1: "video_id",
-	2: "title",
-	3: "content",
-	4: "cover_url",
-	5: "video_url",
-	6: "likes_count",
-	7: "views_count",
-	8: "comments_count",
-	9: "shares_count",
-}
-
-func (p *UpdateKolVideoReq) IsSetTitle() bool {
-	return p.Title != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetContent() bool {
-	return p.Content != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetCoverURL() bool {
-	return p.CoverURL != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetVideoURL() bool {
-	return p.VideoURL != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetLikesCount() bool {
-	return p.LikesCount != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetViewsCount() bool {
-	return p.ViewsCount != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetCommentsCount() bool {
-	return p.CommentsCount != nil
-}
-
-func (p *UpdateKolVideoReq) IsSetSharesCount() bool {
-	return p.SharesCount != nil
+	2: "embed_code",
 }
 
 func (p *UpdateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
@@ -8313,62 +7257,6 @@ func (p *UpdateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
 		case 2:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 3:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField3(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 4:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField4(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 5:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField5(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 6:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField6(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 7:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField7(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 8:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField8(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 9:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField9(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -8416,90 +7304,13 @@ func (p *UpdateKolVideoReq) ReadField1(iprot thrift.TProtocol) error {
 }
 func (p *UpdateKolVideoReq) ReadField2(iprot thrift.TProtocol) error {
 
-	var _field *string
+	var _field string
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		_field = &v
+		_field = v
 	}
-	p.Title = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField3(iprot thrift.TProtocol) error {
-
-	var _field *string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.Content = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField4(iprot thrift.TProtocol) error {
-
-	var _field *string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.CoverURL = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField5(iprot thrift.TProtocol) error {
-
-	var _field *string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.VideoURL = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField6(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.LikesCount = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField7(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.ViewsCount = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField8(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.CommentsCount = _field
-	return nil
-}
-func (p *UpdateKolVideoReq) ReadField9(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = &v
-	}
-	p.SharesCount = _field
+	p.EmbedCode = _field
 	return nil
 }
 
@@ -8515,34 +7326,6 @@ func (p *UpdateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
-			goto WriteFieldError
-		}
-		if err = p.writeField3(oprot); err != nil {
-			fieldId = 3
-			goto WriteFieldError
-		}
-		if err = p.writeField4(oprot); err != nil {
-			fieldId = 4
-			goto WriteFieldError
-		}
-		if err = p.writeField5(oprot); err != nil {
-			fieldId = 5
-			goto WriteFieldError
-		}
-		if err = p.writeField6(oprot); err != nil {
-			fieldId = 6
-			goto WriteFieldError
-		}
-		if err = p.writeField7(oprot); err != nil {
-			fieldId = 7
-			goto WriteFieldError
-		}
-		if err = p.writeField8(oprot); err != nil {
-			fieldId = 8
-			goto WriteFieldError
-		}
-		if err = p.writeField9(oprot); err != nil {
-			fieldId = 9
 			goto WriteFieldError
 		}
 	}
@@ -8581,155 +7364,20 @@ WriteFieldEndError:
 }
 
 func (p *UpdateKolVideoReq) writeField2(oprot thrift.TProtocol) (err error) {
-	if p.IsSetTitle() {
-		if err = oprot.WriteFieldBegin("title", thrift.STRING, 2); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.Title); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
+	if err = oprot.WriteFieldBegin("embed_code", thrift.STRING, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.EmbedCode); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
 	}
 	return nil
 WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField3(oprot thrift.TProtocol) (err error) {
-	if p.IsSetContent() {
-		if err = oprot.WriteFieldBegin("content", thrift.STRING, 3); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.Content); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField4(oprot thrift.TProtocol) (err error) {
-	if p.IsSetCoverURL() {
-		if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 4); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.CoverURL); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField5(oprot thrift.TProtocol) (err error) {
-	if p.IsSetVideoURL() {
-		if err = oprot.WriteFieldBegin("video_url", thrift.STRING, 5); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteString(*p.VideoURL); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField6(oprot thrift.TProtocol) (err error) {
-	if p.IsSetLikesCount() {
-		if err = oprot.WriteFieldBegin("likes_count", thrift.I64, 6); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.LikesCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField7(oprot thrift.TProtocol) (err error) {
-	if p.IsSetViewsCount() {
-		if err = oprot.WriteFieldBegin("views_count", thrift.I64, 7); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.ViewsCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField8(oprot thrift.TProtocol) (err error) {
-	if p.IsSetCommentsCount() {
-		if err = oprot.WriteFieldBegin("comments_count", thrift.I64, 8); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.CommentsCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
-}
-
-func (p *UpdateKolVideoReq) writeField9(oprot thrift.TProtocol) (err error) {
-	if p.IsSetSharesCount() {
-		if err = oprot.WriteFieldBegin("shares_count", thrift.I64, 9); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI64(*p.SharesCount); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
 }
 
 func (p *UpdateKolVideoReq) String() string {

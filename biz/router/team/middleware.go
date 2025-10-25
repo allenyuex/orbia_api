@@ -3,6 +3,7 @@
 package team
 
 import (
+	"orbia_api/biz/consts"
 	"orbia_api/biz/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -29,53 +30,53 @@ func _teamMw() []app.HandlerFunc {
 }
 
 func _createMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _getMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _updateMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _listMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _inviteMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _acceptinvitationMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _rejectinvitationMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _membersMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _createteamMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _getuserinvitationsMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _team_idMw() []app.HandlerFunc {
@@ -84,18 +85,18 @@ func _team_idMw() []app.HandlerFunc {
 }
 
 func _getteamMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _inviteuserMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _getteammembersMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _memberMw() []app.HandlerFunc {
@@ -104,18 +105,18 @@ func _memberMw() []app.HandlerFunc {
 }
 
 func _removeteammemberMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _updateteamMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _getuserteamsMw() []app.HandlerFunc {
-	// 需要JWT认证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _invitationMw() []app.HandlerFunc {

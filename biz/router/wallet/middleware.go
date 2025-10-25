@@ -3,6 +3,7 @@
 package wallet
 
 import (
+	"orbia_api/biz/consts"
 	"orbia_api/biz/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -24,8 +25,8 @@ func _v1Mw() []app.HandlerFunc {
 }
 
 func _walletMw() []app.HandlerFunc {
-	// 钱包相关接口需要身份验证
-	return []app.HandlerFunc{mw.AuthMiddleware()}
+	// 钱包相关接口需要身份验证，普通用户和管理员都可访问
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
 }
 
 func _getwalletinfoMw() []app.HandlerFunc {

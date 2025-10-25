@@ -169,26 +169,15 @@ CREATE TABLE IF NOT EXISTS orbia_kol_plan (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL报价Plans表';
 
 -- KOL视频表
-CREATE TABLE IF NOT EXISTS orbia_kol_video (
+DROP TABLE IF EXISTS orbia_kol_video;
+CREATE TABLE orbia_kol_video (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '视频ID',
     kol_id BIGINT NOT NULL COMMENT 'KOL ID',
-    title VARCHAR(500) NOT NULL COMMENT '视频标题',
-    content TEXT COMMENT '视频内容/描述',
-    cover_url VARCHAR(500) COMMENT '视频封面URL',
-    video_url VARCHAR(500) COMMENT '视频链接',
-    platform VARCHAR(50) NOT NULL COMMENT '平台：tiktok, youtube',
-    platform_video_id VARCHAR(200) COMMENT '平台视频ID',
-    likes_count BIGINT DEFAULT 0 COMMENT '点赞数',
-    views_count BIGINT DEFAULT 0 COMMENT '观看数',
-    comments_count BIGINT DEFAULT 0 COMMENT '评论数',
-    shares_count BIGINT DEFAULT 0 COMMENT '分享数',
-    published_at TIMESTAMP NULL COMMENT '发布时间',
+    embed_code TEXT NOT NULL COMMENT '视频嵌入代码',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted_at TIMESTAMP NULL COMMENT '软删除时间',
     INDEX idx_kol_id (kol_id),
-    INDEX idx_platform (platform),
-    INDEX idx_published_at (published_at),
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (kol_id) REFERENCES orbia_kol(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL视频表';

@@ -3,6 +3,7 @@
 package order
 
 import (
+	"orbia_api/biz/consts"
 	"orbia_api/biz/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -24,9 +25,9 @@ func _v1Mw() []app.HandlerFunc {
 }
 
 func _orderMw() []app.HandlerFunc {
-	// 所有订单接口都需要认证
+	// 所有订单接口都需要认证，普通用户和管理员都可访问
 	return []app.HandlerFunc{
-		mw.AuthMiddleware(),
+		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
 	}
 }
 
