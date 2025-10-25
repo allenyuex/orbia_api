@@ -69,6 +69,9 @@ type OrderRepository interface {
 
 	// 检查用户是否拥有订单
 	IsOrderOwner(orderID string, userID int64) (bool, error)
+
+	// 管理员功能
+	GetAllOrders(keyword string, status string, offset int, limit int) ([]*OrderWithKolInfo, int64, error)
 }
 
 // orderRepository 订单仓储实现
@@ -239,4 +242,39 @@ func (r *orderRepository) IsOrderOwner(orderID string, userID int64) (bool, erro
 		return false, err
 	}
 	return count > 0, nil
+}
+
+// GetAllOrders 获取所有订单列表（管理员功能）
+func (r *orderRepository) GetAllOrders(keyword string, status string, offset int, limit int) ([]*OrderWithKolInfo, int64, error) {
+	var orders []*OrderWithKolInfo
+	var total int64
+
+	query := r.db.Table("orbia_kol_order").
+		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url").
+		Joins("LEFT JOIN orbia_kol ON orbia_kol_order.kol_id = orbia_kol.id").
+		Joins("LEFT JOIN orbia_user ON orbia_kol_order.user_id = orbia_user.id")
+
+	// 关键字搜索（订单ID、用户名、邮箱、钱包地址）
+	if keyword != "" {
+		query = query.Where("orbia_kol_order.order_id LIKE ? OR orbia_user.nickname LIKE ? OR orbia_user.email LIKE ? OR orbia_user.wallet_address LIKE ?",
+			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	// 状态筛选
+	if status != "" {
+		query = query.Where("orbia_kol_order.status = ?", status)
+	}
+
+	// 获取总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	err := query.Order("orbia_kol_order.created_at DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&orders).Error
+
+	return orders, total, err
 }

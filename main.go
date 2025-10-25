@@ -3,12 +3,40 @@
 package main
 
 import (
+	"log"
+
+	"orbia_api/biz/dal/mysql"
+	"orbia_api/biz/handler"
+	"orbia_api/biz/infra/config"
+	"orbia_api/biz/mw"
+
+	"orbia_api/biz/router"
+
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
 func main() {
+	// 加载配置文件
+	if err := config.LoadConfig("conf/config.yaml"); err != nil {
+		log.Fatalf("❌ Failed to load config: %v", err)
+	}
+	log.Println("✅ Config loaded successfully")
+
+	// 初始化数据库
+	if err := mysql.Init(); err != nil {
+		log.Fatalf("❌ Failed to initialize database: %v", err)
+	}
+	defer mysql.Close()
+	log.Println("✅ Database initialized successfully")
+
+	// 初始化所有 handler 服务
+	handler.InitAllServices()
+
 	h := server.Default()
 
-	register(h)
+	// 注册全局 CORS 中间件
+	h.Use(mw.CORS())
+
+	router.GeneratedRegister(h)
 	h.Spin()
 }

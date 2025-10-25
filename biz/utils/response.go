@@ -63,3 +63,11 @@ func FormatTime(t *time.Time) string {
 	}
 	return t.Format(apiconsts.DateTimeFormat)
 }
+
+// BuildErrorResp 构建错误响应
+func BuildErrorResp(code int, message string) Response {
+	return Response{
+		Code:    code,
+		Message: message,
+	}
+}

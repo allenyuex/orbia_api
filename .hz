@@ -2,5 +2,5 @@
 
 hz version: v0.9.7
 handlerDir: ""
-modelDir: ""
+modelDir: hertz_gen
 routerDir: ""

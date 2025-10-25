@@ -23,11 +23,11 @@ type OrbiaUser struct {
 	Nickname         *string        `gorm:"column:nickname;type:varchar(100)" json:"nickname"`
 	AvatarURL        *string        `gorm:"column:avatar_url;type:varchar(500)" json:"avatar_url"`
 	Role             string         `gorm:"column:role;type:enum('user','admin');not null;default:user" json:"role"`
-	KolID            *int64         `gorm:"column:kol_id;type:bigint" json:"kol_id"`
 	CurrentTeamID    *int64         `gorm:"column:current_team_id;type:bigint" json:"current_team_id"`
 	CreatedAt        *time.Time     `gorm:"column:created_at;type:datetime(3)" json:"created_at"`
 	UpdatedAt        *time.Time     `gorm:"column:updated_at;type:datetime(3)" json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"column:deleted_at;type:datetime(3)" json:"deleted_at"`
+	KolID            *int64         `gorm:"column:kol_id;type:bigint" json:"kol_id"`
 }
 
 // TableName OrbiaUser's table name

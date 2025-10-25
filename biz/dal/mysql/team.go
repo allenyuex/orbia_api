@@ -1,9 +1,10 @@
 package mysql
 
 import (
-	"time"
-	"gorm.io/gorm"
 	"orbia_api/biz/utils"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 // Team 团队模型
@@ -65,7 +66,10 @@ type TeamRepository interface {
 	UpdateTeam(team *Team) error
 	DeleteTeam(id int64) error
 	GetUserTeams(userID int64, offset, limit int) ([]*Team, int64, error)
-	
+	// 管理员功能
+	GetAllTeams(keyword string, offset int, limit int) ([]*Team, int64, error)
+	GetTeamMemberCount(teamID int64) (int64, error)
+
 	// 团队成员相关
 	AddTeamMember(member *TeamMember) error
 	GetTeamMembers(teamID int64, offset, limit int) ([]*TeamMember, int64, error)
@@ -73,7 +77,7 @@ type TeamRepository interface {
 	UpdateTeamMember(member *TeamMember) error
 	RemoveTeamMember(teamID, userID int64) error
 	GetUserRole(teamID, userID int64) (string, error)
-	
+
 	// 团队邀请相关
 	CreateInvitation(invitation *TeamInvitation) error
 	GetInvitationByCode(code string) (*TeamInvitation, error)
@@ -124,50 +128,50 @@ func (r *teamRepository) GetUserTeams(userID int64, offset, limit int) ([]*Team,
 		"offset":  offset,
 		"limit":   limit,
 	})
-	
+
 	// 检查 db 是否为 nil
 	if r.db == nil {
 		utils.LogError(nil, "database connection is nil in GetUserTeams")
 		return nil, 0, gorm.ErrInvalidDB
 	}
-	
+
 	var teams []*Team
 	var total int64
-	
+
 	// 通过团队成员表关联查询用户的团队
 	query := r.db.Table("orbia_team t").
 		Joins("JOIN orbia_team_member tm ON t.id = tm.team_id").
 		Where("tm.user_id = ?", userID)
-	
+
 	utils.LogDebug("Executing count query", map[string]interface{}{
 		"user_id": userID,
 	})
-	
+
 	// 获取总数
 	err := query.Count(&total).Error
 	if err != nil {
 		utils.LogError(err, "failed to count user teams")
 		return nil, 0, err
 	}
-	
+
 	utils.LogDebug("Count query completed", map[string]interface{}{
 		"user_id": userID,
 		"total":   total,
 	})
-	
+
 	// 获取分页数据
 	err = query.Offset(offset).Limit(limit).Find(&teams).Error
 	if err != nil {
 		utils.LogError(err, "failed to find user teams")
 		return nil, 0, err
 	}
-	
+
 	utils.LogDebug("GetUserTeams repository completed", map[string]interface{}{
 		"user_id":    userID,
 		"total":      total,
 		"team_count": len(teams),
 	})
-	
+
 	return teams, total, nil
 }
 
@@ -180,21 +184,21 @@ func (r *teamRepository) AddTeamMember(member *TeamMember) error {
 func (r *teamRepository) GetTeamMembers(teamID int64, offset, limit int) ([]*TeamMember, int64, error) {
 	var members []*TeamMember
 	var total int64
-	
+
 	query := r.db.Where("team_id = ?", teamID)
-	
+
 	// 获取总数
 	err := query.Model(&TeamMember{}).Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// 获取分页数据
 	err = query.Offset(offset).Limit(limit).Find(&members).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return members, total, nil
 }
 
@@ -247,14 +251,14 @@ func (r *teamRepository) GetInvitationByCode(code string) (*TeamInvitation, erro
 func (r *teamRepository) GetUserInvitations(userID int64, offset, limit int) ([]*TeamInvitation, int64, error) {
 	var invitations []*TeamInvitation
 	var total int64
-	
+
 	// 根据邮箱或钱包地址查询邀请
 	var user User
 	err := r.db.Where("id = ?", userID).First(&user).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	query := r.db.Where("status = 'pending' AND expires_at > ?", time.Now())
 	if user.Email != nil {
 		query = query.Where("invitee_email = ?", *user.Email)
@@ -262,19 +266,19 @@ func (r *teamRepository) GetUserInvitations(userID int64, offset, limit int) ([]
 	if user.WalletAddress != nil {
 		query = query.Or("invitee_wallet = ?", *user.WalletAddress)
 	}
-	
+
 	// 获取总数
 	err = query.Model(&TeamInvitation{}).Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// 获取分页数据
 	err = query.Offset(offset).Limit(limit).Find(&invitations).Error
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return invitations, total, nil
 }
 
@@ -288,4 +292,39 @@ func (r *teamRepository) ExpireInvitations() error {
 	return r.db.Model(&TeamInvitation{}).
 		Where("status = 'pending' AND expires_at < ?", time.Now()).
 		Update("status", "expired").Error
+}
+
+// GetAllTeams 获取所有团队列表（管理员功能）
+func (r *teamRepository) GetAllTeams(keyword string, offset int, limit int) ([]*Team, int64, error) {
+	var teams []*Team
+	var total int64
+
+	query := r.db.Model(&Team{})
+
+	// 关键字搜索（团队名称）
+	if keyword != "" {
+		query = query.Where("name LIKE ?", "%"+keyword+"%")
+	}
+
+	// 获取总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	err := query.Order("created_at DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&teams).Error
+
+	return teams, total, err
+}
+
+// GetTeamMemberCount 获取团队成员数量
+func (r *teamRepository) GetTeamMemberCount(teamID int64) (int64, error) {
+	var count int64
+	err := r.db.Model(&TeamMember{}).
+		Where("team_id = ?", teamID).
+		Count(&count).Error
+	return count, err
 }

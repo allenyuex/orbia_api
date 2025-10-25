@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS orbia_user (
     nickname VARCHAR(100) COMMENT '昵称',
     avatar_url VARCHAR(500) COMMENT '头像URL',
     role ENUM('user', 'admin') NOT NULL DEFAULT 'user' COMMENT '用户角色：user-普通用户，admin-管理员',
+    status ENUM('normal', 'disabled', 'deleted') NOT NULL DEFAULT 'normal' COMMENT '用户状态：normal-正常，disabled-禁用，deleted-已删除',
     kol_id BIGINT COMMENT '关联的KOL ID',
     current_team_id BIGINT COMMENT '当前团队ID',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS orbia_user (
     INDEX idx_wallet_address (wallet_address),
     INDEX idx_email (email),
     INDEX idx_role (role),
+    INDEX idx_status (status),
     INDEX idx_kol_id (kol_id),
     INDEX idx_current_team_id (current_team_id),
     INDEX idx_created_at (created_at)

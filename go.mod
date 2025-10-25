@@ -12,6 +12,7 @@ require (
 	github.com/cloudwego/hertz v0.10.2
 	github.com/ethereum/go-ethereum v1.16.4
 	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/hertz-contrib/cors v0.1.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.43.0
 	gopkg.in/yaml.v3 v3.0.1

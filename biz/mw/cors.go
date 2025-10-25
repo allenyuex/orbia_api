@@ -1,26 +1,40 @@
 package mw
 
 import (
-	"context"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/hertz-contrib/cors"
 )
 
 // CORS 跨域中间件
 func CORS() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-		c.Header("Access-Control-Expose-Headers", "Content-Length")
-		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Max-Age", "43200")
+	return cors.New(cors.Config{
+		// 允许所有来源
+		AllowOrigins: []string{"*"},
 
-		if string(c.Method()) == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
+		// 允许的 HTTP 方法
+		AllowMethods: []string{
+			"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS",
+		},
 
-		c.Next(ctx)
-	}
+		// 允许的请求头
+		AllowHeaders: []string{
+			"Origin", "Content-Length", "Content-Type",
+			"Authorization",
+			"X-Requested-With", "X-CSRF-Token",
+		},
+
+		// 暴露的响应头
+		ExposeHeaders: []string{
+			"Content-Length", "Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers", "Content-Disposition",
+		},
+
+		// 允许携带认证信息
+		AllowCredentials: true,
+
+		// 预检请求的缓存时间
+		MaxAge: 12 * time.Hour,
+	})
 }

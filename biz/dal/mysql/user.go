@@ -17,6 +17,7 @@ type User struct {
 	Nickname         *string        `gorm:"column:nickname;size:100" json:"nickname"`
 	AvatarURL        *string        `gorm:"column:avatar_url;size:500" json:"avatar_url"`
 	Role             string         `gorm:"column:role;type:enum('user','admin');default:'user';not null" json:"role"`
+	Status           string         `gorm:"column:status;type:enum('normal','disabled','deleted');default:'normal';not null" json:"status"`
 	KolID            *int64         `gorm:"column:kol_id" json:"kol_id"`
 	CurrentTeamID    *int64         `gorm:"column:current_team_id" json:"current_team_id"`
 	CreatedAt        time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
@@ -37,6 +38,9 @@ type UserRepository interface {
 	GetUserByID(id int64) (*User, error)
 	UpdateUser(user *User) error
 	DeleteUser(id int64) error
+	// 管理员功能
+	GetAllUsers(keyword string, role string, status string, offset int, limit int) ([]*User, int64, error)
+	UpdateUserStatus(userID int64, status string) error
 }
 
 // userRepository 用户仓储实现
@@ -92,4 +96,48 @@ func (r *userRepository) UpdateUser(user *User) error {
 // DeleteUser 删除用户（软删除）
 func (r *userRepository) DeleteUser(id int64) error {
 	return r.db.Delete(&User{}, id).Error
+}
+
+// GetAllUsers 获取所有用户列表（管理员功能）
+func (r *userRepository) GetAllUsers(keyword string, role string, status string, offset int, limit int) ([]*User, int64, error) {
+	var users []*User
+	var total int64
+
+	query := r.db.Model(&User{})
+
+	// 关键字搜索（用户名、邮箱、钱包地址）
+	if keyword != "" {
+		query = query.Where("nickname LIKE ? OR email LIKE ? OR wallet_address LIKE ?",
+			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	// 角色筛选
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+
+	// 状态筛选
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	// 获取总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	err := query.Order("created_at DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&users).Error
+
+	return users, total, err
+}
+
+// UpdateUserStatus 更新用户状态（管理员功能）
+func (r *userRepository) UpdateUserStatus(userID int64, status string) error {
+	return r.db.Model(&User{}).
+		Where("id = ?", userID).
+		Update("status", status).Error
 }

@@ -130,6 +130,8 @@ type KolRepository interface {
 	UpdateKol(kol *Kol) error
 	DeleteKol(id int64) error
 	GetKolList(status *string, country *string, tag *string, offset, limit int) ([]*Kol, int64, error)
+	// 管理员功能
+	GetAllKols(keyword string, status string, country string, tag string, offset int, limit int) ([]*Kol, int64, error)
 
 	// KOL语言
 	CreateKolLanguage(language *KolLanguage) error
@@ -383,4 +385,47 @@ func (r *kolRepository) UpdateKolVideo(video *KolVideo) error {
 // DeleteKolVideo 删除KOL视频（软删除）
 func (r *kolRepository) DeleteKolVideo(id int64) error {
 	return r.db.Delete(&KolVideo{}, id).Error
+}
+
+// GetAllKols 获取所有KOL列表（管理员功能）
+func (r *kolRepository) GetAllKols(keyword string, status string, country string, tag string, offset int, limit int) ([]*Kol, int64, error) {
+	var kols []*Kol
+	var total int64
+
+	query := r.db.Model(&Kol{})
+
+	// 关键字搜索（显示名称、国家）
+	if keyword != "" {
+		query = query.Where("display_name LIKE ? OR country LIKE ?",
+			"%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	// 状态筛选
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	// 国家筛选
+	if country != "" {
+		query = query.Where("country = ?", country)
+	}
+
+	// 标签筛选
+	if tag != "" {
+		query = query.Joins("INNER JOIN orbia_kol_tag ON orbia_kol.id = orbia_kol_tag.kol_id").
+			Where("orbia_kol_tag.tag = ?", tag)
+	}
+
+	// 获取总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 获取分页数据
+	err := query.Order("created_at DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&kols).Error
+
+	return kols, total, err
 }

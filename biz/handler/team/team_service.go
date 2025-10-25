@@ -25,23 +25,23 @@ var (
 // InitTeamService 初始化团队服务
 func InitTeamService() {
 	utils.LogDebug("Initializing team service", nil)
-	
+
 	// 检查 mysql.DB 是否为 nil
 	if mysql.DB == nil {
 		utils.LogError(nil, "mysql.DB is nil during team service initialization")
 		return
 	}
-	
+
 	teamRepo := mysql.NewTeamRepository(mysql.DB)
 	userRepo := mysql.NewUserRepository(mysql.DB)
 	teamSvc = teamService.NewTeamService(teamRepo, userRepo)
-	
+
 	// 检查 teamSvc 是否成功初始化
 	if teamSvc == nil {
 		utils.LogError(nil, "failed to initialize team service")
 		return
 	}
-	
+
 	utils.LogInfo("Team service initialized successfully", nil)
 }
 
@@ -184,7 +184,7 @@ func UpdateTeam(ctx context.Context, c *app.RequestContext) {
 // @router /api/v1/team/list [GET]
 func GetUserTeams(ctx context.Context, c *app.RequestContext) {
 	utils.LogDebug("GetUserTeams handler called", nil)
-	
+
 	// 检查 teamSvc 是否为 nil
 	if teamSvc == nil {
 		utils.LogError(nil, "teamSvc is nil in GetUserTeams handler")
@@ -196,7 +196,7 @@ func GetUserTeams(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	
+
 	var err error
 	var req team.GetUserTeamsReq
 	err = c.BindAndValidate(&req)

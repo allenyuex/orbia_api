@@ -16,8 +16,8 @@ struct TokenResp {
 
 // 分页请求
 struct PageReq {
-    1: optional i32 page = 1
-    2: optional i32 page_size = 10
+    1: optional i32 page = 1 (api.query="page")
+    2: optional i32 page_size = 10 (api.query="page_size")
 }
 
 // 分页响应
@@ -26,4 +26,11 @@ struct PageResp {
     2: i32 page_size
     3: i64 total
     4: i32 total_pages
+}
+
+// 通用搜索请求
+struct SearchReq {
+    1: optional string keyword (api.query="keyword") // 搜索关键字
+    2: optional i32 page = 1 (api.query="page")
+    3: optional i32 page_size = 10 (api.query="page_size")
 }
