@@ -31,12 +31,12 @@ func _kolMw() []app.HandlerFunc {
 
 func _applykolMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _getkolinfoMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _getkollistMw() []app.HandlerFunc {
@@ -46,7 +46,7 @@ func _getkollistMw() []app.HandlerFunc {
 
 func _getkolplansMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _reviewkolMw() []app.HandlerFunc {
@@ -56,12 +56,12 @@ func _reviewkolMw() []app.HandlerFunc {
 
 func _updatekolinfoMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _getkolvideosMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _planMw() []app.HandlerFunc {
@@ -71,12 +71,12 @@ func _planMw() []app.HandlerFunc {
 
 func _deletekolplanMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _savekolplanMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _statsMw() []app.HandlerFunc {
@@ -86,7 +86,7 @@ func _statsMw() []app.HandlerFunc {
 
 func _updatekolstatsMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _videoMw() []app.HandlerFunc {
@@ -96,15 +96,15 @@ func _videoMw() []app.HandlerFunc {
 
 func _createkolvideoMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _deletekolvideoMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _updatekolvideoMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }

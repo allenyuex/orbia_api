@@ -4,7 +4,6 @@ namespace go common
 struct BaseResp {
     1: i32 code
     2: string message
-    3: optional string data
 }
 
 // JWT Token 响应

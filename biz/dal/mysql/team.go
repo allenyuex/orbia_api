@@ -77,6 +77,7 @@ type TeamRepository interface {
 	UpdateTeamMember(member *TeamMember) error
 	RemoveTeamMember(teamID, userID int64) error
 	GetUserRole(teamID, userID int64) (string, error)
+	IsTeamMember(teamID, userID int64) (bool, error)
 
 	// 团队邀请相关
 	CreateInvitation(invitation *TeamInvitation) error
@@ -230,6 +231,16 @@ func (r *teamRepository) GetUserRole(teamID, userID int64) (string, error) {
 		return "", err
 	}
 	return member.Role, nil
+}
+
+// IsTeamMember 检查用户是否是团队成员
+func (r *teamRepository) IsTeamMember(teamID, userID int64) (bool, error) {
+	var count int64
+	err := r.db.Model(&TeamMember{}).Where("team_id = ? AND user_id = ?", teamID, userID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
 
 // CreateInvitation 创建邀请

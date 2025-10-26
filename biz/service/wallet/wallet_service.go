@@ -3,11 +3,9 @@ package wallet
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"orbia_api/biz/dal/model"
 	"orbia_api/biz/dal/mysql"
-	"orbia_api/biz/utils"
 
 	"gorm.io/gorm"
 )
@@ -87,154 +85,19 @@ func (s *walletService) GetWalletInfo(userID int64) (*model.OrbiaWallet, error) 
 	return wallet, nil
 }
 
-// CryptoRecharge 加密货币充值
+// CryptoRecharge 加密货币充值（已废弃，请使用充值订单接口）
 func (s *walletService) CryptoRecharge(userID int64, amount float64, cryptoCurrency, cryptoChain, cryptoAddress string) (*model.OrbiaTransaction, error) {
-	if amount <= 0 {
-		return nil, errors.New("invalid amount")
-	}
-
-	// 获取钱包信息
-	wallet, err := s.walletRepo.GetWalletByUserID(userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get wallet: %v", err)
-	}
-
-	// 生成交易ID
-	transactionID, err := utils.GenerateID()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate transaction ID: %v", err)
-	}
-
-	// 创建交易记录
-	paymentMethod := "crypto"
-	txType := "recharge"
-	status := "pending"
-	transaction := &model.OrbiaTransaction{
-		TransactionID:  fmt.Sprintf("TX%d", transactionID),
-		UserID:         userID,
-		Type:           txType,
-		Amount:         amount,
-		BalanceBefore:  wallet.Balance,
-		BalanceAfter:   wallet.Balance, // 待确认前余额不变
-		Status:         status,
-		PaymentMethod:  &paymentMethod,
-		CryptoCurrency: &cryptoCurrency,
-		CryptoChain:    &cryptoChain,
-		CryptoAddress:  &cryptoAddress,
-	}
-
-	// 保存交易记录
-	if err := s.txRepo.CreateTransaction(nil, transaction); err != nil {
-		return nil, fmt.Errorf("failed to create transaction: %v", err)
-	}
-
-	return transaction, nil
+	return nil, errors.New("this API is deprecated, please use /api/v1/recharge/create/crypto instead")
 }
 
-// OnlineRecharge 在线支付充值
+// OnlineRecharge 在线支付充值（已废弃，请使用充值订单接口）
 func (s *walletService) OnlineRecharge(userID int64, amount float64, platform string) (*model.OrbiaTransaction, string, error) {
-	if amount <= 0 {
-		return nil, "", errors.New("invalid amount")
-	}
-
-	// 获取钱包信息
-	wallet, err := s.walletRepo.GetWalletByUserID(userID)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to get wallet: %v", err)
-	}
-
-	// 生成交易ID
-	transactionID, err := utils.GenerateID()
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to generate transaction ID: %v", err)
-	}
-
-	// 生成支付订单ID（这里简单使用交易ID，实际应该调用支付平台API）
-	paymentOrderID := fmt.Sprintf("PAY%d", transactionID)
-
-	// 生成支付URL（这里是模拟，实际应该调用支付平台API）
-	paymentURL := fmt.Sprintf("https://payment.example.com/%s/%s", platform, paymentOrderID)
-
-	// 创建交易记录
-	paymentMethod := "online"
-	txType := "recharge"
-	status := "pending"
-	transaction := &model.OrbiaTransaction{
-		TransactionID:         fmt.Sprintf("TX%d", transactionID),
-		UserID:                userID,
-		Type:                  txType,
-		Amount:                amount,
-		BalanceBefore:         wallet.Balance,
-		BalanceAfter:          wallet.Balance, // 待确认前余额不变
-		Status:                status,
-		PaymentMethod:         &paymentMethod,
-		OnlinePaymentPlatform: &platform,
-		OnlinePaymentOrderID:  &paymentOrderID,
-		OnlinePaymentURL:      &paymentURL,
-	}
-
-	// 保存交易记录
-	if err := s.txRepo.CreateTransaction(nil, transaction); err != nil {
-		return nil, "", fmt.Errorf("failed to create transaction: %v", err)
-	}
-
-	return transaction, paymentURL, nil
+	return nil, "", errors.New("this API is deprecated, please use /api/v1/recharge/create/online instead")
 }
 
-// ConfirmCryptoRecharge 确认加密货币充值
+// ConfirmCryptoRecharge 确认加密货币充值（已废弃）
 func (s *walletService) ConfirmCryptoRecharge(userID int64, transactionID, cryptoTxHash string) (*model.OrbiaTransaction, error) {
-	// 获取交易记录
-	transaction, err := s.txRepo.GetTransactionByID(transactionID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("transaction not found")
-		}
-		return nil, fmt.Errorf("failed to get transaction: %v", err)
-	}
-
-	// 验证交易所属用户
-	if transaction.UserID != userID {
-		return nil, errors.New("transaction does not belong to this user")
-	}
-
-	// 验证交易状态
-	if transaction.Status != "pending" {
-		return nil, errors.New("transaction is not in pending status")
-	}
-
-	// 验证交易类型
-	if transaction.Type != "recharge" {
-		return nil, errors.New("transaction is not a recharge")
-	}
-
-	// TODO: 实际应该验证链上交易哈希的真实性
-
-	// 开始事务
-	return transaction, s.db.Transaction(func(tx *gorm.DB) error {
-		// 更新余额
-		if err := s.walletRepo.UpdateBalance(tx, userID, transaction.Amount, 0); err != nil {
-			return fmt.Errorf("failed to update balance: %v", err)
-		}
-
-		// 获取更新后的余额
-		wallet, err := s.walletRepo.GetWalletByUserID(userID)
-		if err != nil {
-			return fmt.Errorf("failed to get wallet: %v", err)
-		}
-
-		// 更新交易状态
-		now := time.Now()
-		transaction.Status = "completed"
-		transaction.CryptoTxHash = &cryptoTxHash
-		transaction.BalanceAfter = wallet.Balance
-		transaction.CompletedAt = &now
-
-		if err := s.txRepo.UpdateTransaction(transaction); err != nil {
-			return fmt.Errorf("failed to update transaction: %v", err)
-		}
-
-		return nil
-	})
+	return nil, errors.New("this API is deprecated, recharge is now managed through recharge orders")
 }
 
 // GetTransactionList 获取交易记录列表

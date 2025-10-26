@@ -24,7 +24,7 @@ func Register(r *server.Hertz) {
 			{
 				_auth := _v1.Group("/auth", _authMw()...)
 				_auth.POST("/email-login", append(_emailloginMw(), auth.EmailLogin)...)
-				_auth.POST("/send-code", append(_sendcodeMw(), auth.SendCode)...)
+				_auth.POST("/send-verification-code", append(_sendverificationcodeMw(), auth.SendVerificationCode)...)
 				_auth.POST("/wallet-login", append(_walletloginMw(), auth.WalletLogin)...)
 			}
 		}

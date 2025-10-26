@@ -5,9 +5,12 @@ import (
 
 	"orbia_api/biz/handler/admin"
 	"orbia_api/biz/handler/auth"
+	"orbia_api/biz/handler/campaign"
+	"orbia_api/biz/handler/conversation"
 	"orbia_api/biz/handler/dictionary"
 	"orbia_api/biz/handler/kol"
 	"orbia_api/biz/handler/payment_setting"
+	"orbia_api/biz/handler/recharge_order"
 	"orbia_api/biz/handler/team"
 	"orbia_api/biz/handler/user"
 	"orbia_api/biz/handler/wallet"
@@ -49,6 +52,15 @@ func InitAllServices() {
 
 	payment_setting.InitPaymentSettingService()
 	log.Println("  ✅ Payment Setting service initialized")
+
+	recharge_order.InitRechargeOrderHandler()
+	log.Println("  ✅ Recharge Order service initialized")
+
+	conversation.InitConversationService()
+	log.Println("  ✅ Conversation service initialized")
+
+	campaign.InitCampaignService()
+	log.Println("  ✅ Campaign service initialized")
 
 	log.Println("✅ All handler services initialized successfully")
 }

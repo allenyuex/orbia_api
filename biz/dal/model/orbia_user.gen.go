@@ -22,7 +22,7 @@ type OrbiaUser struct {
 	CodeExpiry       *time.Time     `gorm:"column:code_expiry;type:datetime(3)" json:"code_expiry"`
 	Nickname         *string        `gorm:"column:nickname;type:varchar(100)" json:"nickname"`
 	AvatarURL        *string        `gorm:"column:avatar_url;type:varchar(500)" json:"avatar_url"`
-	Role             string         `gorm:"column:role;type:enum('user','admin');not null;default:user" json:"role"`
+	Role             string         `gorm:"column:role;type:enum('normal','admin');not null;default:normal" json:"role"`
 	CurrentTeamID    *int64         `gorm:"column:current_team_id;type:bigint" json:"current_team_id"`
 	CreatedAt        *time.Time     `gorm:"column:created_at;type:datetime(3)" json:"created_at"`
 	UpdatedAt        *time.Time     `gorm:"column:updated_at;type:datetime(3)" json:"updated_at"`

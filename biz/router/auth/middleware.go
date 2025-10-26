@@ -40,3 +40,8 @@ func _walletloginMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _sendverificationcodeMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

@@ -284,38 +284,16 @@ func buildTransactionResponse(tx *model.OrbiaTransaction) *walletModel.Transacti
 		UpdatedAt:     utils.FormatTime(tx.UpdatedAt),
 	}
 
-	if tx.PaymentMethod != nil {
-		resp.PaymentMethod = tx.PaymentMethod
-	}
-	if tx.CryptoCurrency != nil {
-		resp.CryptoCurrency = tx.CryptoCurrency
-	}
-	if tx.CryptoChain != nil {
-		resp.CryptoChain = tx.CryptoChain
-	}
-	if tx.CryptoAddress != nil {
-		resp.CryptoAddress = tx.CryptoAddress
-	}
-	if tx.CryptoTxHash != nil {
-		resp.CryptoTxHash = tx.CryptoTxHash
-	}
-	if tx.OnlinePaymentPlatform != nil {
-		resp.OnlinePaymentPlatform = tx.OnlinePaymentPlatform
-	}
-	if tx.OnlinePaymentOrderID != nil {
-		resp.OnlinePaymentOrderID = tx.OnlinePaymentOrderID
-	}
-	if tx.OnlinePaymentURL != nil {
-		resp.OnlinePaymentURL = tx.OnlinePaymentURL
+	// Transaction表已简化，只保留消费相关字段
+	if tx.RelatedOrderType != nil {
+		relatedOrderType := *tx.RelatedOrderType
+		resp.PaymentMethod = &relatedOrderType // 复用PaymentMethod字段存储订单类型
 	}
 	if tx.RelatedOrderID != nil {
 		resp.RelatedOrderID = tx.RelatedOrderID
 	}
 	if tx.Remark != nil {
 		resp.Remark = tx.Remark
-	}
-	if tx.FailedReason != nil {
-		resp.FailedReason = tx.FailedReason
 	}
 	if tx.CompletedAt != nil {
 		completedAt := utils.FormatTime(tx.CompletedAt)

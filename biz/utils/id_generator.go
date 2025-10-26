@@ -132,6 +132,27 @@ func GenerateAdOrderID() string {
 	return fmt.Sprintf("ADORD_%d_%d", timestamp, id%100000)
 }
 
+// GenerateConversationID 生成会话ID（格式：CONV_{timestamp}_{random}）
+func GenerateConversationID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("CONV_%d_%d", timestamp, id%100000)
+}
+
+// GenerateMessageID 生成消息ID（格式：MSG_{timestamp}_{random}）
+func GenerateMessageID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("MSG_%d_%d", timestamp, id%100000)
+}
+
+// GenerateCampaignID 生成Campaign ID（格式：CAMPAIGN_{timestamp}_{random}）
+func GenerateCampaignID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("CAMPAIGN_%d_%d", timestamp, id%100000)
+}
+
 // GenerateID 生成通用ID字符串
 func GenerateID() (string, error) {
 	return GetDefaultGenerator().NextIDString()

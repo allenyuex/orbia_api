@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS orbia_user (
     code_expiry TIMESTAMP NULL COMMENT '验证码过期时间',
     nickname VARCHAR(100) COMMENT '昵称',
     avatar_url VARCHAR(500) COMMENT '头像URL',
-    role ENUM('user', 'admin') NOT NULL DEFAULT 'user' COMMENT '用户角色：user-普通用户，admin-管理员',
+    role ENUM('normal', 'admin') NOT NULL DEFAULT 'normal' COMMENT '用户角色：normal-普通用户，admin-管理员',
     status ENUM('normal', 'disabled', 'deleted') NOT NULL DEFAULT 'normal' COMMENT '用户状态：normal-正常，disabled-禁用，deleted-已删除',
     kol_id BIGINT COMMENT '关联的KOL ID',
     current_team_id BIGINT COMMENT '当前团队ID',
@@ -278,27 +278,20 @@ CREATE TABLE IF NOT EXISTS orbia_wallet (
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户钱包表';
 
--- 交易记录表
-CREATE TABLE IF NOT EXISTS orbia_transaction (
+-- 交易记录表（仅用于记录支出账单）
+DROP TABLE IF EXISTS orbia_transaction;
+CREATE TABLE orbia_transaction (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
     transaction_id VARCHAR(64) NOT NULL UNIQUE COMMENT '交易ID（业务唯一ID，格式：TXN{snowflake_id}）',
     user_id BIGINT NOT NULL COMMENT '用户ID',
-    type ENUM('recharge', 'consume', 'refund', 'freeze', 'unfreeze') NOT NULL COMMENT '交易类型：recharge-充值，consume-消费，refund-退款，freeze-冻结，unfreeze-解冻',
+    type ENUM('consume', 'refund', 'freeze', 'unfreeze') NOT NULL COMMENT '交易类型：consume-消费，refund-退款，freeze-冻结，unfreeze-解冻',
     amount DECIMAL(12, 2) NOT NULL COMMENT '交易金额（美元）',
     balance_before DECIMAL(12, 2) NOT NULL COMMENT '交易前余额（美元）',
     balance_after DECIMAL(12, 2) NOT NULL COMMENT '交易后余额（美元）',
     status ENUM('pending', 'processing', 'completed', 'failed', 'cancelled') NOT NULL DEFAULT 'pending' COMMENT '交易状态：pending-待处理，processing-处理中，completed-已完成，failed-失败，cancelled-已取消',
-    payment_method ENUM('crypto', 'online') COMMENT '支付方式：crypto-加密货币，online-在线支付',
-    crypto_currency VARCHAR(20) COMMENT '加密货币类型：USDT, USDC',
-    crypto_chain VARCHAR(50) COMMENT '加密货币链：ETH, BSC, POLYGON, TRON, ARBITRUM, OPTIMISM',
-    crypto_address VARCHAR(500) COMMENT '加密货币支付地址',
-    crypto_tx_hash VARCHAR(500) COMMENT '加密货币交易哈希',
-    online_payment_platform VARCHAR(50) COMMENT '在线支付平台：stripe, paypal',
-    online_payment_order_id VARCHAR(200) COMMENT '在线支付平台订单ID',
-    online_payment_url TEXT COMMENT '在线支付URL',
+    related_order_type VARCHAR(50) COMMENT '关联订单类型：kol_order-KOL订单，ad_order-广告订单',
     related_order_id VARCHAR(64) COMMENT '关联订单ID（如果是消费/退款类型）',
     remark TEXT COMMENT '备注说明',
-    failed_reason TEXT COMMENT '失败原因',
     completed_at TIMESTAMP NULL COMMENT '完成时间',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -306,12 +299,11 @@ CREATE TABLE IF NOT EXISTS orbia_transaction (
     INDEX idx_user_id (user_id),
     INDEX idx_type (type),
     INDEX idx_status (status),
-    INDEX idx_payment_method (payment_method),
+    INDEX idx_related_order_type (related_order_type),
     INDEX idx_related_order_id (related_order_id),
     INDEX idx_created_at (created_at),
-    INDEX idx_crypto_tx_hash (crypto_tx_hash),
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易记录表（仅记录支出账单）';
 
 -- 数据字典项表（需要先删除，因为有外键约束）
 DROP TABLE IF EXISTS orbia_dictionary_item;
@@ -361,6 +353,9 @@ CREATE TABLE orbia_dictionary_item (
     FOREIGN KEY (dictionary_id) REFERENCES orbia_dictionary(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据字典项表';
 
+-- 充值订单表（需要先删除，因为有外键约束）
+DROP TABLE IF EXISTS orbia_recharge_order;
+
 -- 收款钱包设置表
 DROP TABLE IF EXISTS orbia_payment_setting;
 CREATE TABLE orbia_payment_setting (
@@ -377,3 +372,199 @@ CREATE TABLE orbia_payment_setting (
     INDEX idx_deleted_at (deleted_at),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收款钱包设置表';
+
+-- 创建充值订单表
+CREATE TABLE orbia_recharge_order (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    order_id VARCHAR(64) NOT NULL UNIQUE COMMENT '订单ID（业务唯一ID，格式：RCHORD_{timestamp}_{random}）',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    amount DECIMAL(12, 2) NOT NULL COMMENT '充值金额（美元）',
+    payment_type ENUM('crypto', 'online') NOT NULL COMMENT '支付类型：crypto-加密货币，online-在线支付',
+    payment_setting_id BIGINT COMMENT '关联的payment_setting ID（用于加密货币支付）',
+    payment_network VARCHAR(100) COMMENT '快照-区块链网络',
+    payment_address VARCHAR(500) COMMENT '快照-钱包地址',
+    payment_label VARCHAR(200) COMMENT '快照-钱包标签',
+    user_crypto_address VARCHAR(500) COMMENT '用户的转账钱包地址（仅加密货币支付）',
+    crypto_tx_hash VARCHAR(500) COMMENT '加密货币交易哈希（用户或管理员填写）',
+    online_payment_platform VARCHAR(50) COMMENT '在线支付平台：stripe, paypal',
+    online_payment_order_id VARCHAR(200) COMMENT '在线支付平台订单ID',
+    online_payment_url TEXT COMMENT '在线支付URL',
+    status ENUM('pending', 'confirmed', 'failed', 'cancelled') NOT NULL DEFAULT 'pending' COMMENT '订单状态：pending-待确认，confirmed-已确认，failed-失败，cancelled-已取消',
+    confirmed_by BIGINT COMMENT '确认人ID（管理员）',
+    confirmed_at TIMESTAMP NULL COMMENT '确认时间',
+    failed_reason TEXT COMMENT '失败原因',
+    remark TEXT COMMENT '备注',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_order_id (order_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_payment_type (payment_type),
+    INDEX idx_payment_setting_id (payment_setting_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at),
+    INDEX idx_confirmed_at (confirmed_at),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_crypto_tx_hash (crypto_tx_hash),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (payment_setting_id) REFERENCES orbia_payment_setting(id) ON DELETE SET NULL,
+    FOREIGN KEY (confirmed_by) REFERENCES orbia_user(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='充值订单表';
+
+-- 验证码表
+DROP TABLE IF EXISTS orbia_verification_code;
+CREATE TABLE orbia_verification_code (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID',
+    email VARCHAR(255) NOT NULL COMMENT '邮箱地址',
+    code VARCHAR(10) NOT NULL COMMENT '验证码',
+    code_type ENUM('login', 'register', 'reset_password') NOT NULL DEFAULT 'login' COMMENT '验证码类型：login-登录，register-注册，reset_password-重置密码',
+    status ENUM('unused', 'used', 'expired') NOT NULL DEFAULT 'unused' COMMENT '状态：unused-未使用，used-已使用，expired-已过期',
+    used_at TIMESTAMP NULL COMMENT '使用时间',
+    expires_at TIMESTAMP NOT NULL COMMENT '过期时间',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_email (email),
+    INDEX idx_code (code),
+    INDEX idx_code_type (code_type),
+    INDEX idx_status (status),
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='验证码表';
+
+-- 会话表
+DROP TABLE IF EXISTS orbia_message;
+DROP TABLE IF EXISTS orbia_conversation_member;
+DROP TABLE IF EXISTS orbia_conversation;
+
+CREATE TABLE orbia_conversation (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    conversation_id VARCHAR(64) NOT NULL UNIQUE COMMENT '会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）',
+    title VARCHAR(200) COMMENT '会话标题',
+    type ENUM('kol_order', 'ad_order', 'general', 'support') NOT NULL DEFAULT 'general' COMMENT '会话类型：kol_order-KOL订单会话，ad_order-广告订单会话，general-普通会话，support-客服会话',
+    related_order_type VARCHAR(50) COMMENT '关联订单类型：kol_order, ad_order',
+    related_order_id VARCHAR(64) COMMENT '关联订单ID',
+    status ENUM('active', 'archived', 'closed') NOT NULL DEFAULT 'active' COMMENT '会话状态：active-活跃，archived-已归档，closed-已关闭',
+    last_message_at TIMESTAMP NULL COMMENT '最后消息时间',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_type (type),
+    INDEX idx_related_order_type (related_order_type),
+    INDEX idx_related_order_id (related_order_id),
+    INDEX idx_status (status),
+    INDEX idx_last_message_at (last_message_at),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会话表';
+
+-- 会话成员表
+CREATE TABLE orbia_conversation_member (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '成员ID',
+    conversation_id BIGINT NOT NULL COMMENT '会话ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    role ENUM('creator', 'member', 'admin') NOT NULL DEFAULT 'member' COMMENT '成员角色：creator-创建者，member-成员，admin-管理员',
+    unread_count INT NOT NULL DEFAULT 0 COMMENT '未读消息数',
+    last_read_at TIMESTAMP NULL COMMENT '最后已读时间',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
+    UNIQUE KEY uk_conversation_user (conversation_id, user_id),
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_role (role),
+    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会话成员表';
+
+-- 消息表
+CREATE TABLE orbia_message (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    message_id VARCHAR(64) NOT NULL UNIQUE COMMENT '消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）',
+    conversation_id BIGINT NOT NULL COMMENT '会话ID',
+    sender_id BIGINT NOT NULL COMMENT '发送者用户ID',
+    message_type ENUM('text', 'image', 'file', 'video', 'audio', 'system') NOT NULL DEFAULT 'text' COMMENT '消息类型：text-文本，image-图片，file-文件，video-视频，audio-音频，system-系统消息',
+    content TEXT NOT NULL COMMENT '消息内容（文本内容或文件URL）',
+    file_name VARCHAR(500) COMMENT '文件名（如果是文件类型）',
+    file_size BIGINT COMMENT '文件大小（字节）',
+    file_type VARCHAR(100) COMMENT '文件MIME类型',
+    status ENUM('sent', 'delivered', 'read', 'failed') NOT NULL DEFAULT 'sent' COMMENT '消息状态：sent-已发送，delivered-已送达，read-已读，failed-发送失败',
+    created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间（毫秒精度）',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_message_id (message_id),
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_sender_id (sender_id),
+    INDEX idx_message_type (message_type),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES orbia_user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息表';
+
+-- Campaign表（广告活动表）
+CREATE TABLE IF NOT EXISTS orbia_campaign (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID',
+    campaign_id VARCHAR(64) NOT NULL UNIQUE COMMENT '业务唯一ID（格式：CAMPAIGN_{timestamp}_{random}）',
+    user_id BIGINT NOT NULL COMMENT '创建用户ID',
+    team_id BIGINT NOT NULL COMMENT '所属团队ID',
+    campaign_name VARCHAR(200) NOT NULL COMMENT '活动名称',
+    promotion_objective ENUM('awareness', 'consideration', 'conversion') NOT NULL COMMENT '推广目标：awareness-品牌认知，consideration-受众意向，conversion-行为转化',
+    optimization_goal VARCHAR(50) NOT NULL COMMENT '优化目标：根据promotion_objective不同有不同值',
+    location TEXT COMMENT '地区（JSON数组，存储数据字典ID列表）',
+    age BIGINT COMMENT '年龄段（引用数据字典ID）',
+    gender BIGINT COMMENT '性别（引用数据字典ID）',
+    languages TEXT COMMENT '语言（JSON数组，多选数据字典ID）',
+    spending_power BIGINT COMMENT '消费能力（引用数据字典ID）',
+    operating_system BIGINT COMMENT '操作系统（引用数据字典ID）',
+    os_versions TEXT COMMENT '系统版本（JSON数组，多选数据字典ID）',
+    device_models TEXT COMMENT '设备品牌（JSON数组，多选数据字典ID）',
+    connection_type BIGINT COMMENT '网络情况（引用数据字典ID）',
+    device_price_type TINYINT DEFAULT 0 COMMENT '设备价格类型：0-any，1-specific range',
+    device_price_min DECIMAL(15,2) COMMENT '设备价格最小值',
+    device_price_max DECIMAL(15,2) COMMENT '设备价格最大值',
+    planned_start_time TIMESTAMP NOT NULL COMMENT '计划开始时间',
+    planned_end_time TIMESTAMP NOT NULL COMMENT '计划结束时间',
+    time_zone BIGINT COMMENT '时区（引用数据字典ID）',
+    dayparting_type TINYINT DEFAULT 0 COMMENT '分时段类型：0-全天，1-特定时段',
+    dayparting_schedule TEXT COMMENT '特定时段配置（JSON格式）',
+    frequency_cap_type TINYINT DEFAULT 0 COMMENT '频次上限类型：0-每七天不超过三次，1-每天不超过一次，2-自定义',
+    frequency_cap_times INT COMMENT '自定义频次（次数）',
+    frequency_cap_days INT COMMENT '自定义频次（天数）',
+    budget_type TINYINT NOT NULL COMMENT '预算类型：0-每日预算，1-总预算',
+    budget_amount DECIMAL(15,2) NOT NULL COMMENT '预算金额',
+    website VARCHAR(1000) COMMENT '网站链接',
+    ios_download_url VARCHAR(1000) COMMENT 'iOS下载链接',
+    android_download_url VARCHAR(1000) COMMENT 'Android下载链接',
+    status ENUM('pending', 'active', 'paused', 'ended') NOT NULL DEFAULT 'pending' COMMENT '状态：pending-待启动，active-已启动，paused-暂停，ended-已结束',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_campaign_id (campaign_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_team_id (team_id),
+    INDEX idx_status (status),
+    INDEX idx_promotion_objective (promotion_objective),
+    INDEX idx_planned_start_time (planned_start_time),
+    INDEX idx_planned_end_time (planned_end_time),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES orbia_team(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Campaign表（广告活动表）';
+
+-- Campaign附件表
+CREATE TABLE IF NOT EXISTS orbia_campaign_attachment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '附件ID',
+    campaign_id BIGINT NOT NULL COMMENT '关联Campaign ID',
+    file_url VARCHAR(1000) NOT NULL COMMENT '文件URL',
+    file_name VARCHAR(500) NOT NULL COMMENT '文件名',
+    file_type VARCHAR(100) NOT NULL COMMENT '文件类型（MIME类型）',
+    file_size BIGINT COMMENT '文件大小（字节）',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_campaign_id (campaign_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    FOREIGN KEY (campaign_id) REFERENCES orbia_campaign(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Campaign附件表';

@@ -4,8 +4,8 @@ package consts
 type UserRole string
 
 const (
-	// RoleUser 普通用户
-	RoleUser UserRole = "user"
+	// RoleNormal 普通用户
+	RoleNormal UserRole = "normal"
 
 	// RoleAdmin 管理员
 	RoleAdmin UserRole = "admin"
@@ -19,7 +19,7 @@ func (r UserRole) String() string {
 // IsValid 检查角色是否有效
 func (r UserRole) IsValid() bool {
 	switch r {
-	case RoleUser, RoleAdmin:
+	case RoleNormal, RoleAdmin:
 		return true
 	default:
 		return false
@@ -31,13 +31,12 @@ func (r UserRole) IsAdmin() bool {
 	return r == RoleAdmin
 }
 
-// IsUser 判断是否是普通用户
-func (r UserRole) IsUser() bool {
-	return r == RoleUser
+// IsNormal 判断是否是普通用户
+func (r UserRole) IsNormal() bool {
+	return r == RoleNormal
 }
 
 // AllRoles 返回所有角色列表
 func AllRoles() []UserRole {
-	return []UserRole{RoleUser, RoleAdmin}
+	return []UserRole{RoleNormal, RoleAdmin}
 }
-

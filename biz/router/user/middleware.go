@@ -31,12 +31,12 @@ func _userMw() []app.HandlerFunc {
 
 func _getprofileMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _updateprofileMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _getuserbyidMw() []app.HandlerFunc {
@@ -46,6 +46,6 @@ func _getuserbyidMw() []app.HandlerFunc {
 
 func _switchcurrentteamMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 
 }

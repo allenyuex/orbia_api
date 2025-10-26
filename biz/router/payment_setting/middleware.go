@@ -55,7 +55,7 @@ func _updatepaymentsettingMw() []app.HandlerFunc {
 func _payment_settings0Mw() []app.HandlerFunc {
 	// 用户端接口，user 和 admin 角色都可以访问
 	return []app.HandlerFunc{
-		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
+		mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin),
 	}
 }
 

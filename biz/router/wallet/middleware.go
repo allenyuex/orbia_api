@@ -26,7 +26,7 @@ func _v1Mw() []app.HandlerFunc {
 
 func _walletMw() []app.HandlerFunc {
 	// 钱包相关接口需要身份验证，普通用户和管理员都可访问
-	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin)}
+	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
 
 func _getwalletinfoMw() []app.HandlerFunc {

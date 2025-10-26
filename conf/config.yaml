@@ -109,3 +109,17 @@ r2:
       max_size: 104857600  # 100MB
       default_path: "videos"
 
+# SMTP 邮件配置
+smtp:
+  server: "mail.smtp2go.com"
+  port: "2525"  # 使用2525端口（587端口被阻塞）
+  username: "ngd.neo.org"
+  password: "3ukd6UhQ0mF8pUlS"
+  email: "verification@cypherai.network"
+  from_name: "Orbia App"
+
+# 验证码配置
+verification_code:
+  expire_minutes: 10  # 验证码过期时间（分钟）
+  length: 6           # 验证码长度
+

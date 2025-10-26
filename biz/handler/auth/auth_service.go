@@ -28,8 +28,9 @@ func InitAuthService() {
 	teamRepo := mysql.NewTeamRepository(db)
 	walletRepo := mysql.NewWalletRepository(db)
 	txRepo := mysql.NewTransactionRepository(db)
+	verificationRepo := mysql.NewVerificationCodeRepository(db)
 	walletSvc := walletService.NewWalletService(db, walletRepo, txRepo)
-	authSvc = authService.NewAuthService(userRepo, teamRepo, walletSvc)
+	authSvc = authService.NewAuthService(userRepo, teamRepo, walletSvc, verificationRepo)
 }
 
 // WalletLogin 钱包登录
@@ -96,7 +97,7 @@ func EmailLogin(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层处理登录逻辑
-	token, expiresIn, err := authSvc.EmailLogin(req.Email, req.Password)
+	token, expiresIn, err := authSvc.EmailLogin(req.Email, req.Code)
 	if err != nil {
 		hlog.Errorf("EmailLogin service error: %v", err)
 		c.JSON(http.StatusUnauthorized, &auth.EmailLoginResp{
@@ -120,15 +121,15 @@ func EmailLogin(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// SendCode 发送验证码（预留）
-// @router /api/v1/auth/send-code [POST]
-func SendCode(ctx context.Context, c *app.RequestContext) {
+// SendVerificationCode 发送验证码
+// @router /api/v1/auth/send-verification-code [POST]
+func SendVerificationCode(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req auth.SendCodeReq
+	var req auth.SendVerificationCodeReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		hlog.Errorf("SendCode bind error: %v", err)
-		c.JSON(http.StatusBadRequest, &auth.SendCodeResp{
+		hlog.Errorf("SendVerificationCode bind error: %v", err)
+		c.JSON(http.StatusBadRequest, &auth.SendVerificationCodeResp{
 			BaseResp: &common.BaseResp{
 				Code:    400,
 				Message: "Invalid request parameters: " + err.Error(),
@@ -137,13 +138,31 @@ func SendCode(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// TODO: 实现发送验证码逻辑
-	resp := &auth.SendCodeResp{
+	// 获取验证码类型
+	var codeType string
+	if req.CodeType != nil {
+		codeType = *req.CodeType
+	}
+
+	// 调用服务层发送验证码
+	err = authSvc.SendVerificationCode(req.Email, codeType)
+	if err != nil {
+		hlog.Errorf("SendVerificationCode service error: %v", err)
+		c.JSON(http.StatusBadRequest, &auth.SendVerificationCodeResp{
+			BaseResp: &common.BaseResp{
+				Code:    400,
+				Message: err.Error(),
+			},
+		})
+		return
+	}
+
+	resp := &auth.SendVerificationCodeResp{
 		BaseResp: &common.BaseResp{
-			Code:    501,
-			Message: "Send code feature not implemented yet",
+			Code:    200,
+			Message: "Verification code sent successfully",
 		},
 	}
 
-	c.JSON(consts.StatusNotImplemented, resp)
+	c.JSON(consts.StatusOK, resp)
 }

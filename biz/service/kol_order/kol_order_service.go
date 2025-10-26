@@ -9,18 +9,23 @@ import (
 
 	"orbia_api/biz/dal/mysql"
 	kolOrderModel "orbia_api/biz/model/kol_order"
+	conversationService "orbia_api/biz/service/conversation"
 	"orbia_api/biz/utils"
 )
 
 var (
 	orderRepo mysql.OrderRepository
 	kolRepo   mysql.KolRepository
+	convSvc   conversationService.ConversationService
 )
 
 // InitKolOrderService 初始化KOL订单服务
 func InitKolOrderService() {
 	orderRepo = mysql.NewOrderRepository(mysql.DB)
 	kolRepo = mysql.NewKolRepository(mysql.DB)
+	convRepo := mysql.NewConversationRepository(mysql.DB)
+	userRepo := mysql.NewUserRepository(mysql.DB)
+	convSvc = conversationService.NewConversationService(convRepo, userRepo)
 }
 
 // CreateKolOrder 创建KOL订单
@@ -228,6 +233,30 @@ func UpdateKolOrderStatus(userID int64, req *kolOrderModel.UpdateKolOrderStatusR
 	// 5. 更新订单状态
 	if err := orderRepo.UpdateOrderStatus(req.OrderID, req.Status, req.RejectReason); err != nil {
 		return nil, fmt.Errorf("更新订单状态失败: %w", err)
+	}
+
+	// 6. 如果订单状态变更为 "confirmed"，自动创建会话
+	if req.Status == "confirmed" {
+		// 创建会话标题
+		title := fmt.Sprintf("KOL订单: %s", order.Title)
+
+		// 获取 KOL 的用户ID（从 kol 表获取）
+		kolUserID := kol.UserID
+
+		// 创建会话，参与者包括下单用户和 KOL 用户
+		memberUserIDs := []int64{order.UserID, kolUserID}
+
+		_, err := convSvc.CreateConversation(
+			"kol_order",
+			"kol_order",
+			order.OrderID,
+			&title,
+			memberUserIDs,
+		)
+		if err != nil {
+			// 记录错误但不影响订单状态更新
+			fmt.Printf("创建会话失败: %v\n", err)
+		}
 	}
 
 	return resp, nil

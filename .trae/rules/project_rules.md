@@ -7,3 +7,8 @@
 - 遇到数据库结构的任何问题，应以sql/init.sql 为准，通过执行 script/init_db.sh 来更新数据库。
 - dal/mysql 目录下的代码是数据库的模型
 - biz/model 目录下的代码是 api 的模型
+- 所有接口返回值应该遵循 common 里配置的通用包装，如：
+struct BaseResp {
+    1: i32 code
+    2: string message
+}

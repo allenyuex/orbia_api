@@ -10,12 +10,14 @@ import (
 var GlobalConfig *Config
 
 type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	Redis    RedisConfig    `yaml:"redis"`
-	JWT      JWTConfig      `yaml:"jwt"`
-	Log      LogConfig      `yaml:"log"`
-	R2       R2Config       `yaml:"r2"`
+	Server           ServerConfig           `yaml:"server"`
+	Database         DatabaseConfig         `yaml:"database"`
+	Redis            RedisConfig            `yaml:"redis"`
+	JWT              JWTConfig              `yaml:"jwt"`
+	Log              LogConfig              `yaml:"log"`
+	R2               R2Config               `yaml:"r2"`
+	SMTP             SMTPConfig             `yaml:"smtp"`
+	VerificationCode VerificationCodeConfig `yaml:"verification_code"`
 }
 
 type ServerConfig struct {
@@ -79,6 +81,22 @@ type R2Config struct {
 type ExtensionConfig struct {
 	MaxSize     int64  `yaml:"max_size"`     // 该扩展名的最大文件大小（字节）
 	DefaultPath string `yaml:"default_path"` // 默认存储路径，如 avatars, documents
+}
+
+// SMTPConfig SMTP邮件配置
+type SMTPConfig struct {
+	Server   string `yaml:"server"`
+	Port     string `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Email    string `yaml:"email"`
+	FromName string `yaml:"from_name"`
+}
+
+// VerificationCodeConfig 验证码配置
+type VerificationCodeConfig struct {
+	ExpireMinutes int `yaml:"expire_minutes"`
+	Length        int `yaml:"length"`
 }
 
 // LoadConfig 加载配置文件

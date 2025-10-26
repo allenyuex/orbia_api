@@ -30,9 +30,9 @@ func InitAuthMiddleware(userRepo mysql.UserRepository) {
 // AuthMiddleware JWT认证和角色鉴权中间件
 // 支持多个角色参数，只要用户拥有其中任意一个角色即可访问
 // 使用示例:
-//   - AuthMiddleware(consts.RoleUser) - 仅普通用户可访问
+//   - AuthMiddleware(consts.RoleNormal) - 仅普通用户可访问
 //   - AuthMiddleware(consts.RoleAdmin) - 仅管理员可访问
-//   - AuthMiddleware(consts.RoleUser, consts.RoleAdmin) - 普通用户和管理员都可访问
+//   - AuthMiddleware(consts.RoleNormal, consts.RoleAdmin) - 普通用户和管理员都可访问
 func AuthMiddleware(allowedRoles ...consts.UserRole) app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		// 从Header中获取Authorization

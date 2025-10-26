@@ -32,14 +32,14 @@ func _uploadMw() []app.HandlerFunc {
 func _generateuploadtokenMw() []app.HandlerFunc {
 	// your code...
 	return []app.HandlerFunc{
-		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
+		mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin),
 	}
 }
 
 func _validateimageurlMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户和管理员都可访问
 	return []app.HandlerFunc{
-		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
+		mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin),
 	}
 }
 
