@@ -203,7 +203,7 @@ CREATE TABLE orbia_kol_order (
     target_audience VARCHAR(500) NOT NULL COMMENT '目标受众',
     expected_delivery_date DATE NOT NULL COMMENT '期望交付日期',
     additional_requirements TEXT COMMENT '额外要求',
-    status ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending' COMMENT '订单状态：pending-待确认，confirmed-已确认，in_progress-进行中，completed-已完成，cancelled-已取消，refunded-已退款',
+    status ENUM('pending_payment', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending_payment' COMMENT '订单状态：pending_payment-待支付，pending-待确认，confirmed-已确认，in_progress-进行中，completed-已完成，cancelled-已取消，refunded-已退款',
     reject_reason TEXT COMMENT '拒绝/取消原因',
     confirmed_at TIMESTAMP NULL COMMENT '确认时间',
     completed_at TIMESTAMP NULL COMMENT '完成时间',
@@ -312,3 +312,68 @@ CREATE TABLE IF NOT EXISTS orbia_transaction (
     INDEX idx_crypto_tx_hash (crypto_tx_hash),
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易记录表';
+
+-- 数据字典项表（需要先删除，因为有外键约束）
+DROP TABLE IF EXISTS orbia_dictionary_item;
+-- 数据字典表
+DROP TABLE IF EXISTS orbia_dictionary;
+
+-- 创建数据字典表
+CREATE TABLE orbia_dictionary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '字典ID',
+    code VARCHAR(100) NOT NULL UNIQUE COMMENT '字典编码（唯一，只能大小写字母）',
+    name VARCHAR(100) NOT NULL COMMENT '字典名称',
+    description TEXT COMMENT '字典描述',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_code (code),
+    INDEX idx_status (status),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据字典表';
+
+-- 创建数据字典项表
+CREATE TABLE orbia_dictionary_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '字典项ID',
+    dictionary_id BIGINT NOT NULL COMMENT '字典ID',
+    parent_id BIGINT NOT NULL DEFAULT 0 COMMENT '父级ID（0表示根节点）',
+    code VARCHAR(100) NOT NULL COMMENT '字典项编码',
+    name VARCHAR(200) NOT NULL COMMENT '字典项名称',
+    description TEXT COMMENT '字典项描述',
+    icon_url VARCHAR(500) COMMENT '图标URL',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序序号（升序）',
+    level INT NOT NULL DEFAULT 1 COMMENT '层级（1开始）',
+    path VARCHAR(1000) NOT NULL COMMENT '路径（如: 1/2/3）',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    UNIQUE KEY uk_dict_parent_code (dictionary_id, parent_id, code),
+    INDEX idx_dictionary_id (dictionary_id),
+    INDEX idx_parent_id (parent_id),
+    INDEX idx_code (code),
+    INDEX idx_status (status),
+    INDEX idx_sort_order (sort_order),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_path (path(255)),
+    FOREIGN KEY (dictionary_id) REFERENCES orbia_dictionary(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据字典项表';
+
+-- 收款钱包设置表
+DROP TABLE IF EXISTS orbia_payment_setting;
+CREATE TABLE orbia_payment_setting (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '设置ID',
+    network VARCHAR(100) NOT NULL COMMENT '区块链网络（如：TRC-20 - TRON Network (TRC-20)）',
+    address VARCHAR(500) NOT NULL COMMENT '钱包地址',
+    label VARCHAR(200) NOT NULL COMMENT '钱包标签（如：USDT-TRC20 主钱包）',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_network (network),
+    INDEX idx_status (status),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收款钱包设置表';

@@ -7,6 +7,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	apiconsts "orbia_api/biz/consts"
+	"orbia_api/biz/model/common"
 )
 
 // Response 统一响应结构
@@ -69,5 +70,21 @@ func BuildErrorResp(code int, message string) Response {
 	return Response{
 		Code:    code,
 		Message: message,
+	}
+}
+
+// BuildBaseResp 构建基础响应（用于thrift接口）
+func BuildBaseResp(code int, message string) *common.BaseResp {
+	return &common.BaseResp{
+		Code:    int32(code),
+		Message: message,
+	}
+}
+
+// BuildSuccessResp 构建成功响应（用于thrift接口）
+func BuildSuccessResp() *common.BaseResp {
+	return &common.BaseResp{
+		Code:    int32(apiconsts.SuccessCode),
+		Message: apiconsts.SuccessMsg,
 	}
 }

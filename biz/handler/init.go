@@ -5,7 +5,9 @@ import (
 
 	"orbia_api/biz/handler/admin"
 	"orbia_api/biz/handler/auth"
+	"orbia_api/biz/handler/dictionary"
 	"orbia_api/biz/handler/kol"
+	"orbia_api/biz/handler/payment_setting"
 	"orbia_api/biz/handler/team"
 	"orbia_api/biz/handler/user"
 	"orbia_api/biz/handler/wallet"
@@ -41,6 +43,12 @@ func InitAllServices() {
 
 	admin.InitAdminService()
 	log.Println("  ✅ Admin service initialized")
+
+	dictionary.InitDictionaryService()
+	log.Println("  ✅ Dictionary service initialized")
+
+	payment_setting.InitPaymentSettingService()
+	log.Println("  ✅ Payment Setting service initialized")
 
 	log.Println("✅ All handler services initialized successfully")
 }
