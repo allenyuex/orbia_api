@@ -6,7 +6,8 @@ import (
 
 	"orbia_api/biz/dal/model"
 	"orbia_api/biz/dal/mysql"
-	walletModel "orbia_api/biz/model/order/wallet"
+	walletModel "orbia_api/biz/model/wallet"
+	"orbia_api/biz/mw"
 	walletService "orbia_api/biz/service/wallet"
 	"orbia_api/biz/utils"
 
@@ -35,14 +36,14 @@ func GetWalletInfo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
 	}
 
 	// 获取钱包信息
-	wallet, err := walletSvc.GetWalletInfo(userID.(int64))
+	walletData, err := walletSvc.GetWalletInfo(userID)
 	if err != nil {
 		utils.ErrorResponse(c, 500, err.Error())
 		return
@@ -50,14 +51,14 @@ func GetWalletInfo(ctx context.Context, c *app.RequestContext) {
 
 	// 构建响应
 	walletInfo := &walletModel.WalletInfo{
-		ID:            wallet.ID,
-		UserID:        wallet.UserID,
-		Balance:       formatAmount(wallet.Balance),
-		FrozenBalance: formatAmount(wallet.FrozenBalance),
-		TotalRecharge: formatAmount(wallet.TotalRecharge),
-		TotalConsume:  formatAmount(wallet.TotalConsume),
-		CreatedAt:     utils.FormatTime(wallet.CreatedAt),
-		UpdatedAt:     utils.FormatTime(wallet.UpdatedAt),
+		ID:            walletData.ID,
+		UserID:        walletData.UserID,
+		Balance:       formatAmount(walletData.Balance),
+		FrozenBalance: formatAmount(walletData.FrozenBalance),
+		TotalRecharge: formatAmount(walletData.TotalRecharge),
+		TotalConsume:  formatAmount(walletData.TotalConsume),
+		CreatedAt:     utils.FormatTime(walletData.CreatedAt),
+		UpdatedAt:     utils.FormatTime(walletData.UpdatedAt),
 	}
 
 	utils.SuccessResponse(c, map[string]interface{}{
@@ -75,7 +76,7 @@ func CryptoRecharge(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
@@ -90,7 +91,7 @@ func CryptoRecharge(ctx context.Context, c *app.RequestContext) {
 
 	// 创建充值交易
 	transaction, err := walletSvc.CryptoRecharge(
-		userID.(int64),
+		userID,
 		amount,
 		req.CryptoCurrency,
 		req.CryptoChain,
@@ -118,7 +119,7 @@ func OnlineRecharge(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
@@ -133,7 +134,7 @@ func OnlineRecharge(ctx context.Context, c *app.RequestContext) {
 
 	// 创建充值交易
 	transaction, paymentURL, err := walletSvc.OnlineRecharge(
-		userID.(int64),
+		userID,
 		amount,
 		req.Platform,
 	)
@@ -160,7 +161,7 @@ func ConfirmCryptoRecharge(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
@@ -168,7 +169,7 @@ func ConfirmCryptoRecharge(ctx context.Context, c *app.RequestContext) {
 
 	// 确认充值
 	transaction, err := walletSvc.ConfirmCryptoRecharge(
-		userID.(int64),
+		userID,
 		req.TransactionID,
 		req.CryptoTxHash,
 	)
@@ -194,7 +195,7 @@ func GetTransactionList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
@@ -213,7 +214,7 @@ func GetTransactionList(ctx context.Context, c *app.RequestContext) {
 
 	// 获取交易列表
 	transactions, total, err := walletSvc.GetTransactionList(
-		userID.(int64),
+		userID,
 		req.Type,
 		req.Status,
 		page,
@@ -248,14 +249,14 @@ func GetTransactionDetail(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从上下文获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.ErrorResponse(c, 401, "unauthorized")
 		return
 	}
 
 	// 获取交易详情
-	transaction, err := walletSvc.GetTransactionDetail(userID.(int64), req.TransactionID)
+	transaction, err := walletSvc.GetTransactionDetail(userID, req.TransactionID)
 	if err != nil {
 		utils.ErrorResponse(c, 500, err.Error())
 		return

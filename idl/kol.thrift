@@ -39,8 +39,9 @@ struct KolPlan {
 struct KolVideo {
     1: i64 id
     2: string embed_code
-    3: string created_at
-    4: string updated_at
+    3: optional string cover_url
+    4: string created_at
+    5: string updated_at
 }
 
 // KOL详细信息
@@ -184,6 +185,7 @@ struct GetKolPlansResp {
 // 创建KOL视频请求
 struct CreateKolVideoReq {
     1: string embed_code (api.body="embed_code")
+    2: optional string cover_url (api.body="cover_url")
 }
 
 // 创建KOL视频响应
@@ -196,6 +198,7 @@ struct CreateKolVideoResp {
 struct UpdateKolVideoReq {
     1: i64 video_id (api.body="video_id")
     2: string embed_code (api.body="embed_code")
+    3: optional string cover_url (api.body="cover_url")
 }
 
 // 更新KOL视频响应

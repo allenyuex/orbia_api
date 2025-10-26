@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"orbia_api/biz/dal/mysql"
-	"orbia_api/biz/model/upload"
 	"orbia_api/biz/utils"
 
 	"gorm.io/gorm"
@@ -107,21 +106,14 @@ func (s *userService) UpdateProfile(userID int64, nickname, avatarURL *string) e
 
 	// 验证头像URL（如果提供）
 	if avatarURL != nil && *avatarURL != "" {
-		isValid, errorMessage := utils.ValidateImageURL(*avatarURL)
+		isValid, errorMessage := utils.ValidateFileURL(*avatarURL)
 		if !isValid {
 			return fmt.Errorf("invalid avatar URL: %s", errorMessage)
 		}
 
 		// 检查图片是否存在
-		if !utils.CheckImageExists(*avatarURL) {
+		if !utils.CheckFileExists(*avatarURL) {
 			return errors.New("avatar image does not exist or is not accessible")
-		}
-
-		// 验证图片类型是否为头像
-		imagePath := (*avatarURL)[len(utils.GeneratePublicURL("")):]
-		expectedType := utils.GetImageTypeFromPath(imagePath)
-		if expectedType != utils.ImageType(upload.ImageType_AVATAR) {
-			return errors.New("image type must be avatar")
 		}
 	}
 

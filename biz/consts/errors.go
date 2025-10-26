@@ -29,6 +29,10 @@ const (
 
 	// 系统错误 10400-10499
 	SystemErrorCode = 10400
+
+	// 认证相关错误 10500-10599
+	UnauthorizedCode = 10500
+	ForbiddenCode    = 10501
 )
 
 // 错误消息
@@ -54,4 +58,7 @@ const (
 
 	BusinessErrorMsg = "业务错误"
 	SystemErrorMsg   = "系统错误"
+
+	UnauthorizedMsg = "未授权"
+	ForbiddenMsg    = "无权访问"
 )

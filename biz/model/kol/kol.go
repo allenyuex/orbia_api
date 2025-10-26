@@ -1174,10 +1174,11 @@ func (p *KolPlan) String() string {
 
 // KOL视频
 type KolVideo struct {
-	ID        int64  `thrift:"id,1" form:"id" json:"id" query:"id"`
-	EmbedCode string `thrift:"embed_code,2" form:"embed_code" json:"embed_code" query:"embed_code"`
-	CreatedAt string `thrift:"created_at,3" form:"created_at" json:"created_at" query:"created_at"`
-	UpdatedAt string `thrift:"updated_at,4" form:"updated_at" json:"updated_at" query:"updated_at"`
+	ID        int64   `thrift:"id,1" form:"id" json:"id" query:"id"`
+	EmbedCode string  `thrift:"embed_code,2" form:"embed_code" json:"embed_code" query:"embed_code"`
+	CoverURL  *string `thrift:"cover_url,3,optional" form:"cover_url" json:"cover_url,omitempty" query:"cover_url"`
+	CreatedAt string  `thrift:"created_at,4" form:"created_at" json:"created_at" query:"created_at"`
+	UpdatedAt string  `thrift:"updated_at,5" form:"updated_at" json:"updated_at" query:"updated_at"`
 }
 
 func NewKolVideo() *KolVideo {
@@ -1195,6 +1196,15 @@ func (p *KolVideo) GetEmbedCode() (v string) {
 	return p.EmbedCode
 }
 
+var KolVideo_CoverURL_DEFAULT string
+
+func (p *KolVideo) GetCoverURL() (v string) {
+	if !p.IsSetCoverURL() {
+		return KolVideo_CoverURL_DEFAULT
+	}
+	return *p.CoverURL
+}
+
 func (p *KolVideo) GetCreatedAt() (v string) {
 	return p.CreatedAt
 }
@@ -1206,8 +1216,13 @@ func (p *KolVideo) GetUpdatedAt() (v string) {
 var fieldIDToName_KolVideo = map[int16]string{
 	1: "id",
 	2: "embed_code",
-	3: "created_at",
-	4: "updated_at",
+	3: "cover_url",
+	4: "created_at",
+	5: "updated_at",
+}
+
+func (p *KolVideo) IsSetCoverURL() bool {
+	return p.CoverURL != nil
 }
 
 func (p *KolVideo) Read(iprot thrift.TProtocol) (err error) {
@@ -1256,6 +1271,14 @@ func (p *KolVideo) Read(iprot thrift.TProtocol) (err error) {
 		case 4:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField4(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 5:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField5(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -1314,6 +1337,17 @@ func (p *KolVideo) ReadField2(iprot thrift.TProtocol) error {
 }
 func (p *KolVideo) ReadField3(iprot thrift.TProtocol) error {
 
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.CoverURL = _field
+	return nil
+}
+func (p *KolVideo) ReadField4(iprot thrift.TProtocol) error {
+
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
 		return err
@@ -1323,7 +1357,7 @@ func (p *KolVideo) ReadField3(iprot thrift.TProtocol) error {
 	p.CreatedAt = _field
 	return nil
 }
-func (p *KolVideo) ReadField4(iprot thrift.TProtocol) error {
+func (p *KolVideo) ReadField5(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -1355,6 +1389,10 @@ func (p *KolVideo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
+			goto WriteFieldError
+		}
+		if err = p.writeField5(oprot); err != nil {
+			fieldId = 5
 			goto WriteFieldError
 		}
 	}
@@ -1410,7 +1448,26 @@ WriteFieldEndError:
 }
 
 func (p *KolVideo) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 3); err != nil {
+	if p.IsSetCoverURL() {
+		if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 3); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.CoverURL); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *KolVideo) writeField4(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("created_at", thrift.STRING, 4); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteString(p.CreatedAt); err != nil {
@@ -1421,13 +1478,13 @@ func (p *KolVideo) writeField3(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
-func (p *KolVideo) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 4); err != nil {
+func (p *KolVideo) writeField5(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("updated_at", thrift.STRING, 5); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteString(p.UpdatedAt); err != nil {
@@ -1438,9 +1495,9 @@ func (p *KolVideo) writeField4(oprot thrift.TProtocol) (err error) {
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
 func (p *KolVideo) String() string {
@@ -6858,7 +6915,8 @@ func (p *GetKolPlansResp) String() string {
 
 // 创建KOL视频请求
 type CreateKolVideoReq struct {
-	EmbedCode string `thrift:"embed_code,1" form:"embed_code" json:"embed_code"`
+	EmbedCode string  `thrift:"embed_code,1" form:"embed_code" json:"embed_code"`
+	CoverURL  *string `thrift:"cover_url,2,optional" form:"cover_url" json:"cover_url,omitempty"`
 }
 
 func NewCreateKolVideoReq() *CreateKolVideoReq {
@@ -6872,8 +6930,22 @@ func (p *CreateKolVideoReq) GetEmbedCode() (v string) {
 	return p.EmbedCode
 }
 
+var CreateKolVideoReq_CoverURL_DEFAULT string
+
+func (p *CreateKolVideoReq) GetCoverURL() (v string) {
+	if !p.IsSetCoverURL() {
+		return CreateKolVideoReq_CoverURL_DEFAULT
+	}
+	return *p.CoverURL
+}
+
 var fieldIDToName_CreateKolVideoReq = map[int16]string{
 	1: "embed_code",
+	2: "cover_url",
+}
+
+func (p *CreateKolVideoReq) IsSetCoverURL() bool {
+	return p.CoverURL != nil
 }
 
 func (p *CreateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
@@ -6898,6 +6970,14 @@ func (p *CreateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
 		case 1:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -6943,6 +7023,17 @@ func (p *CreateKolVideoReq) ReadField1(iprot thrift.TProtocol) error {
 	p.EmbedCode = _field
 	return nil
 }
+func (p *CreateKolVideoReq) ReadField2(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.CoverURL = _field
+	return nil
+}
 
 func (p *CreateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -6952,6 +7043,10 @@ func (p *CreateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 	if p != nil {
 		if err = p.writeField1(oprot); err != nil {
 			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
 			goto WriteFieldError
 		}
 	}
@@ -6987,6 +7082,25 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *CreateKolVideoReq) writeField2(oprot thrift.TProtocol) (err error) {
+	if p.IsSetCoverURL() {
+		if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.CoverURL); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
 func (p *CreateKolVideoReq) String() string {
@@ -7203,8 +7317,9 @@ func (p *CreateKolVideoResp) String() string {
 
 // 更新KOL视频请求
 type UpdateKolVideoReq struct {
-	VideoID   int64  `thrift:"video_id,1" form:"video_id" json:"video_id"`
-	EmbedCode string `thrift:"embed_code,2" form:"embed_code" json:"embed_code"`
+	VideoID   int64   `thrift:"video_id,1" form:"video_id" json:"video_id"`
+	EmbedCode string  `thrift:"embed_code,2" form:"embed_code" json:"embed_code"`
+	CoverURL  *string `thrift:"cover_url,3,optional" form:"cover_url" json:"cover_url,omitempty"`
 }
 
 func NewUpdateKolVideoReq() *UpdateKolVideoReq {
@@ -7222,9 +7337,23 @@ func (p *UpdateKolVideoReq) GetEmbedCode() (v string) {
 	return p.EmbedCode
 }
 
+var UpdateKolVideoReq_CoverURL_DEFAULT string
+
+func (p *UpdateKolVideoReq) GetCoverURL() (v string) {
+	if !p.IsSetCoverURL() {
+		return UpdateKolVideoReq_CoverURL_DEFAULT
+	}
+	return *p.CoverURL
+}
+
 var fieldIDToName_UpdateKolVideoReq = map[int16]string{
 	1: "video_id",
 	2: "embed_code",
+	3: "cover_url",
+}
+
+func (p *UpdateKolVideoReq) IsSetCoverURL() bool {
+	return p.CoverURL != nil
 }
 
 func (p *UpdateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
@@ -7257,6 +7386,14 @@ func (p *UpdateKolVideoReq) Read(iprot thrift.TProtocol) (err error) {
 		case 2:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -7313,6 +7450,17 @@ func (p *UpdateKolVideoReq) ReadField2(iprot thrift.TProtocol) error {
 	p.EmbedCode = _field
 	return nil
 }
+func (p *UpdateKolVideoReq) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.CoverURL = _field
+	return nil
+}
 
 func (p *UpdateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -7326,6 +7474,10 @@ func (p *UpdateKolVideoReq) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
 			goto WriteFieldError
 		}
 	}
@@ -7378,6 +7530,25 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *UpdateKolVideoReq) writeField3(oprot thrift.TProtocol) (err error) {
+	if p.IsSetCoverURL() {
+		if err = oprot.WriteFieldBegin("cover_url", thrift.STRING, 3); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.CoverURL); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
 }
 
 func (p *UpdateKolVideoReq) String() string {

@@ -17,6 +17,7 @@ type OrbiaKolVideo struct {
 	ID        int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:视频ID" json:"id"`                // 视频ID
 	KolID     int64          `gorm:"column:kol_id;type:bigint;not null;comment:KOL ID" json:"kol_id"`                           // KOL ID
 	EmbedCode string         `gorm:"column:embed_code;type:text;not null;comment:视频嵌入代码" json:"embed_code"`                     // 视频嵌入代码
+	CoverURL  *string        `gorm:"column:cover_url;type:varchar(500);comment:视频封面URL" json:"cover_url"`                       // 视频封面URL
 	CreatedAt *time.Time     `gorm:"column:created_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"` // 创建时间
 	UpdatedAt *time.Time     `gorm:"column:updated_at;type:timestamp;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updated_at"` // 更新时间
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;type:timestamp;comment:软删除时间" json:"deleted_at"`                          // 软删除时间

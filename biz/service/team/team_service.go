@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
-	"gorm.io/gorm"
 	"orbia_api/biz/dal/mysql"
 	"orbia_api/biz/model/common"
 	"orbia_api/biz/model/team"
-	"orbia_api/biz/model/upload"
 	"orbia_api/biz/utils"
+
+	"gorm.io/gorm"
 )
 
 // TeamService 团队服务接口
@@ -147,21 +147,14 @@ func (s *teamService) UpdateTeam(userID int64, req *team.UpdateTeamReq) (*team.U
 	if req.IconURL != nil {
 		// 验证团队图标URL（如果提供）
 		if *req.IconURL != "" {
-			isValid, errorMessage := utils.ValidateImageURL(*req.IconURL)
+			isValid, errorMessage := utils.ValidateFileURL(*req.IconURL)
 			if !isValid {
 				return nil, fmt.Errorf("invalid icon URL: %s", errorMessage)
 			}
 
 			// 检查图片是否存在
-			if !utils.CheckImageExists(*req.IconURL) {
+			if !utils.CheckFileExists(*req.IconURL) {
 				return nil, errors.New("icon image does not exist or is not accessible")
-			}
-
-			// 验证图片类型是否为团队图标
-			imagePath := (*req.IconURL)[len(utils.GeneratePublicURL("")):]
-			expectedType := utils.GetImageTypeFromPath(imagePath)
-			if expectedType != utils.ImageType(upload.ImageType_TEAM_ICON) {
-				return nil, errors.New("image type must be team icon")
 			}
 		}
 		t.IconURL = req.IconURL
@@ -183,13 +176,13 @@ func (s *teamService) GetUserTeams(userID int64, req *team.GetUserTeamsReq) (*te
 	utils.LogDebug("GetUserTeams service called", map[string]interface{}{
 		"user_id": userID,
 	})
-	
+
 	// 检查 teamRepo 是否为 nil
 	if s.teamRepo == nil {
 		utils.LogError(nil, "teamRepo is nil in GetUserTeams")
 		return nil, errors.New("team repository is not initialized")
 	}
-	
+
 	teams, _, err := s.teamRepo.GetUserTeams(userID, 0, 100) // 暂时设置固定分页
 	if err != nil {
 		utils.LogError(err, "failed to get user teams from repository")

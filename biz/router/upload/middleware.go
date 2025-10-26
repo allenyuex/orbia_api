@@ -25,18 +25,25 @@ func _v1Mw() []app.HandlerFunc {
 }
 
 func _uploadMw() []app.HandlerFunc {
-	// 上传相关接口需要JWT认证，普通用户和管理员都可访问
+	// your code...
+	return nil
+}
+
+func _generateuploadtokenMw() []app.HandlerFunc {
+	// your code...
 	return []app.HandlerFunc{
 		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
 	}
 }
 
-func _generateuploadtokenMw() []app.HandlerFunc {
-	// your code...
-	return nil
+func _validateimageurlMw() []app.HandlerFunc {
+	// 需要JWT认证，普通用户和管理员都可访问
+	return []app.HandlerFunc{
+		mw.AuthMiddleware(consts.RoleUser, consts.RoleAdmin),
+	}
 }
 
-func _validateimageurlMw() []app.HandlerFunc {
+func _validatefileurlMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }

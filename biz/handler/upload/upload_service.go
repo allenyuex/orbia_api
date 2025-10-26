@@ -6,6 +6,7 @@ import (
 	"context"
 
 	upload "orbia_api/biz/model/upload"
+	"orbia_api/biz/mw"
 	uploadService "orbia_api/biz/service/upload"
 	"orbia_api/biz/utils"
 
@@ -25,7 +26,7 @@ func GenerateUploadToken(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从JWT中获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "unauthorized")
 		return
@@ -33,7 +34,7 @@ func GenerateUploadToken(ctx context.Context, c *app.RequestContext) {
 
 	// 调用service层
 	service := uploadService.NewUploadService()
-	resp, err := service.GenerateUploadToken(userID.(int64), &req)
+	resp, err := service.GenerateUploadToken(userID, &req)
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return
@@ -42,11 +43,11 @@ func GenerateUploadToken(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// ValidateImageURL .
+// ValidateFileURL .
 // @router /api/v1/upload/validate [POST]
-func ValidateImageURL(ctx context.Context, c *app.RequestContext) {
+func ValidateFileURL(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req upload.ValidateImageURLReq
+	var req upload.ValidateFileURLReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
@@ -54,7 +55,7 @@ func ValidateImageURL(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从JWT中获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "unauthorized")
 		return
@@ -62,7 +63,7 @@ func ValidateImageURL(ctx context.Context, c *app.RequestContext) {
 
 	// 调用service层
 	service := uploadService.NewUploadService()
-	resp, err := service.ValidateImageURL(userID.(int64), &req)
+	resp, err := service.ValidateFileURL(userID, &req)
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return

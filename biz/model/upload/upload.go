@@ -4,65 +4,17 @@ package upload
 
 import (
 	"context"
-	"database/sql"
-	"database/sql/driver"
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"orbia_api/biz/model/common"
 )
 
-// 图片上传类型枚举
-type ImageType int64
-
-const (
-	// 头像
-	ImageType_AVATAR ImageType = 1
-	// 团队图标
-	ImageType_TEAM_ICON ImageType = 2
-)
-
-func (p ImageType) String() string {
-	switch p {
-	case ImageType_AVATAR:
-		return "AVATAR"
-	case ImageType_TEAM_ICON:
-		return "TEAM_ICON"
-	}
-	return "<UNSET>"
-}
-
-func ImageTypeFromString(s string) (ImageType, error) {
-	switch s {
-	case "AVATAR":
-		return ImageType_AVATAR, nil
-	case "TEAM_ICON":
-		return ImageType_TEAM_ICON, nil
-	}
-	return ImageType(0), fmt.Errorf("not a valid ImageType string")
-}
-
-func ImageTypePtr(v ImageType) *ImageType { return &v }
-func (p *ImageType) Scan(value interface{}) (err error) {
-	var result sql.NullInt64
-	err = result.Scan(value)
-	*p = ImageType(result.Int64)
-	return
-}
-
-func (p *ImageType) Value() (driver.Value, error) {
-	if p == nil {
-		return nil, nil
-	}
-	return int64(*p), nil
-}
-
 // 生成上传token请求
 type GenerateUploadTokenReq struct {
-	ImageType ImageType `thrift:"image_type,1,required,ImageType" form:"image_type,required" json:"image_type,required"`
-	// 文件扩展名，如 .jpg, .png
-	FileExtension string `thrift:"file_extension,2,required" form:"file_extension,required" json:"file_extension,required"`
+	// 文件扩展名，如 .jpg, .png, .pdf（会自动转为小写）
+	FileExtension string `thrift:"file_extension,1,required" form:"file_extension,required" json:"file_extension,required"`
 	// 文件大小（字节）
-	FileSize *int64 `thrift:"file_size,3,optional" form:"file_size" json:"file_size,omitempty"`
+	FileSize *int64 `thrift:"file_size,2,optional" form:"file_size" json:"file_size,omitempty"`
 }
 
 func NewGenerateUploadTokenReq() *GenerateUploadTokenReq {
@@ -70,10 +22,6 @@ func NewGenerateUploadTokenReq() *GenerateUploadTokenReq {
 }
 
 func (p *GenerateUploadTokenReq) InitDefault() {
-}
-
-func (p *GenerateUploadTokenReq) GetImageType() (v ImageType) {
-	return p.ImageType
 }
 
 func (p *GenerateUploadTokenReq) GetFileExtension() (v string) {
@@ -90,9 +38,8 @@ func (p *GenerateUploadTokenReq) GetFileSize() (v int64) {
 }
 
 var fieldIDToName_GenerateUploadTokenReq = map[int16]string{
-	1: "image_type",
-	2: "file_extension",
-	3: "file_size",
+	1: "file_extension",
+	2: "file_size",
 }
 
 func (p *GenerateUploadTokenReq) IsSetFileSize() bool {
@@ -103,7 +50,6 @@ func (p *GenerateUploadTokenReq) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
-	var issetImageType bool = false
 	var issetFileExtension bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
@@ -121,26 +67,17 @@ func (p *GenerateUploadTokenReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I32 {
-				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-				issetImageType = true
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 2:
 			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField2(iprot); err != nil {
+				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
 				issetFileExtension = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 3:
+		case 2:
 			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField3(iprot); err != nil {
+				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -159,13 +96,8 @@ func (p *GenerateUploadTokenReq) Read(iprot thrift.TProtocol) (err error) {
 		goto ReadStructEndError
 	}
 
-	if !issetImageType {
-		fieldId = 1
-		goto RequiredFieldNotSetError
-	}
-
 	if !issetFileExtension {
-		fieldId = 2
+		fieldId = 1
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -188,17 +120,6 @@ RequiredFieldNotSetError:
 
 func (p *GenerateUploadTokenReq) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field ImageType
-	if v, err := iprot.ReadI32(); err != nil {
-		return err
-	} else {
-		_field = ImageType(v)
-	}
-	p.ImageType = _field
-	return nil
-}
-func (p *GenerateUploadTokenReq) ReadField2(iprot thrift.TProtocol) error {
-
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
 		return err
@@ -208,7 +129,7 @@ func (p *GenerateUploadTokenReq) ReadField2(iprot thrift.TProtocol) error {
 	p.FileExtension = _field
 	return nil
 }
-func (p *GenerateUploadTokenReq) ReadField3(iprot thrift.TProtocol) error {
+func (p *GenerateUploadTokenReq) ReadField2(iprot thrift.TProtocol) error {
 
 	var _field *int64
 	if v, err := iprot.ReadI64(); err != nil {
@@ -234,10 +155,6 @@ func (p *GenerateUploadTokenReq) Write(oprot thrift.TProtocol) (err error) {
 			fieldId = 2
 			goto WriteFieldError
 		}
-		if err = p.writeField3(oprot); err != nil {
-			fieldId = 3
-			goto WriteFieldError
-		}
 	}
 	if err = oprot.WriteFieldStop(); err != nil {
 		goto WriteFieldStopError
@@ -257,10 +174,10 @@ WriteStructEndError:
 }
 
 func (p *GenerateUploadTokenReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("image_type", thrift.I32, 1); err != nil {
+	if err = oprot.WriteFieldBegin("file_extension", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(int32(p.ImageType)); err != nil {
+	if err := oprot.WriteString(p.FileExtension); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -274,25 +191,8 @@ WriteFieldEndError:
 }
 
 func (p *GenerateUploadTokenReq) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("file_extension", thrift.STRING, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.FileExtension); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *GenerateUploadTokenReq) writeField3(oprot thrift.TProtocol) (err error) {
 	if p.IsSetFileSize() {
-		if err = oprot.WriteFieldBegin("file_size", thrift.I64, 3); err != nil {
+		if err = oprot.WriteFieldBegin("file_size", thrift.I64, 2); err != nil {
 			goto WriteFieldBeginError
 		}
 		if err := oprot.WriteI64(*p.FileSize); err != nil {
@@ -304,9 +204,9 @@ func (p *GenerateUploadTokenReq) writeField3(oprot thrift.TProtocol) (err error)
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
 func (p *GenerateUploadTokenReq) String() string {
@@ -319,23 +219,15 @@ func (p *GenerateUploadTokenReq) String() string {
 
 // 生成上传token响应
 type GenerateUploadTokenResp struct {
-	// 上传URL
+	// 预签名上传URL（使用PUT方法）
 	UploadURL string `thrift:"upload_url,1" form:"upload_url" json:"upload_url" query:"upload_url"`
-	// 访问密钥ID
-	AccessKeyID string `thrift:"access_key_id,2" form:"access_key_id" json:"access_key_id" query:"access_key_id"`
-	// 访问密钥
-	SecretAccessKey string `thrift:"secret_access_key,3" form:"secret_access_key" json:"secret_access_key" query:"secret_access_key"`
-	// 会话令牌
-	SessionToken string `thrift:"session_token,4" form:"session_token" json:"session_token" query:"session_token"`
-	// 存储桶名称
-	Bucket string `thrift:"bucket,5" form:"bucket" json:"bucket" query:"bucket"`
-	// 对象键（文件路径）
-	Key string `thrift:"key,6" form:"key" json:"key" query:"key"`
-	// 公开访问URL
-	PublicURL string `thrift:"public_url,7" form:"public_url" json:"public_url" query:"public_url"`
+	// 上传成功后的公开访问URL
+	PublicURL string `thrift:"public_url,2" form:"public_url" json:"public_url" query:"public_url"`
 	// 过期时间（秒）
-	ExpiresIn int64            `thrift:"expires_in,8" form:"expires_in" json:"expires_in" query:"expires_in"`
-	BaseResp  *common.BaseResp `thrift:"base_resp,9" form:"base_resp" json:"base_resp" query:"base_resp"`
+	ExpiresIn int64 `thrift:"expires_in,3" form:"expires_in" json:"expires_in" query:"expires_in"`
+	// 上传时必需的HTTP请求头
+	Headers  map[string]string `thrift:"headers,4" form:"headers" json:"headers" query:"headers"`
+	BaseResp *common.BaseResp  `thrift:"base_resp,5" form:"base_resp" json:"base_resp" query:"base_resp"`
 }
 
 func NewGenerateUploadTokenResp() *GenerateUploadTokenResp {
@@ -349,32 +241,16 @@ func (p *GenerateUploadTokenResp) GetUploadURL() (v string) {
 	return p.UploadURL
 }
 
-func (p *GenerateUploadTokenResp) GetAccessKeyID() (v string) {
-	return p.AccessKeyID
-}
-
-func (p *GenerateUploadTokenResp) GetSecretAccessKey() (v string) {
-	return p.SecretAccessKey
-}
-
-func (p *GenerateUploadTokenResp) GetSessionToken() (v string) {
-	return p.SessionToken
-}
-
-func (p *GenerateUploadTokenResp) GetBucket() (v string) {
-	return p.Bucket
-}
-
-func (p *GenerateUploadTokenResp) GetKey() (v string) {
-	return p.Key
-}
-
 func (p *GenerateUploadTokenResp) GetPublicURL() (v string) {
 	return p.PublicURL
 }
 
 func (p *GenerateUploadTokenResp) GetExpiresIn() (v int64) {
 	return p.ExpiresIn
+}
+
+func (p *GenerateUploadTokenResp) GetHeaders() (v map[string]string) {
+	return p.Headers
 }
 
 var GenerateUploadTokenResp_BaseResp_DEFAULT *common.BaseResp
@@ -388,14 +264,10 @@ func (p *GenerateUploadTokenResp) GetBaseResp() (v *common.BaseResp) {
 
 var fieldIDToName_GenerateUploadTokenResp = map[int16]string{
 	1: "upload_url",
-	2: "access_key_id",
-	3: "secret_access_key",
-	4: "session_token",
-	5: "bucket",
-	6: "key",
-	7: "public_url",
-	8: "expires_in",
-	9: "base_resp",
+	2: "public_url",
+	3: "expires_in",
+	4: "headers",
+	5: "base_resp",
 }
 
 func (p *GenerateUploadTokenResp) IsSetBaseResp() bool {
@@ -438,7 +310,7 @@ func (p *GenerateUploadTokenResp) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 3:
-			if fieldTypeId == thrift.STRING {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -446,7 +318,7 @@ func (p *GenerateUploadTokenResp) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 4:
-			if fieldTypeId == thrift.STRING {
+			if fieldTypeId == thrift.MAP {
 				if err = p.ReadField4(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -454,40 +326,8 @@ func (p *GenerateUploadTokenResp) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 5:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField5(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 6:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField6(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 7:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField7(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 8:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField8(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 9:
 			if fieldTypeId == thrift.STRUCT {
-				if err = p.ReadField9(iprot); err != nil {
+				if err = p.ReadField5(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -541,65 +381,10 @@ func (p *GenerateUploadTokenResp) ReadField2(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.AccessKeyID = _field
-	return nil
-}
-func (p *GenerateUploadTokenResp) ReadField3(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.SecretAccessKey = _field
-	return nil
-}
-func (p *GenerateUploadTokenResp) ReadField4(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.SessionToken = _field
-	return nil
-}
-func (p *GenerateUploadTokenResp) ReadField5(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.Bucket = _field
-	return nil
-}
-func (p *GenerateUploadTokenResp) ReadField6(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.Key = _field
-	return nil
-}
-func (p *GenerateUploadTokenResp) ReadField7(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
 	p.PublicURL = _field
 	return nil
 }
-func (p *GenerateUploadTokenResp) ReadField8(iprot thrift.TProtocol) error {
+func (p *GenerateUploadTokenResp) ReadField3(iprot thrift.TProtocol) error {
 
 	var _field int64
 	if v, err := iprot.ReadI64(); err != nil {
@@ -610,7 +395,36 @@ func (p *GenerateUploadTokenResp) ReadField8(iprot thrift.TProtocol) error {
 	p.ExpiresIn = _field
 	return nil
 }
-func (p *GenerateUploadTokenResp) ReadField9(iprot thrift.TProtocol) error {
+func (p *GenerateUploadTokenResp) ReadField4(iprot thrift.TProtocol) error {
+	_, _, size, err := iprot.ReadMapBegin()
+	if err != nil {
+		return err
+	}
+	_field := make(map[string]string, size)
+	for i := 0; i < size; i++ {
+		var _key string
+		if v, err := iprot.ReadString(); err != nil {
+			return err
+		} else {
+			_key = v
+		}
+
+		var _val string
+		if v, err := iprot.ReadString(); err != nil {
+			return err
+		} else {
+			_val = v
+		}
+
+		_field[_key] = _val
+	}
+	if err := iprot.ReadMapEnd(); err != nil {
+		return err
+	}
+	p.Headers = _field
+	return nil
+}
+func (p *GenerateUploadTokenResp) ReadField5(iprot thrift.TProtocol) error {
 	_field := common.NewBaseResp()
 	if err := _field.Read(iprot); err != nil {
 		return err
@@ -643,22 +457,6 @@ func (p *GenerateUploadTokenResp) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField5(oprot); err != nil {
 			fieldId = 5
-			goto WriteFieldError
-		}
-		if err = p.writeField6(oprot); err != nil {
-			fieldId = 6
-			goto WriteFieldError
-		}
-		if err = p.writeField7(oprot); err != nil {
-			fieldId = 7
-			goto WriteFieldError
-		}
-		if err = p.writeField8(oprot); err != nil {
-			fieldId = 8
-			goto WriteFieldError
-		}
-		if err = p.writeField9(oprot); err != nil {
-			fieldId = 9
 			goto WriteFieldError
 		}
 	}
@@ -697,10 +495,10 @@ WriteFieldEndError:
 }
 
 func (p *GenerateUploadTokenResp) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("access_key_id", thrift.STRING, 2); err != nil {
+	if err = oprot.WriteFieldBegin("public_url", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.AccessKeyID); err != nil {
+	if err := oprot.WriteString(p.PublicURL); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -714,10 +512,10 @@ WriteFieldEndError:
 }
 
 func (p *GenerateUploadTokenResp) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("secret_access_key", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("expires_in", thrift.I64, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.SecretAccessKey); err != nil {
+	if err := oprot.WriteI64(p.ExpiresIn); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -731,10 +529,21 @@ WriteFieldEndError:
 }
 
 func (p *GenerateUploadTokenResp) writeField4(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("session_token", thrift.STRING, 4); err != nil {
+	if err = oprot.WriteFieldBegin("headers", thrift.MAP, 4); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.SessionToken); err != nil {
+	if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Headers)); err != nil {
+		return err
+	}
+	for k, v := range p.Headers {
+		if err := oprot.WriteString(k); err != nil {
+			return err
+		}
+		if err := oprot.WriteString(v); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteMapEnd(); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -748,10 +557,10 @@ WriteFieldEndError:
 }
 
 func (p *GenerateUploadTokenResp) writeField5(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("bucket", thrift.STRING, 5); err != nil {
+	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 5); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Bucket); err != nil {
+	if err := p.BaseResp.Write(oprot); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -764,74 +573,6 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
 }
 
-func (p *GenerateUploadTokenResp) writeField6(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("key", thrift.STRING, 6); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.Key); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
-}
-
-func (p *GenerateUploadTokenResp) writeField7(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("public_url", thrift.STRING, 7); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.PublicURL); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
-}
-
-func (p *GenerateUploadTokenResp) writeField8(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("expires_in", thrift.I64, 8); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.ExpiresIn); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
-}
-
-func (p *GenerateUploadTokenResp) writeField9(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 9); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := p.BaseResp.Write(oprot); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 9 end error: ", p), err)
-}
-
 func (p *GenerateUploadTokenResp) String() string {
 	if p == nil {
 		return "<nil>"
@@ -840,38 +581,31 @@ func (p *GenerateUploadTokenResp) String() string {
 
 }
 
-// 验证图片URL请求
-type ValidateImageURLReq struct {
-	ImageURL  string    `thrift:"image_url,1,required" form:"image_url,required" json:"image_url,required"`
-	ImageType ImageType `thrift:"image_type,2,required,ImageType" form:"image_type,required" json:"image_type,required"`
+// 验证文件URL请求
+type ValidateFileURLReq struct {
+	FileURL string `thrift:"file_url,1,required" form:"file_url,required" json:"file_url,required"`
 }
 
-func NewValidateImageURLReq() *ValidateImageURLReq {
-	return &ValidateImageURLReq{}
+func NewValidateFileURLReq() *ValidateFileURLReq {
+	return &ValidateFileURLReq{}
 }
 
-func (p *ValidateImageURLReq) InitDefault() {
+func (p *ValidateFileURLReq) InitDefault() {
 }
 
-func (p *ValidateImageURLReq) GetImageURL() (v string) {
-	return p.ImageURL
+func (p *ValidateFileURLReq) GetFileURL() (v string) {
+	return p.FileURL
 }
 
-func (p *ValidateImageURLReq) GetImageType() (v ImageType) {
-	return p.ImageType
+var fieldIDToName_ValidateFileURLReq = map[int16]string{
+	1: "file_url",
 }
 
-var fieldIDToName_ValidateImageURLReq = map[int16]string{
-	1: "image_url",
-	2: "image_type",
-}
-
-func (p *ValidateImageURLReq) Read(iprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLReq) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
-	var issetImageURL bool = false
-	var issetImageType bool = false
+	var issetFileURL bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -892,16 +626,7 @@ func (p *ValidateImageURLReq) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
-				issetImageURL = true
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 2:
-			if fieldTypeId == thrift.I32 {
-				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-				issetImageType = true
+				issetFileURL = true
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
@@ -918,13 +643,8 @@ func (p *ValidateImageURLReq) Read(iprot thrift.TProtocol) (err error) {
 		goto ReadStructEndError
 	}
 
-	if !issetImageURL {
+	if !issetFileURL {
 		fieldId = 1
-		goto RequiredFieldNotSetError
-	}
-
-	if !issetImageType {
-		fieldId = 2
 		goto RequiredFieldNotSetError
 	}
 	return nil
@@ -933,7 +653,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_ValidateImageURLReq[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_ValidateFileURLReq[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -942,10 +662,10 @@ ReadFieldEndError:
 ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 RequiredFieldNotSetError:
-	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_ValidateImageURLReq[fieldId]))
+	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_ValidateFileURLReq[fieldId]))
 }
 
-func (p *ValidateImageURLReq) ReadField1(iprot thrift.TProtocol) error {
+func (p *ValidateFileURLReq) ReadField1(iprot thrift.TProtocol) error {
 
 	var _field string
 	if v, err := iprot.ReadString(); err != nil {
@@ -953,33 +673,18 @@ func (p *ValidateImageURLReq) ReadField1(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.ImageURL = _field
-	return nil
-}
-func (p *ValidateImageURLReq) ReadField2(iprot thrift.TProtocol) error {
-
-	var _field ImageType
-	if v, err := iprot.ReadI32(); err != nil {
-		return err
-	} else {
-		_field = ImageType(v)
-	}
-	p.ImageType = _field
+	p.FileURL = _field
 	return nil
 }
 
-func (p *ValidateImageURLReq) Write(oprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLReq) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("ValidateImageURLReq"); err != nil {
+	if err = oprot.WriteStructBegin("ValidateFileURLReq"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
 		if err = p.writeField1(oprot); err != nil {
 			fieldId = 1
-			goto WriteFieldError
-		}
-		if err = p.writeField2(oprot); err != nil {
-			fieldId = 2
 			goto WriteFieldError
 		}
 	}
@@ -1000,11 +705,11 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *ValidateImageURLReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("image_url", thrift.STRING, 1); err != nil {
+func (p *ValidateFileURLReq) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("file_url", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.ImageURL); err != nil {
+	if err := oprot.WriteString(p.FileURL); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1017,33 +722,16 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *ValidateImageURLReq) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("image_type", thrift.I32, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI32(int32(p.ImageType)); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *ValidateImageURLReq) String() string {
+func (p *ValidateFileURLReq) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ValidateImageURLReq(%+v)", *p)
+	return fmt.Sprintf("ValidateFileURLReq(%+v)", *p)
 
 }
 
-// 验证图片URL响应
-type ValidateImageURLResp struct {
+// 验证文件URL响应
+type ValidateFileURLResp struct {
 	// 是否有效
 	IsValid bool `thrift:"is_valid,1" form:"is_valid" json:"is_valid" query:"is_valid"`
 	// 错误信息
@@ -1051,50 +739,50 @@ type ValidateImageURLResp struct {
 	BaseResp     *common.BaseResp `thrift:"base_resp,3" form:"base_resp" json:"base_resp" query:"base_resp"`
 }
 
-func NewValidateImageURLResp() *ValidateImageURLResp {
-	return &ValidateImageURLResp{}
+func NewValidateFileURLResp() *ValidateFileURLResp {
+	return &ValidateFileURLResp{}
 }
 
-func (p *ValidateImageURLResp) InitDefault() {
+func (p *ValidateFileURLResp) InitDefault() {
 }
 
-func (p *ValidateImageURLResp) GetIsValid() (v bool) {
+func (p *ValidateFileURLResp) GetIsValid() (v bool) {
 	return p.IsValid
 }
 
-var ValidateImageURLResp_ErrorMessage_DEFAULT string
+var ValidateFileURLResp_ErrorMessage_DEFAULT string
 
-func (p *ValidateImageURLResp) GetErrorMessage() (v string) {
+func (p *ValidateFileURLResp) GetErrorMessage() (v string) {
 	if !p.IsSetErrorMessage() {
-		return ValidateImageURLResp_ErrorMessage_DEFAULT
+		return ValidateFileURLResp_ErrorMessage_DEFAULT
 	}
 	return *p.ErrorMessage
 }
 
-var ValidateImageURLResp_BaseResp_DEFAULT *common.BaseResp
+var ValidateFileURLResp_BaseResp_DEFAULT *common.BaseResp
 
-func (p *ValidateImageURLResp) GetBaseResp() (v *common.BaseResp) {
+func (p *ValidateFileURLResp) GetBaseResp() (v *common.BaseResp) {
 	if !p.IsSetBaseResp() {
-		return ValidateImageURLResp_BaseResp_DEFAULT
+		return ValidateFileURLResp_BaseResp_DEFAULT
 	}
 	return p.BaseResp
 }
 
-var fieldIDToName_ValidateImageURLResp = map[int16]string{
+var fieldIDToName_ValidateFileURLResp = map[int16]string{
 	1: "is_valid",
 	2: "error_message",
 	3: "base_resp",
 }
 
-func (p *ValidateImageURLResp) IsSetErrorMessage() bool {
+func (p *ValidateFileURLResp) IsSetErrorMessage() bool {
 	return p.ErrorMessage != nil
 }
 
-func (p *ValidateImageURLResp) IsSetBaseResp() bool {
+func (p *ValidateFileURLResp) IsSetBaseResp() bool {
 	return p.BaseResp != nil
 }
 
-func (p *ValidateImageURLResp) Read(iprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLResp) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -1156,7 +844,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_ValidateImageURLResp[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_ValidateFileURLResp[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -1166,7 +854,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *ValidateImageURLResp) ReadField1(iprot thrift.TProtocol) error {
+func (p *ValidateFileURLResp) ReadField1(iprot thrift.TProtocol) error {
 
 	var _field bool
 	if v, err := iprot.ReadBool(); err != nil {
@@ -1177,7 +865,7 @@ func (p *ValidateImageURLResp) ReadField1(iprot thrift.TProtocol) error {
 	p.IsValid = _field
 	return nil
 }
-func (p *ValidateImageURLResp) ReadField2(iprot thrift.TProtocol) error {
+func (p *ValidateFileURLResp) ReadField2(iprot thrift.TProtocol) error {
 
 	var _field *string
 	if v, err := iprot.ReadString(); err != nil {
@@ -1188,7 +876,7 @@ func (p *ValidateImageURLResp) ReadField2(iprot thrift.TProtocol) error {
 	p.ErrorMessage = _field
 	return nil
 }
-func (p *ValidateImageURLResp) ReadField3(iprot thrift.TProtocol) error {
+func (p *ValidateFileURLResp) ReadField3(iprot thrift.TProtocol) error {
 	_field := common.NewBaseResp()
 	if err := _field.Read(iprot); err != nil {
 		return err
@@ -1197,9 +885,9 @@ func (p *ValidateImageURLResp) ReadField3(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ValidateImageURLResp) Write(oprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLResp) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("ValidateImageURLResp"); err != nil {
+	if err = oprot.WriteStructBegin("ValidateFileURLResp"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -1233,7 +921,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *ValidateImageURLResp) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLResp) writeField1(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("is_valid", thrift.BOOL, 1); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -1250,7 +938,7 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *ValidateImageURLResp) writeField2(oprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLResp) writeField2(oprot thrift.TProtocol) (err error) {
 	if p.IsSetErrorMessage() {
 		if err = oprot.WriteFieldBegin("error_message", thrift.STRING, 2); err != nil {
 			goto WriteFieldBeginError
@@ -1269,7 +957,7 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
-func (p *ValidateImageURLResp) writeField3(oprot thrift.TProtocol) (err error) {
+func (p *ValidateFileURLResp) writeField3(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 3); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -1286,11 +974,11 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
 }
 
-func (p *ValidateImageURLResp) String() string {
+func (p *ValidateFileURLResp) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ValidateImageURLResp(%+v)", *p)
+	return fmt.Sprintf("ValidateFileURLResp(%+v)", *p)
 
 }
 
@@ -1298,8 +986,8 @@ func (p *ValidateImageURLResp) String() string {
 type UploadService interface {
 	// 生成上传token
 	GenerateUploadToken(ctx context.Context, req *GenerateUploadTokenReq) (r *GenerateUploadTokenResp, err error)
-	// 验证图片URL
-	ValidateImageURL(ctx context.Context, req *ValidateImageURLReq) (r *ValidateImageURLResp, err error)
+	// 验证文件URL
+	ValidateFileURL(ctx context.Context, req *ValidateFileURLReq) (r *ValidateFileURLResp, err error)
 }
 
 type UploadServiceClient struct {
@@ -1337,11 +1025,11 @@ func (p *UploadServiceClient) GenerateUploadToken(ctx context.Context, req *Gene
 	}
 	return _result.GetSuccess(), nil
 }
-func (p *UploadServiceClient) ValidateImageURL(ctx context.Context, req *ValidateImageURLReq) (r *ValidateImageURLResp, err error) {
-	var _args UploadServiceValidateImageURLArgs
+func (p *UploadServiceClient) ValidateFileURL(ctx context.Context, req *ValidateFileURLReq) (r *ValidateFileURLResp, err error) {
+	var _args UploadServiceValidateFileURLArgs
 	_args.Req = req
-	var _result UploadServiceValidateImageURLResult
-	if err = p.Client_().Call(ctx, "ValidateImageURL", &_args, &_result); err != nil {
+	var _result UploadServiceValidateFileURLResult
+	if err = p.Client_().Call(ctx, "ValidateFileURL", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -1368,7 +1056,7 @@ func (p *UploadServiceProcessor) ProcessorMap() map[string]thrift.TProcessorFunc
 func NewUploadServiceProcessor(handler UploadService) *UploadServiceProcessor {
 	self := &UploadServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
 	self.AddToProcessorMap("GenerateUploadToken", &uploadServiceProcessorGenerateUploadToken{handler: handler})
-	self.AddToProcessorMap("ValidateImageURL", &uploadServiceProcessorValidateImageURL{handler: handler})
+	self.AddToProcessorMap("ValidateFileURL", &uploadServiceProcessorValidateFileURL{handler: handler})
 	return self
 }
 func (p *UploadServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -1437,16 +1125,16 @@ func (p *uploadServiceProcessorGenerateUploadToken) Process(ctx context.Context,
 	return true, err
 }
 
-type uploadServiceProcessorValidateImageURL struct {
+type uploadServiceProcessorValidateFileURL struct {
 	handler UploadService
 }
 
-func (p *uploadServiceProcessorValidateImageURL) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := UploadServiceValidateImageURLArgs{}
+func (p *uploadServiceProcessorValidateFileURL) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := UploadServiceValidateFileURLArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("ValidateImageURL", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("ValidateFileURL", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1455,11 +1143,11 @@ func (p *uploadServiceProcessorValidateImageURL) Process(ctx context.Context, se
 
 	iprot.ReadMessageEnd()
 	var err2 error
-	result := UploadServiceValidateImageURLResult{}
-	var retval *ValidateImageURLResp
-	if retval, err2 = p.handler.ValidateImageURL(ctx, args.Req); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing ValidateImageURL: "+err2.Error())
-		oprot.WriteMessageBegin("ValidateImageURL", thrift.EXCEPTION, seqId)
+	result := UploadServiceValidateFileURLResult{}
+	var retval *ValidateFileURLResp
+	if retval, err2 = p.handler.ValidateFileURL(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing ValidateFileURL: "+err2.Error())
+		oprot.WriteMessageBegin("ValidateFileURL", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1467,7 +1155,7 @@ func (p *uploadServiceProcessorValidateImageURL) Process(ctx context.Context, se
 	} else {
 		result.Success = retval
 	}
-	if err2 = oprot.WriteMessageBegin("ValidateImageURL", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("ValidateFileURL", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1779,35 +1467,35 @@ func (p *UploadServiceGenerateUploadTokenResult) String() string {
 
 }
 
-type UploadServiceValidateImageURLArgs struct {
-	Req *ValidateImageURLReq `thrift:"req,1"`
+type UploadServiceValidateFileURLArgs struct {
+	Req *ValidateFileURLReq `thrift:"req,1"`
 }
 
-func NewUploadServiceValidateImageURLArgs() *UploadServiceValidateImageURLArgs {
-	return &UploadServiceValidateImageURLArgs{}
+func NewUploadServiceValidateFileURLArgs() *UploadServiceValidateFileURLArgs {
+	return &UploadServiceValidateFileURLArgs{}
 }
 
-func (p *UploadServiceValidateImageURLArgs) InitDefault() {
+func (p *UploadServiceValidateFileURLArgs) InitDefault() {
 }
 
-var UploadServiceValidateImageURLArgs_Req_DEFAULT *ValidateImageURLReq
+var UploadServiceValidateFileURLArgs_Req_DEFAULT *ValidateFileURLReq
 
-func (p *UploadServiceValidateImageURLArgs) GetReq() (v *ValidateImageURLReq) {
+func (p *UploadServiceValidateFileURLArgs) GetReq() (v *ValidateFileURLReq) {
 	if !p.IsSetReq() {
-		return UploadServiceValidateImageURLArgs_Req_DEFAULT
+		return UploadServiceValidateFileURLArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-var fieldIDToName_UploadServiceValidateImageURLArgs = map[int16]string{
+var fieldIDToName_UploadServiceValidateFileURLArgs = map[int16]string{
 	1: "req",
 }
 
-func (p *UploadServiceValidateImageURLArgs) IsSetReq() bool {
+func (p *UploadServiceValidateFileURLArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *UploadServiceValidateImageURLArgs) Read(iprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLArgs) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -1853,7 +1541,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UploadServiceValidateImageURLArgs[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UploadServiceValidateFileURLArgs[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -1863,8 +1551,8 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLArgs) ReadField1(iprot thrift.TProtocol) error {
-	_field := NewValidateImageURLReq()
+func (p *UploadServiceValidateFileURLArgs) ReadField1(iprot thrift.TProtocol) error {
+	_field := NewValidateFileURLReq()
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
@@ -1872,9 +1560,9 @@ func (p *UploadServiceValidateImageURLArgs) ReadField1(iprot thrift.TProtocol) e
 	return nil
 }
 
-func (p *UploadServiceValidateImageURLArgs) Write(oprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLArgs) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("ValidateImageURL_args"); err != nil {
+	if err = oprot.WriteStructBegin("ValidateFileURL_args"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -1900,7 +1588,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -1917,43 +1605,43 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLArgs) String() string {
+func (p *UploadServiceValidateFileURLArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("UploadServiceValidateImageURLArgs(%+v)", *p)
+	return fmt.Sprintf("UploadServiceValidateFileURLArgs(%+v)", *p)
 
 }
 
-type UploadServiceValidateImageURLResult struct {
-	Success *ValidateImageURLResp `thrift:"success,0,optional"`
+type UploadServiceValidateFileURLResult struct {
+	Success *ValidateFileURLResp `thrift:"success,0,optional"`
 }
 
-func NewUploadServiceValidateImageURLResult() *UploadServiceValidateImageURLResult {
-	return &UploadServiceValidateImageURLResult{}
+func NewUploadServiceValidateFileURLResult() *UploadServiceValidateFileURLResult {
+	return &UploadServiceValidateFileURLResult{}
 }
 
-func (p *UploadServiceValidateImageURLResult) InitDefault() {
+func (p *UploadServiceValidateFileURLResult) InitDefault() {
 }
 
-var UploadServiceValidateImageURLResult_Success_DEFAULT *ValidateImageURLResp
+var UploadServiceValidateFileURLResult_Success_DEFAULT *ValidateFileURLResp
 
-func (p *UploadServiceValidateImageURLResult) GetSuccess() (v *ValidateImageURLResp) {
+func (p *UploadServiceValidateFileURLResult) GetSuccess() (v *ValidateFileURLResp) {
 	if !p.IsSetSuccess() {
-		return UploadServiceValidateImageURLResult_Success_DEFAULT
+		return UploadServiceValidateFileURLResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-var fieldIDToName_UploadServiceValidateImageURLResult = map[int16]string{
+var fieldIDToName_UploadServiceValidateFileURLResult = map[int16]string{
 	0: "success",
 }
 
-func (p *UploadServiceValidateImageURLResult) IsSetSuccess() bool {
+func (p *UploadServiceValidateFileURLResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *UploadServiceValidateImageURLResult) Read(iprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLResult) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -1999,7 +1687,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UploadServiceValidateImageURLResult[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UploadServiceValidateFileURLResult[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -2009,8 +1697,8 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLResult) ReadField0(iprot thrift.TProtocol) error {
-	_field := NewValidateImageURLResp()
+func (p *UploadServiceValidateFileURLResult) ReadField0(iprot thrift.TProtocol) error {
+	_field := NewValidateFileURLResp()
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
@@ -2018,9 +1706,9 @@ func (p *UploadServiceValidateImageURLResult) ReadField0(iprot thrift.TProtocol)
 	return nil
 }
 
-func (p *UploadServiceValidateImageURLResult) Write(oprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLResult) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("ValidateImageURL_result"); err != nil {
+	if err = oprot.WriteStructBegin("ValidateFileURL_result"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -2046,7 +1734,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *UploadServiceValidateFileURLResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			goto WriteFieldBeginError
@@ -2065,10 +1753,10 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
 }
 
-func (p *UploadServiceValidateImageURLResult) String() string {
+func (p *UploadServiceValidateFileURLResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("UploadServiceValidateImageURLResult(%+v)", *p)
+	return fmt.Sprintf("UploadServiceValidateFileURLResult(%+v)", *p)
 
 }

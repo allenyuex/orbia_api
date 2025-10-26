@@ -65,13 +65,20 @@ type LogConfig struct {
 }
 
 type R2Config struct {
-	Endpoint                 string `yaml:"endpoint"`
-	AccessKey                string `yaml:"access_key"`
-	SecretKey                string `yaml:"secret_key"`
-	Bucket                   string `yaml:"bucket"`
-	PublicURL                string `yaml:"public_url"`
-	UploadTokenExpireMinutes int    `yaml:"upload_token_expire_minutes"`
-	MaxFileSize              int64  `yaml:"max_file_size"`
+	Endpoint                 string                     `yaml:"endpoint"`
+	AccessKey                string                     `yaml:"access_key"`
+	SecretKey                string                     `yaml:"secret_key"`
+	Bucket                   string                     `yaml:"bucket"`
+	PublicURL                string                     `yaml:"public_url"`
+	UploadTokenExpireMinutes int                        `yaml:"upload_token_expire_minutes"`
+	MaxFileSize              int64                      `yaml:"max_file_size"`      // 默认最大文件大小
+	AllowedExtensions        map[string]ExtensionConfig `yaml:"allowed_extensions"` // 按扩展名配置
+}
+
+// ExtensionConfig 文件扩展名配置
+type ExtensionConfig struct {
+	MaxSize     int64  `yaml:"max_size"`     // 该扩展名的最大文件大小（字节）
+	DefaultPath string `yaml:"default_path"` // 默认存储路径，如 avatars, documents
 }
 
 // LoadConfig 加载配置文件

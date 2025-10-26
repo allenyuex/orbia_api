@@ -101,6 +101,7 @@ type KolVideo struct {
 	ID        int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	KolID     int64          `gorm:"column:kol_id;not null" json:"kol_id"`
 	EmbedCode string         `gorm:"column:embed_code;type:text;not null" json:"embed_code"`
+	CoverURL  *string        `gorm:"column:cover_url;size:500" json:"cover_url"`
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`

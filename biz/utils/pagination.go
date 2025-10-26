@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"orbia_api/hertz_gen/common"
+	"orbia_api/biz/model/common"
 
 	"gorm.io/gorm"
 )
@@ -75,4 +75,23 @@ func GetPaginationInfo(page, pageSize *int32) (params PaginationParams, offset i
 	params = NormalizePagination(page, pageSize)
 	offset = int((params.Page - 1) * params.PageSize)
 	return
+}
+
+// GetPageParams 获取分页参数，处理默认值
+func GetPageParams(page, pageSize *int32) (int, int) {
+	p := 1
+	ps := 10
+
+	if page != nil && *page > 0 {
+		p = int(*page)
+	}
+
+	if pageSize != nil && *pageSize > 0 {
+		ps = int(*pageSize)
+		if ps > 100 {
+			ps = 100 // 限制最大每页数量
+		}
+	}
+
+	return p, ps
 }

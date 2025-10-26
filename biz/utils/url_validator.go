@@ -43,14 +43,14 @@ func AddURLToWhitelist(url string) {
 	if !strings.HasSuffix(url, "/") {
 		url += "/"
 	}
-	
+
 	// 检查是否已存在
 	for _, existing := range URLWhitelist {
 		if existing == url {
 			return
 		}
 	}
-	
+
 	URLWhitelist = append(URLWhitelist, url)
 }
 
@@ -60,7 +60,7 @@ func RemoveURLFromWhitelist(url string) {
 	if !strings.HasSuffix(url, "/") {
 		url += "/"
 	}
-	
+
 	for i, existing := range URLWhitelist {
 		if existing == url {
 			URLWhitelist = append(URLWhitelist[:i], URLWhitelist[i+1:]...)

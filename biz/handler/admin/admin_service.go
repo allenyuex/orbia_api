@@ -6,9 +6,9 @@ import (
 	"context"
 
 	"orbia_api/biz/dal/mysql"
+	admin "orbia_api/biz/model/admin"
 	adminService "orbia_api/biz/service/admin"
 	"orbia_api/biz/utils"
-	admin "orbia_api/hertz_gen/admin"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"

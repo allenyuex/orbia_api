@@ -174,6 +174,7 @@ CREATE TABLE orbia_kol_video (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '视频ID',
     kol_id BIGINT NOT NULL COMMENT 'KOL ID',
     embed_code TEXT NOT NULL COMMENT '视频嵌入代码',
+    cover_url VARCHAR(500) COMMENT '视频封面URL',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted_at TIMESTAMP NULL COMMENT '软删除时间',
@@ -183,9 +184,10 @@ CREATE TABLE orbia_kol_video (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL视频表';
 
 -- KOL订单表
-CREATE TABLE IF NOT EXISTS orbia_kol_order (
+DROP TABLE IF EXISTS orbia_kol_order;
+CREATE TABLE orbia_kol_order (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
-    order_id VARCHAR(64) NOT NULL UNIQUE COMMENT '订单ID（业务唯一ID，格式：ORD{snowflake_id}）',
+    order_id VARCHAR(64) NOT NULL UNIQUE COMMENT '订单ID（业务唯一ID，格式：KORD_{timestamp}_{random}）',
     user_id BIGINT NOT NULL COMMENT '下单用户ID',
     team_id BIGINT COMMENT '下单团队ID（如果是团队下单）',
     kol_id BIGINT NOT NULL COMMENT 'KOL ID',
@@ -194,7 +196,13 @@ CREATE TABLE IF NOT EXISTS orbia_kol_order (
     plan_description TEXT COMMENT 'Plan描述（快照）',
     plan_price DECIMAL(10, 2) NOT NULL COMMENT 'Plan价格（快照，美元）',
     plan_type VARCHAR(20) NOT NULL COMMENT 'Plan类型（快照）：basic, standard, premium',
-    description TEXT NOT NULL COMMENT '订单描述（用户下单时输入）',
+    title VARCHAR(200) NOT NULL COMMENT '订单标题',
+    requirement_description TEXT NOT NULL COMMENT '合作需求描述',
+    video_type VARCHAR(100) NOT NULL COMMENT '视频类型（用户手动输入）',
+    video_duration INT NOT NULL COMMENT '视频预计时长（秒数）',
+    target_audience VARCHAR(500) NOT NULL COMMENT '目标受众',
+    expected_delivery_date DATE NOT NULL COMMENT '期望交付日期',
+    additional_requirements TEXT COMMENT '额外要求',
     status ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending' COMMENT '订单状态：pending-待确认，confirmed-已确认，in_progress-进行中，completed-已完成，cancelled-已取消，refunded-已退款',
     reject_reason TEXT COMMENT '拒绝/取消原因',
     confirmed_at TIMESTAMP NULL COMMENT '确认时间',
@@ -211,11 +219,49 @@ CREATE TABLE IF NOT EXISTS orbia_kol_order (
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
     INDEX idx_deleted_at (deleted_at),
+    INDEX idx_title (title),
+    INDEX idx_expected_delivery_date (expected_delivery_date),
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE,
     FOREIGN KEY (team_id) REFERENCES orbia_team(id) ON DELETE SET NULL,
     FOREIGN KEY (kol_id) REFERENCES orbia_kol(id) ON DELETE CASCADE,
     FOREIGN KEY (plan_id) REFERENCES orbia_kol_plan(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KOL订单表';
+
+-- 广告订单表
+DROP TABLE IF EXISTS orbia_ad_order;
+CREATE TABLE orbia_ad_order (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
+    order_id VARCHAR(64) NOT NULL UNIQUE COMMENT '订单ID（业务唯一ID，格式：ADORD_{timestamp}_{random}）',
+    user_id BIGINT NOT NULL COMMENT '下单用户ID',
+    team_id BIGINT COMMENT '下单团队ID（如果是团队下单）',
+    title VARCHAR(200) NOT NULL COMMENT '广告订单标题',
+    description TEXT NOT NULL COMMENT '广告订单描述',
+    budget DECIMAL(12, 2) NOT NULL COMMENT '广告预算（美元）',
+    ad_type VARCHAR(50) NOT NULL COMMENT '广告类型：banner, video, social_media, influencer',
+    target_audience VARCHAR(500) NOT NULL COMMENT '目标受众',
+    start_date DATE NOT NULL COMMENT '开始日期',
+    end_date DATE NOT NULL COMMENT '结束日期',
+    status ENUM('pending', 'approved', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'pending' COMMENT '订单状态：pending-待审核，approved-已批准，in_progress-进行中，completed-已完成，cancelled-已取消',
+    reject_reason TEXT COMMENT '拒绝/取消原因',
+    approved_at TIMESTAMP NULL COMMENT '批准时间',
+    completed_at TIMESTAMP NULL COMMENT '完成时间',
+    cancelled_at TIMESTAMP NULL COMMENT '取消时间',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_order_id (order_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_team_id (team_id),
+    INDEX idx_status (status),
+    INDEX idx_ad_type (ad_type),
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_title (title),
+    INDEX idx_start_date (start_date),
+    INDEX idx_end_date (end_date),
+    FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES orbia_team(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='广告订单表';
 
 -- 用户钱包表
 CREATE TABLE IF NOT EXISTS orbia_wallet (

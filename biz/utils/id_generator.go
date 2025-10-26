@@ -109,13 +109,27 @@ func (g *IDGenerator) NextIDString() (string, error) {
 	return fmt.Sprintf("%d", id), nil
 }
 
-// GenerateOrderID 生成订单ID（带前缀）
+// GenerateOrderID 生成订单ID（带前缀）- 已废弃，请使用 GenerateKolOrderID 或 GenerateAdOrderID
 func GenerateOrderID() (string, error) {
 	id, err := GetDefaultGenerator().NextID()
 	if err != nil {
 		return "", err
 	}
 	return fmt.Sprintf("ORD%d", id), nil
+}
+
+// GenerateKolOrderID 生成KOL订单ID（格式：KORD_{timestamp}_{random}）
+func GenerateKolOrderID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("KORD_%d_%d", timestamp, id%100000)
+}
+
+// GenerateAdOrderID 生成广告订单ID（格式：ADORD_{timestamp}_{random}）
+func GenerateAdOrderID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("ADORD_%d_%d", timestamp, id%100000)
 }
 
 // GenerateID 生成通用ID字符串

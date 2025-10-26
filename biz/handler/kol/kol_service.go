@@ -709,7 +709,7 @@ func CreateKolVideo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层创建视频
-	videoID, err := kolSvc.CreateKolVideo(userID, req.EmbedCode)
+	videoID, err := kolSvc.CreateKolVideo(userID, req.EmbedCode, req.CoverURL)
 	if err != nil {
 		hlog.Errorf("CreateKolVideo service error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.CreateKolVideoResp{
@@ -763,7 +763,7 @@ func UpdateKolVideo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层更新视频
-	err = kolSvc.UpdateKolVideo(userID, req.VideoID, req.EmbedCode)
+	err = kolSvc.UpdateKolVideo(userID, req.VideoID, req.EmbedCode, req.CoverURL)
 	if err != nil {
 		hlog.Errorf("UpdateKolVideo service error: %v", err)
 		c.JSON(http.StatusBadRequest, &kolModel.UpdateKolVideoResp{
@@ -905,13 +905,23 @@ func GetKolVideos(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	// 辅助函数：将指针字符串转换为字符串
+	ptrToStr := func(s *string) string {
+		if s != nil {
+			return *s
+		}
+		return ""
+	}
+
 	// 转换为响应格式
 	// 确保即使没有数据也返回空数组而不是 null
 	videoList := make([]*kolModel.KolVideo, 0, len(videos))
 	for _, video := range videos {
+		coverURL := ptrToStr(video.CoverURL)
 		videoInfo := &kolModel.KolVideo{
 			ID:        video.ID,
 			EmbedCode: video.EmbedCode,
+			CoverURL:  &coverURL,
 			CreatedAt: video.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt: video.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}

@@ -8,25 +8,31 @@ import (
 
 // KolOrder KOL订单模型
 type KolOrder struct {
-	ID              int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	OrderID         string         `gorm:"uniqueIndex;column:order_id;size:64;not null" json:"order_id"`
-	UserID          int64          `gorm:"column:user_id;not null" json:"user_id"`
-	TeamID          *int64         `gorm:"column:team_id" json:"team_id"`
-	KolID           int64          `gorm:"column:kol_id;not null" json:"kol_id"`
-	PlanID          int64          `gorm:"column:plan_id;not null" json:"plan_id"`
-	PlanTitle       string         `gorm:"column:plan_title;size:200;not null" json:"plan_title"`
-	PlanDescription *string        `gorm:"column:plan_description;type:text" json:"plan_description"`
-	PlanPrice       float64        `gorm:"column:plan_price;type:decimal(10,2);not null" json:"plan_price"`
-	PlanType        string         `gorm:"column:plan_type;size:20;not null" json:"plan_type"`
-	Description     string         `gorm:"column:description;type:text;not null" json:"description"`
-	Status          string         `gorm:"column:status;type:enum('pending','confirmed','in_progress','completed','cancelled','refunded');default:pending;not null" json:"status"`
-	RejectReason    *string        `gorm:"column:reject_reason;type:text" json:"reject_reason"`
-	ConfirmedAt     *time.Time     `gorm:"column:confirmed_at" json:"confirmed_at"`
-	CompletedAt     *time.Time     `gorm:"column:completed_at" json:"completed_at"`
-	CancelledAt     *time.Time     `gorm:"column:cancelled_at" json:"cancelled_at"`
-	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
-	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
-	DeletedAt       gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`
+	ID                     int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	OrderID                string         `gorm:"uniqueIndex;column:order_id;size:64;not null" json:"order_id"`
+	UserID                 int64          `gorm:"column:user_id;not null" json:"user_id"`
+	TeamID                 *int64         `gorm:"column:team_id" json:"team_id"`
+	KolID                  int64          `gorm:"column:kol_id;not null" json:"kol_id"`
+	PlanID                 int64          `gorm:"column:plan_id;not null" json:"plan_id"`
+	PlanTitle              string         `gorm:"column:plan_title;size:200;not null" json:"plan_title"`
+	PlanDescription        *string        `gorm:"column:plan_description;type:text" json:"plan_description"`
+	PlanPrice              float64        `gorm:"column:plan_price;type:decimal(10,2);not null" json:"plan_price"`
+	PlanType               string         `gorm:"column:plan_type;size:20;not null" json:"plan_type"`
+	Title                  string         `gorm:"column:title;size:200;not null" json:"title"`
+	RequirementDescription string         `gorm:"column:requirement_description;type:text;not null" json:"requirement_description"`
+	VideoType              string         `gorm:"column:video_type;size:100;not null" json:"video_type"`
+	VideoDuration          int32          `gorm:"column:video_duration;not null" json:"video_duration"`
+	TargetAudience         string         `gorm:"column:target_audience;size:500;not null" json:"target_audience"`
+	ExpectedDeliveryDate   string         `gorm:"column:expected_delivery_date;type:date;not null" json:"expected_delivery_date"`
+	AdditionalRequirements *string        `gorm:"column:additional_requirements;type:text" json:"additional_requirements"`
+	Status                 string         `gorm:"column:status;type:enum('pending','confirmed','in_progress','completed','cancelled','refunded');default:pending;not null" json:"status"`
+	RejectReason           *string        `gorm:"column:reject_reason;type:text" json:"reject_reason"`
+	ConfirmedAt            *time.Time     `gorm:"column:confirmed_at" json:"confirmed_at"`
+	CompletedAt            *time.Time     `gorm:"column:completed_at" json:"completed_at"`
+	CancelledAt            *time.Time     `gorm:"column:cancelled_at" json:"cancelled_at"`
+	CreatedAt              time.Time      `gorm:"column:created_at;autoCreateTime" json:"created_at"`
+	UpdatedAt              time.Time      `gorm:"column:updated_at;autoUpdateTime" json:"updated_at"`
+	DeletedAt              gorm.DeletedAt `gorm:"index;column:deleted_at" json:"-"`
 }
 
 // TableName 指定表名
@@ -39,6 +45,8 @@ type OrderWithKolInfo struct {
 	KolOrder
 	KolDisplayName *string `json:"kol_display_name"`
 	KolAvatarURL   *string `json:"kol_avatar_url"`
+	UserNickname   *string `json:"user_nickname"`
+	TeamName       *string `json:"team_name"`
 }
 
 // OrderRepository 订单仓储接口
@@ -52,11 +60,11 @@ type OrderRepository interface {
 	// 根据订单ID获取订单（包含KOL信息）
 	GetOrderWithKolInfo(orderID string) (*OrderWithKolInfo, error)
 
-	// 获取用户的订单列表
-	GetUserOrders(userID int64, status *string, offset, limit int) ([]*OrderWithKolInfo, int64, error)
+	// 获取用户的订单列表（支持模糊搜索）
+	GetUserOrders(userID int64, status *string, keyword *string, kolID *int64, offset, limit int) ([]*OrderWithKolInfo, int64, error)
 
-	// 获取KOL收到的订单列表
-	GetKolOrders(kolID int64, status *string, offset, limit int) ([]*OrderWithKolInfo, int64, error)
+	// 获取KOL收到的订单列表（支持模糊搜索）
+	GetKolOrders(kolID int64, status *string, keyword *string, offset, limit int) ([]*OrderWithKolInfo, int64, error)
 
 	// 获取团队的订单列表
 	GetTeamOrders(teamID int64, status *string, offset, limit int) ([]*OrderWithKolInfo, int64, error)
@@ -103,8 +111,10 @@ func (r *orderRepository) GetOrderByID(orderID string) (*KolOrder, error) {
 func (r *orderRepository) GetOrderWithKolInfo(orderID string) (*OrderWithKolInfo, error) {
 	var result OrderWithKolInfo
 	err := r.db.Table("orbia_kol_order").
-		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url").
+		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url, orbia_user.nickname as user_nickname, orbia_team.name as team_name").
 		Joins("LEFT JOIN orbia_kol ON orbia_kol_order.kol_id = orbia_kol.id").
+		Joins("LEFT JOIN orbia_user ON orbia_kol_order.user_id = orbia_user.id").
+		Joins("LEFT JOIN orbia_team ON orbia_kol_order.team_id = orbia_team.id").
 		Where("orbia_kol_order.order_id = ?", orderID).
 		First(&result).Error
 	if err != nil {
@@ -113,18 +123,30 @@ func (r *orderRepository) GetOrderWithKolInfo(orderID string) (*OrderWithKolInfo
 	return &result, nil
 }
 
-// GetUserOrders 获取用户的订单列表
-func (r *orderRepository) GetUserOrders(userID int64, status *string, offset, limit int) ([]*OrderWithKolInfo, int64, error) {
+// GetUserOrders 获取用户的订单列表（支持模糊搜索）
+func (r *orderRepository) GetUserOrders(userID int64, status *string, keyword *string, kolID *int64, offset, limit int) ([]*OrderWithKolInfo, int64, error) {
 	var orders []*OrderWithKolInfo
 	var total int64
 
 	query := r.db.Table("orbia_kol_order").
-		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url").
+		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url, orbia_user.nickname as user_nickname, orbia_team.name as team_name").
 		Joins("LEFT JOIN orbia_kol ON orbia_kol_order.kol_id = orbia_kol.id").
+		Joins("LEFT JOIN orbia_user ON orbia_kol_order.user_id = orbia_user.id").
+		Joins("LEFT JOIN orbia_team ON orbia_kol_order.team_id = orbia_team.id").
 		Where("orbia_kol_order.user_id = ?", userID)
 
 	if status != nil && *status != "" {
 		query = query.Where("orbia_kol_order.status = ?", *status)
+	}
+
+	if kolID != nil && *kolID > 0 {
+		query = query.Where("orbia_kol_order.kol_id = ?", *kolID)
+	}
+
+	if keyword != nil && *keyword != "" {
+		likeKeyword := "%" + *keyword + "%"
+		query = query.Where("orbia_kol_order.title LIKE ? OR orbia_kol_order.order_id LIKE ? OR orbia_kol.display_name LIKE ?",
+			likeKeyword, likeKeyword, likeKeyword)
 	}
 
 	// 获取总数
@@ -143,18 +165,26 @@ func (r *orderRepository) GetUserOrders(userID int64, status *string, offset, li
 	return orders, total, nil
 }
 
-// GetKolOrders 获取KOL收到的订单列表
-func (r *orderRepository) GetKolOrders(kolID int64, status *string, offset, limit int) ([]*OrderWithKolInfo, int64, error) {
+// GetKolOrders 获取KOL收到的订单列表（支持模糊搜索）
+func (r *orderRepository) GetKolOrders(kolID int64, status *string, keyword *string, offset, limit int) ([]*OrderWithKolInfo, int64, error) {
 	var orders []*OrderWithKolInfo
 	var total int64
 
 	query := r.db.Table("orbia_kol_order").
-		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url").
+		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url, orbia_user.nickname as user_nickname, orbia_team.name as team_name").
 		Joins("LEFT JOIN orbia_kol ON orbia_kol_order.kol_id = orbia_kol.id").
+		Joins("LEFT JOIN orbia_user ON orbia_kol_order.user_id = orbia_user.id").
+		Joins("LEFT JOIN orbia_team ON orbia_kol_order.team_id = orbia_team.id").
 		Where("orbia_kol_order.kol_id = ?", kolID)
 
 	if status != nil && *status != "" {
 		query = query.Where("orbia_kol_order.status = ?", *status)
+	}
+
+	if keyword != nil && *keyword != "" {
+		likeKeyword := "%" + *keyword + "%"
+		query = query.Where("orbia_kol_order.title LIKE ? OR orbia_kol_order.order_id LIKE ? OR orbia_user.nickname LIKE ?",
+			likeKeyword, likeKeyword, likeKeyword)
 	}
 
 	// 获取总数
@@ -179,8 +209,10 @@ func (r *orderRepository) GetTeamOrders(teamID int64, status *string, offset, li
 	var total int64
 
 	query := r.db.Table("orbia_kol_order").
-		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url").
+		Select("orbia_kol_order.*, orbia_kol.display_name as kol_display_name, orbia_kol.avatar_url as kol_avatar_url, orbia_user.nickname as user_nickname, orbia_team.name as team_name").
 		Joins("LEFT JOIN orbia_kol ON orbia_kol_order.kol_id = orbia_kol.id").
+		Joins("LEFT JOIN orbia_user ON orbia_kol_order.user_id = orbia_user.id").
+		Joins("LEFT JOIN orbia_team ON orbia_kol_order.team_id = orbia_team.id").
 		Where("orbia_kol_order.team_id = ?", teamID)
 
 	if status != nil && *status != "" {

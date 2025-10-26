@@ -24,7 +24,7 @@ func Register(r *server.Hertz) {
 			{
 				_upload := _v1.Group("/upload", _uploadMw()...)
 				_upload.POST("/token", append(_generateuploadtokenMw(), upload.GenerateUploadToken)...)
-				_upload.POST("/validate", append(_validateimageurlMw(), upload.ValidateImageURL)...)
+				_upload.POST("/validate", append(_validatefileurlMw(), upload.ValidateFileURL)...)
 			}
 		}
 	}

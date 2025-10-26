@@ -7,9 +7,9 @@ import (
 
 	"orbia_api/biz/consts"
 	"orbia_api/biz/dal/mysql"
+	"orbia_api/biz/model/admin"
+	"orbia_api/biz/model/common"
 	"orbia_api/biz/utils"
-	"orbia_api/hertz_gen/admin"
-	"orbia_api/hertz_gen/common"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )

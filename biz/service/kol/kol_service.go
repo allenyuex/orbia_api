@@ -28,8 +28,8 @@ type KolService interface {
 	GetKolPlans(kolID *int64, userID *int64) ([]*mysql.KolPlan, error)
 
 	// KOL视频管理
-	CreateKolVideo(userID int64, embedCode string) (int64, error)
-	UpdateKolVideo(userID, videoID int64, embedCode string) error
+	CreateKolVideo(userID int64, embedCode string, coverURL *string) (int64, error)
+	UpdateKolVideo(userID, videoID int64, embedCode string, coverURL *string) error
 	DeleteKolVideo(userID, videoID int64) error
 	GetKolVideos(kolID *int64, userID *int64, page, pageSize int) ([]*mysql.KolVideo, int64, error)
 }
@@ -498,7 +498,7 @@ func (s *kolService) GetKolPlans(kolID *int64, userID *int64) ([]*mysql.KolPlan,
 }
 
 // CreateKolVideo 创建KOL视频
-func (s *kolService) CreateKolVideo(userID int64, embedCode string) (int64, error) {
+func (s *kolService) CreateKolVideo(userID int64, embedCode string, coverURL *string) (int64, error) {
 	// 获取KOL信息
 	kol, err := s.kolRepo.GetKolByUserID(userID)
 	if err != nil {
@@ -512,6 +512,7 @@ func (s *kolService) CreateKolVideo(userID int64, embedCode string) (int64, erro
 	video := &mysql.KolVideo{
 		KolID:     kol.ID,
 		EmbedCode: embedCode,
+		CoverURL:  coverURL,
 	}
 
 	if err := s.kolRepo.CreateKolVideo(video); err != nil {
@@ -522,7 +523,7 @@ func (s *kolService) CreateKolVideo(userID int64, embedCode string) (int64, erro
 }
 
 // UpdateKolVideo 更新KOL视频
-func (s *kolService) UpdateKolVideo(userID, videoID int64, embedCode string) error {
+func (s *kolService) UpdateKolVideo(userID, videoID int64, embedCode string, coverURL *string) error {
 	// 获取KOL信息
 	kol, err := s.kolRepo.GetKolByUserID(userID)
 	if err != nil {
@@ -548,6 +549,9 @@ func (s *kolService) UpdateKolVideo(userID, videoID int64, embedCode string) err
 
 	// 更新视频信息
 	video.EmbedCode = embedCode
+	if coverURL != nil {
+		video.CoverURL = coverURL
+	}
 
 	if err := s.kolRepo.UpdateKolVideo(video); err != nil {
 		return fmt.Errorf("failed to update video: %v", err)

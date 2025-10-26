@@ -249,7 +249,7 @@ func SwitchCurrentTeam(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get(mw.AuthUserIDKey)
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, &user.SwitchCurrentTeamResp{
 			BaseResp: &common.BaseResp{
@@ -261,7 +261,7 @@ func SwitchCurrentTeam(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用服务层切换团队
-	switchedTeam, err := userSvc.SwitchCurrentTeam(userID.(int64), req.TeamID)
+	switchedTeam, err := userSvc.SwitchCurrentTeam(userID, req.TeamID)
 	if err != nil {
 		hlog.Errorf("SwitchCurrentTeam service error: %v", err)
 		c.JSON(http.StatusBadRequest, &user.SwitchCurrentTeamResp{

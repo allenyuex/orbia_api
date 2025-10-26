@@ -51,5 +51,61 @@ r2:
   bucket: "orbia"
   public_url: "https://pub-7fecd33efbfc4271b901992eefd6a9ba.r2.dev"
   upload_token_expire_minutes: 30  # 上传token过期时间（分钟）
-  max_file_size: 10485760          # 最大文件大小（10MB）
+  max_file_size: 10485760          # 默认最大文件大小（10MB）
+  
+  # 按文件扩展名配置
+  allowed_extensions:
+    # 图片类型
+    .jpg:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .jpeg:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .png:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .gif:
+      max_size: 5242880   # 5MB
+      default_path: "images"
+    .webp:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    
+    # 文档类型
+    .pdf:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .doc:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .docx:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .xls:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .xlsx:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .ppt:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .pptx:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .txt:
+      max_size: 1048576   # 1MB
+      default_path: "documents"
+    
+    # 视频类型
+    .mp4:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
+    .mov:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
+    .avi:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
 
