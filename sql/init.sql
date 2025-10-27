@@ -568,3 +568,56 @@ CREATE TABLE IF NOT EXISTS orbia_campaign_attachment (
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (campaign_id) REFERENCES orbia_campaign(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Campaign附件表';
+
+-- 优秀广告案例表
+CREATE TABLE IF NOT EXISTS orbia_excellent_case (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '案例ID',
+    video_url VARCHAR(1000) NOT NULL COMMENT '视频URL',
+    cover_url VARCHAR(1000) NOT NULL COMMENT '封面URL',
+    title VARCHAR(200) NOT NULL COMMENT '案例标题',
+    description TEXT COMMENT '案例描述',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序序号（升序，数字越小越靠前）',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    INDEX idx_sort_order (sort_order),
+    INDEX idx_status (status),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='优秀广告案例表';
+
+-- 内容趋势表
+CREATE TABLE IF NOT EXISTS orbia_content_trend (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '趋势ID',
+    ranking INT NOT NULL COMMENT '排名（1,2,3,4,5...）',
+    hot_keyword VARCHAR(200) NOT NULL COMMENT '热点词（如：defi, web3等）',
+    value_level ENUM('low', 'medium', 'high') NOT NULL COMMENT '价值等级：low-低，medium-中，high-高',
+    heat BIGINT NOT NULL DEFAULT 0 COMMENT '热度值',
+    growth_rate DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '增长比例（百分比，如：15.5表示15.5%）',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-启用，0-禁用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
+    UNIQUE KEY uk_ranking (ranking, deleted_at),
+    INDEX idx_status (status),
+    INDEX idx_deleted_at (deleted_at),
+    INDEX idx_created_at (created_at),
+    INDEX idx_ranking (ranking)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='内容趋势表';
+
+-- 平台数据统计表
+CREATE TABLE IF NOT EXISTS orbia_platform_stats (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '统计ID（此表只有一行数据）',
+    active_kols BIGINT NOT NULL DEFAULT 0 COMMENT '活跃的KOLs数量',
+    total_coverage BIGINT NOT NULL DEFAULT 0 COMMENT '总覆盖用户数',
+    total_ad_impressions BIGINT NOT NULL DEFAULT 0 COMMENT '累计广告曝光次数',
+    total_transaction_amount DECIMAL(15, 2) NOT NULL DEFAULT 0.00 COMMENT '平台总交易额（美元）',
+    average_roi DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '平均ROI（百分比，如：15.5表示15.5%）',
+    average_cpm DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '平均CPM（Cost Per Mille，每千次展示成本）',
+    web3_brand_count BIGINT NOT NULL DEFAULT 0 COMMENT '合作Web3品牌数',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_created_at (created_at),
+    INDEX idx_updated_at (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='平台数据统计表';

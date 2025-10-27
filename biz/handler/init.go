@@ -7,6 +7,7 @@ import (
 	"orbia_api/biz/handler/auth"
 	"orbia_api/biz/handler/campaign"
 	"orbia_api/biz/handler/conversation"
+	"orbia_api/biz/handler/dashboard"
 	"orbia_api/biz/handler/dictionary"
 	"orbia_api/biz/handler/kol"
 	"orbia_api/biz/handler/payment_setting"
@@ -61,6 +62,9 @@ func InitAllServices() {
 
 	campaign.InitCampaignService()
 	log.Println("  ✅ Campaign service initialized")
+
+	dashboard.InitDashboardService()
+	log.Println("  ✅ Dashboard service initialized")
 
 	log.Println("✅ All handler services initialized successfully")
 }

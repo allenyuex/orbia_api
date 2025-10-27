@@ -114,8 +114,8 @@ func (r *dictionaryRepository) GetDictionaries(keyword string, status *int32, of
 		return nil, 0, err
 	}
 
-	// 获取分页数据
-	err := query.Order("created_at DESC").
+	// 获取分页数据，添加id作为次要排序条件确保排序稳定
+	err := query.Order("created_at DESC, id DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&dictionaries).Error
