@@ -189,9 +189,9 @@ func (s *authService) SendVerificationCode(email, codeType string) error {
 	}
 
 	// 发送验证码邮件
-	if err := utils.SendVerificationEmail(email, code, cfg.ExpireMinutes); err != nil {
-		return fmt.Errorf("failed to send verification email: %v", err)
-	}
+	//if err := utils.SendVerificationEmail(email, code, cfg.ExpireMinutes); err != nil {
+	//	return fmt.Errorf("failed to send verification email: %v", err)
+	//}
 
 	return nil
 }
