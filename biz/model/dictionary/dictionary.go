@@ -5902,209 +5902,6 @@ func (p *GetDictionaryItemsResp) String() string {
 
 }
 
-// 获取字典树形结构请求
-type GetDictionaryTreeReq struct {
-	// 字典编码
-	DictionaryCode string `thrift:"dictionary_code,1" json:"dictionary_code" query:"dictionary_code"`
-	// 是否只返回启用的：1-是，0-否
-	OnlyEnabled int32 `thrift:"only_enabled,2,optional" json:"only_enabled,omitempty" query:"only_enabled"`
-}
-
-func NewGetDictionaryTreeReq() *GetDictionaryTreeReq {
-	return &GetDictionaryTreeReq{
-		OnlyEnabled: 1,
-	}
-}
-
-func (p *GetDictionaryTreeReq) InitDefault() {
-	p.OnlyEnabled = 1
-}
-
-func (p *GetDictionaryTreeReq) GetDictionaryCode() (v string) {
-	return p.DictionaryCode
-}
-
-var GetDictionaryTreeReq_OnlyEnabled_DEFAULT int32 = 1
-
-func (p *GetDictionaryTreeReq) GetOnlyEnabled() (v int32) {
-	if !p.IsSetOnlyEnabled() {
-		return GetDictionaryTreeReq_OnlyEnabled_DEFAULT
-	}
-	return p.OnlyEnabled
-}
-
-var fieldIDToName_GetDictionaryTreeReq = map[int16]string{
-	1: "dictionary_code",
-	2: "only_enabled",
-}
-
-func (p *GetDictionaryTreeReq) IsSetOnlyEnabled() bool {
-	return p.OnlyEnabled != GetDictionaryTreeReq_OnlyEnabled_DEFAULT
-}
-
-func (p *GetDictionaryTreeReq) Read(iprot thrift.TProtocol) (err error) {
-
-	var fieldTypeId thrift.TType
-	var fieldId int16
-
-	if _, err = iprot.ReadStructBegin(); err != nil {
-		goto ReadStructBeginError
-	}
-
-	for {
-		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
-		if err != nil {
-			goto ReadFieldBeginError
-		}
-		if fieldTypeId == thrift.STOP {
-			break
-		}
-
-		switch fieldId {
-		case 1:
-			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField1(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		case 2:
-			if fieldTypeId == thrift.I32 {
-				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		default:
-			if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
-		}
-		if err = iprot.ReadFieldEnd(); err != nil {
-			goto ReadFieldEndError
-		}
-	}
-	if err = iprot.ReadStructEnd(); err != nil {
-		goto ReadStructEndError
-	}
-
-	return nil
-ReadStructBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
-ReadFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
-ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetDictionaryTreeReq[fieldId]), err)
-SkipFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
-
-ReadFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
-ReadStructEndError:
-	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-}
-
-func (p *GetDictionaryTreeReq) ReadField1(iprot thrift.TProtocol) error {
-
-	var _field string
-	if v, err := iprot.ReadString(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.DictionaryCode = _field
-	return nil
-}
-func (p *GetDictionaryTreeReq) ReadField2(iprot thrift.TProtocol) error {
-
-	var _field int32
-	if v, err := iprot.ReadI32(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.OnlyEnabled = _field
-	return nil
-}
-
-func (p *GetDictionaryTreeReq) Write(oprot thrift.TProtocol) (err error) {
-	var fieldId int16
-	if err = oprot.WriteStructBegin("GetDictionaryTreeReq"); err != nil {
-		goto WriteStructBeginError
-	}
-	if p != nil {
-		if err = p.writeField1(oprot); err != nil {
-			fieldId = 1
-			goto WriteFieldError
-		}
-		if err = p.writeField2(oprot); err != nil {
-			fieldId = 2
-			goto WriteFieldError
-		}
-	}
-	if err = oprot.WriteFieldStop(); err != nil {
-		goto WriteFieldStopError
-	}
-	if err = oprot.WriteStructEnd(); err != nil {
-		goto WriteStructEndError
-	}
-	return nil
-WriteStructBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
-WriteFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
-WriteFieldStopError:
-	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
-WriteStructEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
-}
-
-func (p *GetDictionaryTreeReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("dictionary_code", thrift.STRING, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteString(p.DictionaryCode); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
-}
-
-func (p *GetDictionaryTreeReq) writeField2(oprot thrift.TProtocol) (err error) {
-	if p.IsSetOnlyEnabled() {
-		if err = oprot.WriteFieldBegin("only_enabled", thrift.I32, 2); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := oprot.WriteI32(p.OnlyEnabled); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *GetDictionaryTreeReq) String() string {
-	if p == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("GetDictionaryTreeReq(%+v)", *p)
-
-}
-
 // 字典项树形节点
 type DictionaryItemTreeNode struct {
 	ID          int64   `thrift:"id,1" form:"id" json:"id" query:"id"`
@@ -6657,42 +6454,44 @@ func (p *DictionaryItemTreeNode) String() string {
 
 }
 
-// 获取字典树形结构响应
-type GetDictionaryTreeResp struct {
-	BaseResp *common.BaseResp          `thrift:"base_resp,1" form:"base_resp" json:"base_resp" query:"base_resp"`
-	Tree     []*DictionaryItemTreeNode `thrift:"tree,2,default,list<DictionaryItemTreeNode>" form:"tree" json:"tree" query:"tree"`
+// 字典及其字典项树形结构
+type DictionaryWithTree struct {
+	// 字典基本信息
+	Dictionary *DictionaryInfo `thrift:"dictionary,1" form:"dictionary" json:"dictionary" query:"dictionary"`
+	// 字典项树形结构
+	Tree []*DictionaryItemTreeNode `thrift:"tree,2,default,list<DictionaryItemTreeNode>" form:"tree" json:"tree" query:"tree"`
 }
 
-func NewGetDictionaryTreeResp() *GetDictionaryTreeResp {
-	return &GetDictionaryTreeResp{}
+func NewDictionaryWithTree() *DictionaryWithTree {
+	return &DictionaryWithTree{}
 }
 
-func (p *GetDictionaryTreeResp) InitDefault() {
+func (p *DictionaryWithTree) InitDefault() {
 }
 
-var GetDictionaryTreeResp_BaseResp_DEFAULT *common.BaseResp
+var DictionaryWithTree_Dictionary_DEFAULT *DictionaryInfo
 
-func (p *GetDictionaryTreeResp) GetBaseResp() (v *common.BaseResp) {
-	if !p.IsSetBaseResp() {
-		return GetDictionaryTreeResp_BaseResp_DEFAULT
+func (p *DictionaryWithTree) GetDictionary() (v *DictionaryInfo) {
+	if !p.IsSetDictionary() {
+		return DictionaryWithTree_Dictionary_DEFAULT
 	}
-	return p.BaseResp
+	return p.Dictionary
 }
 
-func (p *GetDictionaryTreeResp) GetTree() (v []*DictionaryItemTreeNode) {
+func (p *DictionaryWithTree) GetTree() (v []*DictionaryItemTreeNode) {
 	return p.Tree
 }
 
-var fieldIDToName_GetDictionaryTreeResp = map[int16]string{
-	1: "base_resp",
+var fieldIDToName_DictionaryWithTree = map[int16]string{
+	1: "dictionary",
 	2: "tree",
 }
 
-func (p *GetDictionaryTreeResp) IsSetBaseResp() bool {
-	return p.BaseResp != nil
+func (p *DictionaryWithTree) IsSetDictionary() bool {
+	return p.Dictionary != nil
 }
 
-func (p *GetDictionaryTreeResp) Read(iprot thrift.TProtocol) (err error) {
+func (p *DictionaryWithTree) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -6746,7 +6545,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetDictionaryTreeResp[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_DictionaryWithTree[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -6756,15 +6555,15 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *GetDictionaryTreeResp) ReadField1(iprot thrift.TProtocol) error {
-	_field := common.NewBaseResp()
+func (p *DictionaryWithTree) ReadField1(iprot thrift.TProtocol) error {
+	_field := NewDictionaryInfo()
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
-	p.BaseResp = _field
+	p.Dictionary = _field
 	return nil
 }
-func (p *GetDictionaryTreeResp) ReadField2(iprot thrift.TProtocol) error {
+func (p *DictionaryWithTree) ReadField2(iprot thrift.TProtocol) error {
 	_, size, err := iprot.ReadListBegin()
 	if err != nil {
 		return err
@@ -6788,9 +6587,9 @@ func (p *GetDictionaryTreeResp) ReadField2(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *GetDictionaryTreeResp) Write(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryWithTree) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("GetDictionaryTreeResp"); err != nil {
+	if err = oprot.WriteStructBegin("DictionaryWithTree"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -6820,11 +6619,11 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *GetDictionaryTreeResp) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
+func (p *DictionaryWithTree) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("dictionary", thrift.STRUCT, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := p.BaseResp.Write(oprot); err != nil {
+	if err := p.Dictionary.Write(oprot); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -6837,7 +6636,7 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *GetDictionaryTreeResp) writeField2(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryWithTree) writeField2(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("tree", thrift.LIST, 2); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -6862,11 +6661,494 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
-func (p *GetDictionaryTreeResp) String() string {
+func (p *DictionaryWithTree) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("GetDictionaryTreeResp(%+v)", *p)
+	return fmt.Sprintf("DictionaryWithTree(%+v)", *p)
+
+}
+
+// 批量获取字典和字典项请求（用于前端冷启动）
+type GetAllDictionariesWithItemsReq struct {
+	// 页码，默认1
+	Page int32 `thrift:"page,1,optional" form:"page" json:"page,omitempty"`
+	// 每页数量，默认20，最大20
+	PageSize int32 `thrift:"page_size,2,optional" form:"page_size" json:"page_size,omitempty"`
+}
+
+func NewGetAllDictionariesWithItemsReq() *GetAllDictionariesWithItemsReq {
+	return &GetAllDictionariesWithItemsReq{
+		Page:     1,
+		PageSize: 20,
+	}
+}
+
+func (p *GetAllDictionariesWithItemsReq) InitDefault() {
+	p.Page = 1
+	p.PageSize = 20
+}
+
+var GetAllDictionariesWithItemsReq_Page_DEFAULT int32 = 1
+
+func (p *GetAllDictionariesWithItemsReq) GetPage() (v int32) {
+	if !p.IsSetPage() {
+		return GetAllDictionariesWithItemsReq_Page_DEFAULT
+	}
+	return p.Page
+}
+
+var GetAllDictionariesWithItemsReq_PageSize_DEFAULT int32 = 20
+
+func (p *GetAllDictionariesWithItemsReq) GetPageSize() (v int32) {
+	if !p.IsSetPageSize() {
+		return GetAllDictionariesWithItemsReq_PageSize_DEFAULT
+	}
+	return p.PageSize
+}
+
+var fieldIDToName_GetAllDictionariesWithItemsReq = map[int16]string{
+	1: "page",
+	2: "page_size",
+}
+
+func (p *GetAllDictionariesWithItemsReq) IsSetPage() bool {
+	return p.Page != GetAllDictionariesWithItemsReq_Page_DEFAULT
+}
+
+func (p *GetAllDictionariesWithItemsReq) IsSetPageSize() bool {
+	return p.PageSize != GetAllDictionariesWithItemsReq_PageSize_DEFAULT
+}
+
+func (p *GetAllDictionariesWithItemsReq) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetAllDictionariesWithItemsReq[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsReq) ReadField1(iprot thrift.TProtocol) error {
+
+	var _field int32
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.Page = _field
+	return nil
+}
+func (p *GetAllDictionariesWithItemsReq) ReadField2(iprot thrift.TProtocol) error {
+
+	var _field int32
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.PageSize = _field
+	return nil
+}
+
+func (p *GetAllDictionariesWithItemsReq) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetAllDictionariesWithItemsReq"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsReq) writeField1(oprot thrift.TProtocol) (err error) {
+	if p.IsSetPage() {
+		if err = oprot.WriteFieldBegin("page", thrift.I32, 1); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteI32(p.Page); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsReq) writeField2(oprot thrift.TProtocol) (err error) {
+	if p.IsSetPageSize() {
+		if err = oprot.WriteFieldBegin("page_size", thrift.I32, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteI32(p.PageSize); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("GetAllDictionariesWithItemsReq(%+v)", *p)
+
+}
+
+// 批量获取字典和字典项响应
+type GetAllDictionariesWithItemsResp struct {
+	BaseResp *common.BaseResp `thrift:"base_resp,1" form:"base_resp" json:"base_resp" query:"base_resp"`
+	// 字典列表（包含树形字典项）
+	Dictionaries []*DictionaryWithTree `thrift:"dictionaries,2,default,list<DictionaryWithTree>" form:"dictionaries" json:"dictionaries" query:"dictionaries"`
+	// 分页信息
+	PageInfo *common.PageResp `thrift:"page_info,3" form:"page_info" json:"page_info" query:"page_info"`
+}
+
+func NewGetAllDictionariesWithItemsResp() *GetAllDictionariesWithItemsResp {
+	return &GetAllDictionariesWithItemsResp{}
+}
+
+func (p *GetAllDictionariesWithItemsResp) InitDefault() {
+}
+
+var GetAllDictionariesWithItemsResp_BaseResp_DEFAULT *common.BaseResp
+
+func (p *GetAllDictionariesWithItemsResp) GetBaseResp() (v *common.BaseResp) {
+	if !p.IsSetBaseResp() {
+		return GetAllDictionariesWithItemsResp_BaseResp_DEFAULT
+	}
+	return p.BaseResp
+}
+
+func (p *GetAllDictionariesWithItemsResp) GetDictionaries() (v []*DictionaryWithTree) {
+	return p.Dictionaries
+}
+
+var GetAllDictionariesWithItemsResp_PageInfo_DEFAULT *common.PageResp
+
+func (p *GetAllDictionariesWithItemsResp) GetPageInfo() (v *common.PageResp) {
+	if !p.IsSetPageInfo() {
+		return GetAllDictionariesWithItemsResp_PageInfo_DEFAULT
+	}
+	return p.PageInfo
+}
+
+var fieldIDToName_GetAllDictionariesWithItemsResp = map[int16]string{
+	1: "base_resp",
+	2: "dictionaries",
+	3: "page_info",
+}
+
+func (p *GetAllDictionariesWithItemsResp) IsSetBaseResp() bool {
+	return p.BaseResp != nil
+}
+
+func (p *GetAllDictionariesWithItemsResp) IsSetPageInfo() bool {
+	return p.PageInfo != nil
+}
+
+func (p *GetAllDictionariesWithItemsResp) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.LIST {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetAllDictionariesWithItemsResp[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsResp) ReadField1(iprot thrift.TProtocol) error {
+	_field := common.NewBaseResp()
+	if err := _field.Read(iprot); err != nil {
+		return err
+	}
+	p.BaseResp = _field
+	return nil
+}
+func (p *GetAllDictionariesWithItemsResp) ReadField2(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return err
+	}
+	_field := make([]*DictionaryWithTree, 0, size)
+	values := make([]DictionaryWithTree, size)
+	for i := 0; i < size; i++ {
+		_elem := &values[i]
+		_elem.InitDefault()
+
+		if err := _elem.Read(iprot); err != nil {
+			return err
+		}
+
+		_field = append(_field, _elem)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return err
+	}
+	p.Dictionaries = _field
+	return nil
+}
+func (p *GetAllDictionariesWithItemsResp) ReadField3(iprot thrift.TProtocol) error {
+	_field := common.NewPageResp()
+	if err := _field.Read(iprot); err != nil {
+		return err
+	}
+	p.PageInfo = _field
+	return nil
+}
+
+func (p *GetAllDictionariesWithItemsResp) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetAllDictionariesWithItemsResp"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsResp) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.BaseResp.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsResp) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("dictionaries", thrift.LIST, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Dictionaries)); err != nil {
+		return err
+	}
+	for _, v := range p.Dictionaries {
+		if err := v.Write(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteListEnd(); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsResp) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("page_info", thrift.STRUCT, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.PageInfo.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *GetAllDictionariesWithItemsResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("GetAllDictionariesWithItemsResp(%+v)", *p)
 
 }
 
@@ -6892,8 +7174,8 @@ type DictionaryService interface {
 	DeleteDictionaryItem(ctx context.Context, req *DeleteDictionaryItemReq) (r *DeleteDictionaryItemResp, err error)
 
 	GetDictionaryItems(ctx context.Context, req *GetDictionaryItemsReq) (r *GetDictionaryItemsResp, err error)
-	// 获取字典树形结构（公开接口，所有用户可用）
-	GetDictionaryTree(ctx context.Context, req *GetDictionaryTreeReq) (r *GetDictionaryTreeResp, err error)
+	// 批量获取所有字典和字典项（公开接口，用于前端冷启动）
+	GetAllDictionariesWithItems(ctx context.Context, req *GetAllDictionariesWithItemsReq) (r *GetAllDictionariesWithItemsResp, err error)
 }
 
 type DictionaryServiceClient struct {
@@ -7012,11 +7294,11 @@ func (p *DictionaryServiceClient) GetDictionaryItems(ctx context.Context, req *G
 	}
 	return _result.GetSuccess(), nil
 }
-func (p *DictionaryServiceClient) GetDictionaryTree(ctx context.Context, req *GetDictionaryTreeReq) (r *GetDictionaryTreeResp, err error) {
-	var _args DictionaryServiceGetDictionaryTreeArgs
+func (p *DictionaryServiceClient) GetAllDictionariesWithItems(ctx context.Context, req *GetAllDictionariesWithItemsReq) (r *GetAllDictionariesWithItemsResp, err error) {
+	var _args DictionaryServiceGetAllDictionariesWithItemsArgs
 	_args.Req = req
-	var _result DictionaryServiceGetDictionaryTreeResult
-	if err = p.Client_().Call(ctx, "GetDictionaryTree", &_args, &_result); err != nil {
+	var _result DictionaryServiceGetAllDictionariesWithItemsResult
+	if err = p.Client_().Call(ctx, "GetAllDictionariesWithItems", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -7052,7 +7334,7 @@ func NewDictionaryServiceProcessor(handler DictionaryService) *DictionaryService
 	self.AddToProcessorMap("UpdateDictionaryItem", &dictionaryServiceProcessorUpdateDictionaryItem{handler: handler})
 	self.AddToProcessorMap("DeleteDictionaryItem", &dictionaryServiceProcessorDeleteDictionaryItem{handler: handler})
 	self.AddToProcessorMap("GetDictionaryItems", &dictionaryServiceProcessorGetDictionaryItems{handler: handler})
-	self.AddToProcessorMap("GetDictionaryTree", &dictionaryServiceProcessorGetDictionaryTree{handler: handler})
+	self.AddToProcessorMap("GetAllDictionariesWithItems", &dictionaryServiceProcessorGetAllDictionariesWithItems{handler: handler})
 	return self
 }
 func (p *DictionaryServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -7553,16 +7835,16 @@ func (p *dictionaryServiceProcessorGetDictionaryItems) Process(ctx context.Conte
 	return true, err
 }
 
-type dictionaryServiceProcessorGetDictionaryTree struct {
+type dictionaryServiceProcessorGetAllDictionariesWithItems struct {
 	handler DictionaryService
 }
 
-func (p *dictionaryServiceProcessorGetDictionaryTree) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := DictionaryServiceGetDictionaryTreeArgs{}
+func (p *dictionaryServiceProcessorGetAllDictionariesWithItems) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := DictionaryServiceGetAllDictionariesWithItemsArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("GetDictionaryTree", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("GetAllDictionariesWithItems", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -7571,11 +7853,11 @@ func (p *dictionaryServiceProcessorGetDictionaryTree) Process(ctx context.Contex
 
 	iprot.ReadMessageEnd()
 	var err2 error
-	result := DictionaryServiceGetDictionaryTreeResult{}
-	var retval *GetDictionaryTreeResp
-	if retval, err2 = p.handler.GetDictionaryTree(ctx, args.Req); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing GetDictionaryTree: "+err2.Error())
-		oprot.WriteMessageBegin("GetDictionaryTree", thrift.EXCEPTION, seqId)
+	result := DictionaryServiceGetAllDictionariesWithItemsResult{}
+	var retval *GetAllDictionariesWithItemsResp
+	if retval, err2 = p.handler.GetAllDictionariesWithItems(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing GetAllDictionariesWithItems: "+err2.Error())
+		oprot.WriteMessageBegin("GetAllDictionariesWithItems", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -7583,7 +7865,7 @@ func (p *dictionaryServiceProcessorGetDictionaryTree) Process(ctx context.Contex
 	} else {
 		result.Success = retval
 	}
-	if err2 = oprot.WriteMessageBegin("GetDictionaryTree", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("GetAllDictionariesWithItems", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -10541,35 +10823,35 @@ func (p *DictionaryServiceGetDictionaryItemsResult) String() string {
 
 }
 
-type DictionaryServiceGetDictionaryTreeArgs struct {
-	Req *GetDictionaryTreeReq `thrift:"req,1"`
+type DictionaryServiceGetAllDictionariesWithItemsArgs struct {
+	Req *GetAllDictionariesWithItemsReq `thrift:"req,1"`
 }
 
-func NewDictionaryServiceGetDictionaryTreeArgs() *DictionaryServiceGetDictionaryTreeArgs {
-	return &DictionaryServiceGetDictionaryTreeArgs{}
+func NewDictionaryServiceGetAllDictionariesWithItemsArgs() *DictionaryServiceGetAllDictionariesWithItemsArgs {
+	return &DictionaryServiceGetAllDictionariesWithItemsArgs{}
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) InitDefault() {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) InitDefault() {
 }
 
-var DictionaryServiceGetDictionaryTreeArgs_Req_DEFAULT *GetDictionaryTreeReq
+var DictionaryServiceGetAllDictionariesWithItemsArgs_Req_DEFAULT *GetAllDictionariesWithItemsReq
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) GetReq() (v *GetDictionaryTreeReq) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) GetReq() (v *GetAllDictionariesWithItemsReq) {
 	if !p.IsSetReq() {
-		return DictionaryServiceGetDictionaryTreeArgs_Req_DEFAULT
+		return DictionaryServiceGetAllDictionariesWithItemsArgs_Req_DEFAULT
 	}
 	return p.Req
 }
 
-var fieldIDToName_DictionaryServiceGetDictionaryTreeArgs = map[int16]string{
+var fieldIDToName_DictionaryServiceGetAllDictionariesWithItemsArgs = map[int16]string{
 	1: "req",
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) IsSetReq() bool {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) Read(iprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -10615,7 +10897,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_DictionaryServiceGetDictionaryTreeArgs[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_DictionaryServiceGetAllDictionariesWithItemsArgs[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -10625,8 +10907,8 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) ReadField1(iprot thrift.TProtocol) error {
-	_field := NewGetDictionaryTreeReq()
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) ReadField1(iprot thrift.TProtocol) error {
+	_field := NewGetAllDictionariesWithItemsReq()
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
@@ -10634,9 +10916,9 @@ func (p *DictionaryServiceGetDictionaryTreeArgs) ReadField1(iprot thrift.TProtoc
 	return nil
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) Write(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("GetDictionaryTree_args"); err != nil {
+	if err = oprot.WriteStructBegin("GetAllDictionariesWithItems_args"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -10662,7 +10944,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -10679,43 +10961,43 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeArgs) String() string {
+func (p *DictionaryServiceGetAllDictionariesWithItemsArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("DictionaryServiceGetDictionaryTreeArgs(%+v)", *p)
+	return fmt.Sprintf("DictionaryServiceGetAllDictionariesWithItemsArgs(%+v)", *p)
 
 }
 
-type DictionaryServiceGetDictionaryTreeResult struct {
-	Success *GetDictionaryTreeResp `thrift:"success,0,optional"`
+type DictionaryServiceGetAllDictionariesWithItemsResult struct {
+	Success *GetAllDictionariesWithItemsResp `thrift:"success,0,optional"`
 }
 
-func NewDictionaryServiceGetDictionaryTreeResult() *DictionaryServiceGetDictionaryTreeResult {
-	return &DictionaryServiceGetDictionaryTreeResult{}
+func NewDictionaryServiceGetAllDictionariesWithItemsResult() *DictionaryServiceGetAllDictionariesWithItemsResult {
+	return &DictionaryServiceGetAllDictionariesWithItemsResult{}
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) InitDefault() {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) InitDefault() {
 }
 
-var DictionaryServiceGetDictionaryTreeResult_Success_DEFAULT *GetDictionaryTreeResp
+var DictionaryServiceGetAllDictionariesWithItemsResult_Success_DEFAULT *GetAllDictionariesWithItemsResp
 
-func (p *DictionaryServiceGetDictionaryTreeResult) GetSuccess() (v *GetDictionaryTreeResp) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) GetSuccess() (v *GetAllDictionariesWithItemsResp) {
 	if !p.IsSetSuccess() {
-		return DictionaryServiceGetDictionaryTreeResult_Success_DEFAULT
+		return DictionaryServiceGetAllDictionariesWithItemsResult_Success_DEFAULT
 	}
 	return p.Success
 }
 
-var fieldIDToName_DictionaryServiceGetDictionaryTreeResult = map[int16]string{
+var fieldIDToName_DictionaryServiceGetAllDictionariesWithItemsResult = map[int16]string{
 	0: "success",
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) IsSetSuccess() bool {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) Read(iprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -10761,7 +11043,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_DictionaryServiceGetDictionaryTreeResult[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_DictionaryServiceGetAllDictionariesWithItemsResult[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -10771,8 +11053,8 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) ReadField0(iprot thrift.TProtocol) error {
-	_field := NewGetDictionaryTreeResp()
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) ReadField0(iprot thrift.TProtocol) error {
+	_field := NewGetAllDictionariesWithItemsResp()
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
@@ -10780,9 +11062,9 @@ func (p *DictionaryServiceGetDictionaryTreeResult) ReadField0(iprot thrift.TProt
 	return nil
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) Write(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("GetDictionaryTree_result"); err != nil {
+	if err = oprot.WriteStructBegin("GetAllDictionariesWithItems_result"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -10808,7 +11090,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			goto WriteFieldBeginError
@@ -10827,10 +11109,10 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
 }
 
-func (p *DictionaryServiceGetDictionaryTreeResult) String() string {
+func (p *DictionaryServiceGetAllDictionariesWithItemsResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("DictionaryServiceGetDictionaryTreeResult(%+v)", *p)
+	return fmt.Sprintf("DictionaryServiceGetAllDictionariesWithItemsResult(%+v)", *p)
 
 }

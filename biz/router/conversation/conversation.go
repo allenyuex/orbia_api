@@ -18,11 +18,17 @@ func Register(r *server.Hertz) {
 
 	root := r.Group("/", rootMw()...)
 	{
-		_conversation := root.Group("/conversation", _conversationMw()...)
-		_conversation.POST("/get_conversation", append(_getconversationMw(), conversation.GetConversation)...)
-		_conversation.POST("/get_conversations", append(_getconversationsMw(), conversation.GetConversations)...)
-		_conversation.POST("/get_messages", append(_getmessagesMw(), conversation.GetMessages)...)
-		_conversation.POST("/mark_read", append(_markmessagesreadMw(), conversation.MarkMessagesRead)...)
-		_conversation.POST("/send_message", append(_sendmessageMw(), conversation.SendMessage)...)
+		_api := root.Group("/api", _apiMw()...)
+		{
+			_v1 := _api.Group("/v1", _v1Mw()...)
+			{
+				_conversation := _v1.Group("/conversation", _conversationMw()...)
+				_conversation.POST("/get_conversation", append(_getconversationMw(), conversation.GetConversation)...)
+				_conversation.POST("/get_conversations", append(_getconversationsMw(), conversation.GetConversations)...)
+				_conversation.POST("/get_messages", append(_getmessagesMw(), conversation.GetMessages)...)
+				_conversation.POST("/mark_read", append(_markmessagesreadMw(), conversation.MarkMessagesRead)...)
+				_conversation.POST("/send_message", append(_sendmessageMw(), conversation.SendMessage)...)
+			}
+		}
 	}
 }

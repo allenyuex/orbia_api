@@ -9,6 +9,7 @@ import (
 
 	apiconsts "orbia_api/biz/consts"
 	kol_order "orbia_api/biz/model/kol_order"
+	"orbia_api/biz/mw"
 	kolOrderService "orbia_api/biz/service/kol_order"
 	"orbia_api/biz/utils"
 )
@@ -25,14 +26,14 @@ func CreateKolOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.CreateKolOrder(userID.(int64), &req)
+	resp, err := kolOrderService.CreateKolOrder(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -53,14 +54,14 @@ func GetKolOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.GetKolOrder(userID.(int64), &req)
+	resp, err := kolOrderService.GetKolOrder(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -81,14 +82,14 @@ func GetUserKolOrderList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.GetUserKolOrderList(userID.(int64), &req)
+	resp, err := kolOrderService.GetUserKolOrderList(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -109,14 +110,14 @@ func CancelKolOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.CancelKolOrder(userID.(int64), &req)
+	resp, err := kolOrderService.CancelKolOrder(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -137,14 +138,14 @@ func GetKolReceivedOrderList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.GetKolReceivedOrderList(userID.(int64), &req)
+	resp, err := kolOrderService.GetKolReceivedOrderList(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -165,14 +166,14 @@ func UpdateKolOrderStatus(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.UpdateKolOrderStatus(userID.(int64), &req)
+	resp, err := kolOrderService.UpdateKolOrderStatus(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -193,14 +194,14 @@ func ConfirmKolOrderPayment(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := kolOrderService.ConfirmKolOrderPayment(userID.(int64), &req)
+	resp, err := kolOrderService.ConfirmKolOrderPayment(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return

@@ -167,12 +167,6 @@ struct GetDictionaryItemsResp {
     3: common.PageResp page_info
 }
 
-// 获取字典树形结构请求
-struct GetDictionaryTreeReq {
-    1: string dictionary_code (api.query="dictionary_code") // 字典编码
-    2: optional i32 only_enabled = 1 (api.query="only_enabled") // 是否只返回启用的：1-是，0-否
-}
-
 // 字典项树形节点
 struct DictionaryItemTreeNode {
     1: i64 id
@@ -186,10 +180,23 @@ struct DictionaryItemTreeNode {
     9: list<DictionaryItemTreeNode> children // 子节点
 }
 
-// 获取字典树形结构响应
-struct GetDictionaryTreeResp {
+// 字典及其字典项树形结构
+struct DictionaryWithTree {
+    1: DictionaryInfo dictionary // 字典基本信息
+    2: list<DictionaryItemTreeNode> tree // 字典项树形结构
+}
+
+// 批量获取字典和字典项请求（用于前端冷启动）
+struct GetAllDictionariesWithItemsReq {
+    1: optional i32 page = 1 (api.body="page") // 页码，默认1
+    2: optional i32 page_size = 20 (api.body="page_size") // 每页数量，默认20，最大20
+}
+
+// 批量获取字典和字典项响应
+struct GetAllDictionariesWithItemsResp {
     1: common.BaseResp base_resp
-    2: list<DictionaryItemTreeNode> tree
+    2: list<DictionaryWithTree> dictionaries // 字典列表（包含树形字典项）
+    3: common.PageResp page_info // 分页信息
 }
 
 // 字典服务（仅管理员可用）
@@ -208,7 +215,7 @@ service DictionaryService {
     DeleteDictionaryItemResp DeleteDictionaryItem(1: DeleteDictionaryItemReq req) (api.post="/api/v1/admin/dictionary/item/delete")
     GetDictionaryItemsResp GetDictionaryItems(1: GetDictionaryItemsReq req) (api.post="/api/v1/admin/dictionary/item/list")
     
-    // 获取字典树形结构（公开接口，所有用户可用）
-    GetDictionaryTreeResp GetDictionaryTree(1: GetDictionaryTreeReq req) (api.post="/api/v1/dictionary/tree")
+    // 批量获取所有字典和字典项（公开接口，用于前端冷启动）
+    GetAllDictionariesWithItemsResp GetAllDictionariesWithItems(1: GetAllDictionariesWithItemsReq req) (api.post="/api/v1/dictionary/all")
 }
 

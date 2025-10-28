@@ -124,18 +124,18 @@ struct MarkMessagesReadResp {
 // 会话服务定义
 service ConversationService {
     // 发送消息
-    SendMessageResp SendMessage(1: SendMessageReq req) (api.post="/conversation/send_message")
+    SendMessageResp SendMessage(1: SendMessageReq req) (api.post="/api/v1/conversation/send_message")
     
     // 获取消息列表
-    GetMessagesResp GetMessages(1: GetMessagesReq req) (api.post="/conversation/get_messages")
+    GetMessagesResp GetMessages(1: GetMessagesReq req) (api.post="/api/v1/conversation/get_messages")
     
     // 获取会话详情
-    GetConversationResp GetConversation(1: GetConversationReq req) (api.post="/conversation/get_conversation")
+    GetConversationResp GetConversation(1: GetConversationReq req) (api.post="/api/v1/conversation/get_conversation")
     
     // 获取会话列表
-    GetConversationsResp GetConversations(1: GetConversationsReq req) (api.post="/conversation/get_conversations")
+    GetConversationsResp GetConversations(1: GetConversationsReq req) (api.post="/api/v1/conversation/get_conversations")
     
     // 标记消息已读
-    MarkMessagesReadResp MarkMessagesRead(1: MarkMessagesReadReq req) (api.post="/conversation/mark_read")
+    MarkMessagesReadResp MarkMessagesRead(1: MarkMessagesReadReq req) (api.post="/api/v1/conversation/mark_read")
 }
 

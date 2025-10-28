@@ -16,8 +16,8 @@ import (
 )
 
 func main() {
-	// 加载配置文件
-	if err := config.LoadConfig("conf/config.yaml"); err != nil {
+	// 加载配置文件（根据 ORBIA_ENV 环境变量，默认为 dev）
+	if err := config.LoadConfig(); err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
 	log.Println("✅ Config loaded successfully")

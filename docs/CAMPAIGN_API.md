@@ -49,7 +49,7 @@ Authorization: Bearer {your_jwt_token}
 
 创建一个新的广告活动。
 
-**URL**: `/campaign/create`
+**URL**: `/api/v1/campaign/create`
 
 **Method**: `POST`
 
@@ -199,7 +199,7 @@ Authorization: Bearer {your_jwt_token}
 
 更新 Campaign 信息。**注意：只能在 pending 状态下更新。**
 
-**URL**: `/campaign/update`
+**URL**: `/api/v1/campaign/update`
 
 **Method**: `POST`
 
@@ -241,7 +241,7 @@ Authorization: Bearer {your_jwt_token}
 
 更新 Campaign 的运行状态。**普通用户只能在 active 和 paused 之间切换。**
 
-**URL**: `/campaign/status`
+**URL**: `/api/v1/campaign/status`
 
 **Method**: `POST`
 
@@ -285,7 +285,7 @@ Authorization: Bearer {your_jwt_token}
 
 获取当前团队的 Campaign 列表，支持搜索和筛选。
 
-**URL**: `/campaign/list`
+**URL**: `/api/v1/campaign/list`
 
 **Method**: `POST`
 
@@ -359,7 +359,7 @@ Authorization: Bearer {your_jwt_token}
 
 获取指定 Campaign 的完整信息。
 
-**URL**: `/campaign/detail`
+**URL**: `/api/v1/campaign/detail`
 
 **Method**: `POST`
 
@@ -399,7 +399,7 @@ Authorization: Bearer {your_jwt_token}
 
 管理员查看系统中所有的 Campaign，支持多维度筛选。
 
-**URL**: `/admin/campaign/list`
+**URL**: `/api/v1/admin/campaign/list`
 
 **Method**: `POST`
 
@@ -436,7 +436,7 @@ Authorization: Bearer {your_jwt_token}
 
 管理员可以将 Campaign 设置为任何状态，包括启动和结束。
 
-**URL**: `/admin/campaign/status`
+**URL**: `/api/v1/admin/campaign/status`
 
 **Method**: `POST`
 
@@ -647,7 +647,7 @@ Campaign 中的很多字段引用了数据字典（Dictionary）的值。需要�
    - 获取文件URL列表
 
 3. **创建 Campaign**
-   - 调用 `/campaign/create` 接口
+   - 调用 `/api/v1/campaign/create` 接口
    - 传入完整的配置和素材URL
    - Campaign 状态为 `pending`
 
@@ -655,8 +655,8 @@ Campaign 中的很多字段引用了数据字典（Dictionary）的值。需要�
    - 管理员审核通过后将状态改为 `active`
    
 5. **管理运行状态**
-   - 使用 `/campaign/status` 接口暂停/重启
-   - 查看 `/campaign/list` 接口监控所有活动
+   - 使用 `/api/v1/campaign/status` 接口暂停/重启
+   - 查看 `/api/v1/campaign/list` 接口监控所有活动
 
 ### 更新 Campaign 的注意事项
 
@@ -750,7 +750,7 @@ const testData = {
 
 ```bash
 # 创建 Campaign
-curl -X POST http://localhost:8080/campaign/create \
+curl -X POST http://localhost:8080/api/v1/campaign/create \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -767,7 +767,7 @@ curl -X POST http://localhost:8080/campaign/create \
   }'
 
 # 获取列表
-curl -X POST http://localhost:8080/campaign/list \
+curl -X POST http://localhost:8080/api/v1/campaign/list \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

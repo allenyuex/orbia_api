@@ -464,35 +464,55 @@ func (s *DictionaryService) GetDictionaryItems(ctx context.Context, req *dictMod
 	}, nil
 }
 
-// GetDictionaryTree 获取字典树形结构
-func (s *DictionaryService) GetDictionaryTree(ctx context.Context, req *dictModel.GetDictionaryTreeReq) (*dictModel.GetDictionaryTreeResp, error) {
-	onlyEnabled := true
-	if req.OnlyEnabled == 0 {
-		onlyEnabled = false
+// GetAllDictionariesWithItems 批量获取所有字典和字典项（用于前端冷启动）
+func (s *DictionaryService) GetAllDictionariesWithItems(ctx context.Context, req *dictModel.GetAllDictionariesWithItemsReq) (*dictModel.GetAllDictionariesWithItemsResp, error) {
+	// 标准化分页参数，最大页面大小为20
+	params := utils.NormalizePaginationValue(req.Page, req.PageSize)
+	if params.PageSize > 20 {
+		params.PageSize = 20
 	}
+	offset := int((params.Page - 1) * params.PageSize)
 
-	// 获取字典的所有项
-	items, err := s.dictItemRepo.GetDictionaryItemsByDictionaryCode(req.DictionaryCode, onlyEnabled)
+	// 只获取启用的字典
+	status := int32(1)
+	dictionaries, total, err := s.dictRepo.GetDictionaries("", &status, offset, int(params.PageSize))
 	if err != nil {
-		hlog.Errorf("Failed to get dictionary items by code: %v", err)
-		return &dictModel.GetDictionaryTreeResp{
-			BaseResp: utils.BuildBaseResp(500, "获取字典项失败"),
+		hlog.Errorf("Failed to get dictionaries: %v", err)
+		return &dictModel.GetAllDictionariesWithItemsResp{
+			BaseResp: utils.BuildBaseResp(500, "获取字典列表失败"),
 		}, nil
 	}
 
-	if len(items) == 0 {
-		return &dictModel.GetDictionaryTreeResp{
-			BaseResp: utils.BuildSuccessResp(),
-			Tree:     []*dictModel.DictionaryItemTreeNode{},
-		}, nil
+	// 构建响应
+	dictWithTreeList := make([]*dictModel.DictionaryWithTree, 0, len(dictionaries))
+
+	for _, dict := range dictionaries {
+		// 获取该字典的所有启用的字典项
+		items, err := s.dictItemRepo.GetDictionaryItemsByDictionaryCode(dict.Code, true)
+		if err != nil {
+			hlog.Errorf("Failed to get dictionary items for dictionary %s: %v", dict.Code, err)
+			continue
+		}
+
+		// 构建字典信息
+		dictInfo := s.buildDictionaryInfo(dict)
+
+		// 构建树形结构
+		tree := s.buildTree(items, 0)
+
+		dictWithTreeList = append(dictWithTreeList, &dictModel.DictionaryWithTree{
+			Dictionary: dictInfo,
+			Tree:       tree,
+		})
 	}
 
-	// 构建树形结构
-	tree := s.buildTree(items, 0)
+	// 分页信息
+	pageInfo := utils.BuildPageResp(params, total)
 
-	return &dictModel.GetDictionaryTreeResp{
-		BaseResp: utils.BuildSuccessResp(),
-		Tree:     tree,
+	return &dictModel.GetAllDictionariesWithItemsResp{
+		BaseResp:     utils.BuildSuccessResp(),
+		Dictionaries: dictWithTreeList,
+		PageInfo:     pageInfo,
 	}, nil
 }
 

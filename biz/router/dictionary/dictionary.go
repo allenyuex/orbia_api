@@ -42,7 +42,7 @@ func Register(r *server.Hertz) {
 			}
 			{
 				_dictionary0 := _v1.Group("/dictionary", _dictionary0Mw()...)
-				_dictionary0.POST("/tree", append(_getdictionarytreeMw(), dictionary.GetDictionaryTree)...)
+				_dictionary0.POST("/all", append(_getalldictionarieswithitemsMw(), dictionary.GetAllDictionariesWithItems)...)
 			}
 		}
 	}

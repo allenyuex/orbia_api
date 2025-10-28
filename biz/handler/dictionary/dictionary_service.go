@@ -252,18 +252,18 @@ func GetDictionaryItems(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// GetDictionaryTree .
-// @router /api/v1/dictionary/tree [POST]
-func GetDictionaryTree(ctx context.Context, c *app.RequestContext) {
+// GetAllDictionariesWithItems .
+// @router /api/v1/dictionary/all [POST]
+func GetAllDictionariesWithItems(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req dictionary.GetDictionaryTreeReq
+	var req dictionary.GetAllDictionariesWithItemsReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp, err := dictSvc.GetDictionaryTree(ctx, &req)
+	resp, err := dictSvc.GetAllDictionariesWithItems(ctx, &req)
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, map[string]interface{}{
 			"code":    500,

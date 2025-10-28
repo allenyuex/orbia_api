@@ -33,7 +33,7 @@
 
 ### 1. 发送消息
 
-**路由**: `POST /conversation/send_message`
+**路由**: `POST /api/v1/conversation/send_message`
 
 **权限**: 需要 JWT 认证（普通用户和管理员）
 
@@ -75,7 +75,7 @@
 
 ### 2. 获取消息列表
 
-**路由**: `POST /conversation/get_messages`
+**路由**: `POST /api/v1/conversation/get_messages`
 
 **权限**: 需要 JWT 认证（普通用户和管理员）
 
@@ -119,7 +119,7 @@
 
 ### 3. 获取会话详情
 
-**路由**: `POST /conversation/get_conversation`
+**路由**: `POST /api/v1/conversation/get_conversation`
 
 **权限**: 需要 JWT 认证（普通用户和管理员）
 
@@ -169,7 +169,7 @@
 
 ### 4. 获取会话列表
 
-**路由**: `POST /conversation/get_conversations`
+**路由**: `POST /api/v1/conversation/get_conversations`
 
 **权限**: 需要 JWT 认证（普通用户和管理员）
 
@@ -236,7 +236,7 @@
 
 ### 5. 标记消息已读
 
-**路由**: `POST /conversation/mark_read`
+**路由**: `POST /api/v1/conversation/mark_read`
 
 **权限**: 需要 JWT 认证（普通用户和管理员）
 
@@ -296,7 +296,7 @@
 ```javascript
 // 首次加载
 const loadMessages = async (conversationId) => {
-  const response = await api.post('/conversation/get_messages', {
+  const response = await api.post('/api/v1/conversation/get_messages', {
     conversation_id: conversationId,
     limit: 20
   });
@@ -314,7 +314,7 @@ const loadMessages = async (conversationId) => {
 const loadMoreMessages = async (conversationId) => {
   const oldestMessage = messages[0]; // 当前列表中最早的消息
   
-  const response = await api.post('/conversation/get_messages', {
+  const response = await api.post('/api/v1/conversation/get_messages', {
     conversation_id: conversationId,
     before_timestamp: oldestMessage.created_at,
     limit: 20
@@ -340,7 +340,7 @@ const startPolling = (conversationId) => {
   pollingInterval = setInterval(async () => {
     const latestMessage = messages[messages.length - 1];
     
-    const response = await api.post('/conversation/get_messages', {
+    const response = await api.post('/api/v1/conversation/get_messages', {
       conversation_id: conversationId,
       // 不传 before_timestamp，获取最新消息
       limit: 20
@@ -377,7 +377,7 @@ const renderConversationList = (conversations) => {
 
 // 进入会话时标记已读
 const enterConversation = async (conversationId) => {
-  await api.post('/conversation/mark_read', {
+  await api.post('/api/v1/conversation/mark_read', {
     conversation_id: conversationId
   });
   

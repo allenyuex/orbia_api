@@ -49,7 +49,7 @@ func Init() error {
 // autoMigrate 自动迁移数据库表
 func autoMigrate() error {
 	return DB.AutoMigrate(
-		// 在这里添加更多模型
+	// 在这里添加更多模型
 	)
 }
 

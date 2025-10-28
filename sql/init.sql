@@ -305,10 +305,6 @@ CREATE TABLE orbia_transaction (
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='交易记录表（仅记录支出账单）';
 
--- 数据字典项表（需要先删除，因为有外键约束）
-DROP TABLE IF EXISTS orbia_dictionary_item;
--- 数据字典表
-DROP TABLE IF EXISTS orbia_dictionary;
 
 -- 创建数据字典表
 CREATE TABLE orbia_dictionary (

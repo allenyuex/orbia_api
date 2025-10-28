@@ -57,3 +57,13 @@ func _updatecampaignMw() []app.HandlerFunc {
 	// 需要JWT认证，普通用户可访问
 	return []app.HandlerFunc{mw.AuthMiddleware(consts.RoleNormal, consts.RoleAdmin)}
 }
+
+func _apiMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _v1Mw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

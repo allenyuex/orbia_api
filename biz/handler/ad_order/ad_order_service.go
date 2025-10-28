@@ -9,6 +9,7 @@ import (
 
 	apiconsts "orbia_api/biz/consts"
 	ad_order "orbia_api/biz/model/ad_order"
+	"orbia_api/biz/mw"
 	adOrderService "orbia_api/biz/service/ad_order"
 	"orbia_api/biz/utils"
 )
@@ -25,14 +26,14 @@ func CreateAdOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := adOrderService.CreateAdOrder(userID.(int64), &req)
+	resp, err := adOrderService.CreateAdOrder(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -53,17 +54,17 @@ func GetAdOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID和角色
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
-	role, _ := c.Get("role")
-	isAdmin := role != nil && role.(string) == "admin"
+	role, _ := mw.GetAuthUserRole(c)
+	isAdmin := role == "admin"
 
 	// 调用 service 层
-	resp, err := adOrderService.GetAdOrder(userID.(int64), isAdmin, &req)
+	resp, err := adOrderService.GetAdOrder(userID, isAdmin, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -84,14 +85,14 @@ func GetUserAdOrderList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := adOrderService.GetUserAdOrderList(userID.(int64), &req)
+	resp, err := adOrderService.GetUserAdOrderList(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return
@@ -112,14 +113,14 @@ func CancelAdOrder(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, apiconsts.UnauthorizedCode, "未登录")
 		return
 	}
 
 	// 调用 service 层
-	resp, err := adOrderService.CancelAdOrder(userID.(int64), &req)
+	resp, err := adOrderService.CancelAdOrder(userID, &req)
 	if err != nil {
 		utils.Error(c, apiconsts.SystemErrorCode, err.Error())
 		return

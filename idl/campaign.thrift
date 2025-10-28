@@ -83,7 +83,7 @@ struct CreateCampaignReq {
     27: optional string ios_download_url (api.body="ios_download_url")
     28: optional string android_download_url (api.body="android_download_url")
     29: optional list<string> attachment_urls (api.body="attachment_urls")  // 附件URL列表
-} (api.post="/campaign/create")
+} (api.post="/api/v1/campaign/create")
 
 // 创建Campaign响应
 struct CreateCampaignResp {
@@ -123,7 +123,7 @@ struct UpdateCampaignReq {
     28: optional string ios_download_url (api.body="ios_download_url")
     29: optional string android_download_url (api.body="android_download_url")
     30: optional list<string> attachment_urls (api.body="attachment_urls")  // 附件URL列表
-} (api.post="/campaign/update")
+} (api.post="/api/v1/campaign/update")
 
 // 更新Campaign响应
 struct UpdateCampaignResp {
@@ -135,7 +135,7 @@ struct UpdateCampaignResp {
 struct UpdateCampaignStatusReq {
     1: string campaign_id (api.body="campaign_id")
     2: string status (api.body="status")  // active, paused
-} (api.post="/campaign/status")
+} (api.post="/api/v1/campaign/status")
 
 // 暂停/重启Campaign响应
 struct UpdateCampaignStatusResp {
@@ -149,7 +149,7 @@ struct ListCampaignsReq {
     3: optional string promotion_objective (api.body="promotion_objective")  // 推广目标筛选
     4: i32 page = 1 (api.body="page")
     5: i32 page_size = 10 (api.body="page_size")
-} (api.post="/campaign/list")
+} (api.post="/api/v1/campaign/list")
 
 // 获取Campaign列表响应
 struct ListCampaignsResp {
@@ -161,7 +161,7 @@ struct ListCampaignsResp {
 // 获取Campaign详情请求
 struct GetCampaignReq {
     1: string campaign_id (api.body="campaign_id")
-} (api.post="/campaign/detail")
+} (api.post="/api/v1/campaign/detail")
 
 // 获取Campaign详情响应
 struct GetCampaignResp {
@@ -178,7 +178,7 @@ struct AdminListCampaignsReq {
     5: optional i64 team_id (api.body="team_id")  // 按团队筛选
     6: i32 page = 1 (api.body="page")
     7: i32 page_size = 10 (api.body="page_size")
-} (api.post="/admin/campaign/list")
+} (api.post="/api/v1/admin/campaign/list")
 
 // Admin - 获取所有Campaign列表响应
 struct AdminListCampaignsResp {
@@ -191,7 +191,7 @@ struct AdminListCampaignsResp {
 struct AdminUpdateCampaignStatusReq {
     1: string campaign_id (api.body="campaign_id")
     2: string status (api.body="status")  // active, paused, ended
-} (api.post="/admin/campaign/status")
+} (api.post="/api/v1/admin/campaign/status")
 
 // Admin - 更新Campaign状态响应
 struct AdminUpdateCampaignStatusResp {
@@ -201,14 +201,14 @@ struct AdminUpdateCampaignStatusResp {
 // Campaign服务
 service CampaignService {
     // 普通用户接口
-    CreateCampaignResp CreateCampaign(1: CreateCampaignReq req) (api.post="/campaign/create")
-    UpdateCampaignResp UpdateCampaign(1: UpdateCampaignReq req) (api.post="/campaign/update")
-    UpdateCampaignStatusResp UpdateCampaignStatus(1: UpdateCampaignStatusReq req) (api.post="/campaign/status")
-    ListCampaignsResp ListCampaigns(1: ListCampaignsReq req) (api.post="/campaign/list")
-    GetCampaignResp GetCampaign(1: GetCampaignReq req) (api.post="/campaign/detail")
+    CreateCampaignResp CreateCampaign(1: CreateCampaignReq req) (api.post="/api/v1/campaign/create")
+    UpdateCampaignResp UpdateCampaign(1: UpdateCampaignReq req) (api.post="/api/v1/campaign/update")
+    UpdateCampaignStatusResp UpdateCampaignStatus(1: UpdateCampaignStatusReq req) (api.post="/api/v1/campaign/status")
+    ListCampaignsResp ListCampaigns(1: ListCampaignsReq req) (api.post="/api/v1/campaign/list")
+    GetCampaignResp GetCampaign(1: GetCampaignReq req) (api.post="/api/v1/campaign/detail")
     
     // 管理员接口
-    AdminListCampaignsResp AdminListCampaigns(1: AdminListCampaignsReq req) (api.post="/admin/campaign/list")
-    AdminUpdateCampaignStatusResp AdminUpdateCampaignStatus(1: AdminUpdateCampaignStatusReq req) (api.post="/admin/campaign/status")
+    AdminListCampaignsResp AdminListCampaigns(1: AdminListCampaignsReq req) (api.post="/api/v1/admin/campaign/list")
+    AdminUpdateCampaignStatusResp AdminUpdateCampaignStatus(1: AdminUpdateCampaignStatusReq req) (api.post="/api/v1/admin/campaign/status")
 }
 

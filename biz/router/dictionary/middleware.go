@@ -96,3 +96,18 @@ func _getdictionarytreeMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _itemsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _batchgetdictionaryitemsbycodesMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _getalldictionarieswithitemsMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

@@ -11,6 +11,7 @@ import (
 	"orbia_api/biz/dal/mysql"
 	campaignModel "orbia_api/biz/model/campaign"
 	commonModel "orbia_api/biz/model/common"
+	"orbia_api/biz/mw"
 	campaignService "orbia_api/biz/service/campaign"
 	"orbia_api/biz/utils"
 )
@@ -36,18 +37,20 @@ func CreateCampaign(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 从context获取用户ID和团队ID
-	userID, exists := c.Get("user_id")
+	// 从context获取用户ID和用户信息
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "User not authenticated")
 		return
 	}
 
-	teamID, exists := c.Get("team_id")
-	if !exists {
-		utils.Error(c, 400, "Team not found")
+	user, exists := mw.GetAuthUser(c)
+	if !exists || user.CurrentTeamID == nil {
+		utils.Error(c, 400, "User has no team")
 		return
 	}
+
+	teamID := *user.CurrentTeamID
 
 	// 构建service请求
 	serviceReq := &campaignService.CreateCampaignRequest{
@@ -83,7 +86,7 @@ func CreateCampaign(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用service创建Campaign
-	campaign, attachments, err := svc.CreateCampaign(userID.(int64), teamID.(int64), serviceReq)
+	campaign, attachments, err := svc.CreateCampaign(userID, teamID, serviceReq)
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return
@@ -111,7 +114,7 @@ func UpdateCampaign(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从context获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "User not authenticated")
 		return
@@ -182,7 +185,7 @@ func UpdateCampaign(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用service更新Campaign
-	campaign, attachments, err := svc.UpdateCampaign(userID.(int64), req.CampaignID, serviceReq)
+	campaign, attachments, err := svc.UpdateCampaign(userID, req.CampaignID, serviceReq)
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return
@@ -210,14 +213,14 @@ func UpdateCampaignStatus(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从context获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "User not authenticated")
 		return
 	}
 
 	// 调用service更新状态
-	if err := svc.UpdateCampaignStatus(userID.(int64), req.CampaignID, req.Status); err != nil {
+	if err := svc.UpdateCampaignStatus(userID, req.CampaignID, req.Status); err != nil {
 		utils.Error(c, 500, err.Error())
 		return
 	}
@@ -241,18 +244,20 @@ func ListCampaigns(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 从context获取用户ID和团队ID
-	userID, exists := c.Get("user_id")
+	// 从context获取用户ID和用户信息
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "User not authenticated")
 		return
 	}
 
-	teamID, exists := c.Get("team_id")
-	if !exists {
-		utils.Error(c, 400, "Team not found")
+	user, exists := mw.GetAuthUser(c)
+	if !exists || user.CurrentTeamID == nil {
+		utils.Error(c, 400, "User has no team")
 		return
 	}
+
+	teamID := *user.CurrentTeamID
 
 	keyword := ""
 	if req.Keyword != nil {
@@ -270,7 +275,7 @@ func ListCampaigns(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用service获取列表
-	campaigns, total, err := svc.ListCampaigns(userID.(int64), teamID.(int64), keyword, status, promotionObjective, int(req.Page), int(req.PageSize))
+	campaigns, total, err := svc.ListCampaigns(userID, teamID, keyword, status, promotionObjective, int(req.Page), int(req.PageSize))
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return
@@ -313,14 +318,14 @@ func GetCampaign(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 从context获取用户ID
-	userID, exists := c.Get("user_id")
+	userID, exists := mw.GetAuthUserID(c)
 	if !exists {
 		utils.Error(c, 401, "User not authenticated")
 		return
 	}
 
 	// 调用service获取详情
-	campaign, attachments, err := svc.GetCampaign(userID.(int64), req.CampaignID)
+	campaign, attachments, err := svc.GetCampaign(userID, req.CampaignID)
 	if err != nil {
 		utils.Error(c, 500, err.Error())
 		return

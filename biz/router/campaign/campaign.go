@@ -18,19 +18,25 @@ func Register(r *server.Hertz) {
 
 	root := r.Group("/", rootMw()...)
 	{
-		_admin := root.Group("/admin", _adminMw()...)
+		_api := root.Group("/api", _apiMw()...)
 		{
-			_campaign := _admin.Group("/campaign", _campaignMw()...)
-			_campaign.POST("/list", append(_adminlistcampaignsMw(), campaign.AdminListCampaigns)...)
-			_campaign.POST("/status", append(_adminupdatecampaignstatusMw(), campaign.AdminUpdateCampaignStatus)...)
+			_v1 := _api.Group("/v1", _v1Mw()...)
+			{
+				_admin := _v1.Group("/admin", _adminMw()...)
+				{
+					_campaign := _admin.Group("/campaign", _campaignMw()...)
+					_campaign.POST("/list", append(_adminlistcampaignsMw(), campaign.AdminListCampaigns)...)
+					_campaign.POST("/status", append(_adminupdatecampaignstatusMw(), campaign.AdminUpdateCampaignStatus)...)
+				}
+			}
+			{
+				_campaign0 := _v1.Group("/campaign", _campaign0Mw()...)
+				_campaign0.POST("/create", append(_createcampaignMw(), campaign.CreateCampaign)...)
+				_campaign0.POST("/detail", append(_getcampaignMw(), campaign.GetCampaign)...)
+				_campaign0.POST("/list", append(_listcampaignsMw(), campaign.ListCampaigns)...)
+				_campaign0.POST("/status", append(_updatecampaignstatusMw(), campaign.UpdateCampaignStatus)...)
+				_campaign0.POST("/update", append(_updatecampaignMw(), campaign.UpdateCampaign)...)
+			}
 		}
-	}
-	{
-		_campaign0 := root.Group("/campaign", _campaign0Mw()...)
-		_campaign0.POST("/create", append(_createcampaignMw(), campaign.CreateCampaign)...)
-		_campaign0.POST("/detail", append(_getcampaignMw(), campaign.GetCampaign)...)
-		_campaign0.POST("/list", append(_listcampaignsMw(), campaign.ListCampaigns)...)
-		_campaign0.POST("/status", append(_updatecampaignstatusMw(), campaign.UpdateCampaignStatus)...)
-		_campaign0.POST("/update", append(_updatecampaignMw(), campaign.UpdateCampaign)...)
 	}
 }

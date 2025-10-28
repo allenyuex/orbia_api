@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -100,19 +102,63 @@ type VerificationCodeConfig struct {
 }
 
 // LoadConfig 加载配置文件
-func LoadConfig(configPath string) error {
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return fmt.Errorf("读取配置文件失败: %v", err)
+// 根据环境变量 ORBIA_ENV 来决定加载哪个环境的配置
+// 可选值: dev, prod，默认为 dev
+func LoadConfig() error {
+	// 获取环境变量，默认为 dev
+	env := os.Getenv("ORBIA_ENV")
+	if env == "" {
+		env = "dev"
 	}
 
+	// 构建配置文件路径
+	configPath := fmt.Sprintf("conf/%s/config.yaml", env)
+
+	// 读取配置文件
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("读取配置文件失败 (%s): %v", configPath, err)
+	}
+
+	// 替换环境变量
+	content := expandEnvVars(string(data))
+
+	// 解析配置
 	config := &Config{}
-	if err := yaml.Unmarshal(data, config); err != nil {
+	if err := yaml.Unmarshal([]byte(content), config); err != nil {
 		return fmt.Errorf("解析配置文件失败: %v", err)
 	}
 
 	GlobalConfig = config
 	return nil
+}
+
+// expandEnvVars 替换配置文件中的环境变量
+// 支持格式: ${VAR_NAME:default_value} 或 ${VAR_NAME}
+func expandEnvVars(content string) string {
+	// 匹配 ${VAR_NAME:default} 或 ${VAR_NAME}
+	re := regexp.MustCompile(`\$\{([^:}]+)(?::([^}]*))?\}`)
+
+	return re.ReplaceAllStringFunc(content, func(match string) string {
+		// 提取变量名和默认值
+		parts := re.FindStringSubmatch(match)
+		if len(parts) < 2 {
+			return match
+		}
+
+		varName := strings.TrimSpace(parts[1])
+		defaultValue := ""
+		if len(parts) > 2 {
+			defaultValue = parts[2]
+		}
+
+		// 获取环境变量值
+		value := os.Getenv(varName)
+		if value == "" {
+			return defaultValue
+		}
+		return value
+	})
 }
 
 // GetDSN 获取 MySQL DSN 连接字符串
