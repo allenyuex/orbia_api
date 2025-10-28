@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"orbia_api/biz/dal/model"
 	"orbia_api/biz/dal/mysql"
 	kolOrderModel "orbia_api/biz/model/kol_order"
 	conversationService "orbia_api/biz/service/conversation"
@@ -14,9 +15,11 @@ import (
 )
 
 var (
-	orderRepo mysql.OrderRepository
-	kolRepo   mysql.KolRepository
-	convSvc   conversationService.ConversationService
+	orderRepo  mysql.OrderRepository
+	kolRepo    mysql.KolRepository
+	convSvc    conversationService.ConversationService
+	walletRepo mysql.WalletRepository
+	txRepo     mysql.TransactionRepository
 )
 
 // InitKolOrderService 初始化KOL订单服务
@@ -25,6 +28,8 @@ func InitKolOrderService() {
 	kolRepo = mysql.NewKolRepository(mysql.DB)
 	convRepo := mysql.NewConversationRepository(mysql.DB)
 	userRepo := mysql.NewUserRepository(mysql.DB)
+	walletRepo = mysql.NewWalletRepository(mysql.DB)
+	txRepo = mysql.NewTransactionRepository(mysql.DB)
 	convSvc = conversationService.NewConversationService(convRepo, userRepo)
 }
 
@@ -66,7 +71,24 @@ func CreateKolOrder(userID int64, req *kolOrderModel.CreateKolOrderReq) (*kolOrd
 	// 5. 生成订单ID (KORD_ 前缀表示 KOL Order)
 	orderID := utils.GenerateKolOrderID()
 
-	// 6. 创建订单（保存 Plan 快照）
+	// 6. 创建会话标题
+	conversationTitle := fmt.Sprintf("KOL订单: %s", req.Title)
+
+	// 7. 创建会话，参与者包括下单用户和 KOL 用户
+	memberUserIDs := []int64{userID, kol.UserID}
+
+	conversation, err := convSvc.CreateConversation(
+		"kol_order",
+		"kol_order",
+		orderID,
+		&conversationTitle,
+		memberUserIDs,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("创建会话失败: %w", err)
+	}
+
+	// 8. 创建订单（保存 Plan 快照和会话ID）
 	order := &mysql.KolOrder{
 		OrderID:                orderID,
 		UserID:                 userID,
@@ -84,6 +106,7 @@ func CreateKolOrder(userID int64, req *kolOrderModel.CreateKolOrderReq) (*kolOrd
 		TargetAudience:         req.TargetAudience,
 		ExpectedDeliveryDate:   req.ExpectedDeliveryDate,
 		AdditionalRequirements: req.AdditionalRequirements,
+		ConversationID:         &conversation.ConversationID,
 		Status:                 "pending_payment", // 初始状态为待支付
 	}
 
@@ -235,30 +258,6 @@ func UpdateKolOrderStatus(userID int64, req *kolOrderModel.UpdateKolOrderStatusR
 		return nil, fmt.Errorf("更新订单状态失败: %w", err)
 	}
 
-	// 6. 如果订单状态变更为 "confirmed"，自动创建会话
-	if req.Status == "confirmed" {
-		// 创建会话标题
-		title := fmt.Sprintf("KOL订单: %s", order.Title)
-
-		// 获取 KOL 的用户ID（从 kol 表获取）
-		kolUserID := kol.UserID
-
-		// 创建会话，参与者包括下单用户和 KOL 用户
-		memberUserIDs := []int64{order.UserID, kolUserID}
-
-		_, err := convSvc.CreateConversation(
-			"kol_order",
-			"kol_order",
-			order.OrderID,
-			&title,
-			memberUserIDs,
-		)
-		if err != nil {
-			// 记录错误但不影响订单状态更新
-			fmt.Printf("创建会话失败: %v\n", err)
-		}
-	}
-
 	return resp, nil
 }
 
@@ -285,9 +284,71 @@ func ConfirmKolOrderPayment(userID int64, req *kolOrderModel.ConfirmKolOrderPaym
 		return nil, fmt.Errorf("订单状态不是待支付，无法确认支付")
 	}
 
-	// 4. 更新订单状态为待确认（等待KOL确认）
-	if err := orderRepo.UpdateOrderStatus(req.OrderID, "pending", nil); err != nil {
-		return nil, fmt.Errorf("更新订单状态失败: %w", err)
+	// 4. 获取用户钱包信息
+	wallet, err := walletRepo.GetWalletByUserID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("钱包不存在，请先创建钱包")
+		}
+		return nil, fmt.Errorf("获取钱包信息失败: %w", err)
+	}
+
+	// 5. 检查钱包余额是否充足
+	if wallet.Balance < order.PlanPrice {
+		return nil, fmt.Errorf("钱包余额不足，当前余额: %.2f USD，订单金额: %.2f USD", wallet.Balance, order.PlanPrice)
+	}
+
+	// 6. 在事务中执行扣款、创建交易记录和更新订单状态
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 6.1 扣除钱包余额（负值表示减少）
+		if err := walletRepo.UpdateBalance(tx, userID, -order.PlanPrice, 0); err != nil {
+			return fmt.Errorf("扣除钱包余额失败: %w", err)
+		}
+
+		// 6.2 更新钱包的累计消费金额
+		if err := tx.Model(&model.OrbiaWallet{}).
+			Where("user_id = ?", userID).
+			Update("total_consume", gorm.Expr("total_consume + ?", order.PlanPrice)).Error; err != nil {
+			return fmt.Errorf("更新累计消费金额失败: %w", err)
+		}
+
+		// 6.3 生成交易ID
+		transactionID := fmt.Sprintf("TXN%d", time.Now().UnixNano())
+
+		// 6.4 创建交易记录
+		now := time.Now()
+		relatedOrderType := "kol_order"
+		remark := fmt.Sprintf("支付KOL订单：%s", order.Title)
+		transaction := &model.OrbiaTransaction{
+			TransactionID:    transactionID,
+			UserID:           userID,
+			Type:             "consume",
+			Amount:           order.PlanPrice,
+			BalanceBefore:    wallet.Balance,
+			BalanceAfter:     wallet.Balance - order.PlanPrice,
+			Status:           "completed",
+			RelatedOrderType: &relatedOrderType,
+			RelatedOrderID:   &order.OrderID,
+			Remark:           &remark,
+			CompletedAt:      &now,
+		}
+
+		if err := txRepo.CreateTransaction(tx, transaction); err != nil {
+			return fmt.Errorf("创建交易记录失败: %w", err)
+		}
+
+		// 6.5 更新订单状态为待确认（等待KOL确认）
+		if err := tx.Model(&mysql.KolOrder{}).
+			Where("order_id = ?", req.OrderID).
+			Update("status", "pending").Error; err != nil {
+			return fmt.Errorf("更新订单状态失败: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	return resp, nil
@@ -387,6 +448,10 @@ func convertToKolOrderInfo(order *mysql.OrderWithKolInfo) *kolOrderModel.KolOrde
 	if order.CancelledAt != nil {
 		cancelledAt := order.CancelledAt.Format(time.RFC3339)
 		info.CancelledAt = &cancelledAt
+	}
+
+	if order.ConversationID != nil {
+		info.ConversationID = order.ConversationID
 	}
 
 	return info

@@ -41,7 +41,7 @@ type CreateCampaignRequest struct {
 	OperatingSystem    *int64
 	OSVersions         []int64
 	DeviceModels       []int64
-	ConnectionType     *int64
+	ConnectionTypes    []int64
 	DevicePriceType    int8
 	DevicePriceMin     *float64
 	DevicePriceMax     *float64
@@ -74,7 +74,7 @@ type UpdateCampaignRequest struct {
 	OperatingSystem    *int64
 	OSVersions         []int64
 	DeviceModels       []int64
-	ConnectionType     *int64
+	ConnectionTypes    []int64
 	DevicePriceType    *int8
 	DevicePriceMin     *float64
 	DevicePriceMax     *float64
@@ -167,6 +167,7 @@ func (s *campaignService) CreateCampaign(userID int64, teamID int64, req *Create
 	languagesJSON := arrayToJSON(req.Languages)
 	osVersionsJSON := arrayToJSON(req.OSVersions)
 	deviceModelsJSON := arrayToJSON(req.DeviceModels)
+	connectionTypesJSON := arrayToJSON(req.ConnectionTypes)
 
 	// 创建Campaign
 	campaign := &mysql.Campaign{
@@ -184,7 +185,7 @@ func (s *campaignService) CreateCampaign(userID int64, teamID int64, req *Create
 		OperatingSystem:    req.OperatingSystem,
 		OSVersions:         osVersionsJSON,
 		DeviceModels:       deviceModelsJSON,
-		ConnectionType:     req.ConnectionType,
+		ConnectionTypes:    connectionTypesJSON,
 		DevicePriceType:    req.DevicePriceType,
 		DevicePriceMin:     req.DevicePriceMin,
 		DevicePriceMax:     req.DevicePriceMax,
@@ -298,8 +299,8 @@ func (s *campaignService) UpdateCampaign(userID int64, campaignID string, req *U
 		campaign.DeviceModels = arrayToJSON(req.DeviceModels)
 	}
 
-	if req.ConnectionType != nil {
-		campaign.ConnectionType = req.ConnectionType
+	if len(req.ConnectionTypes) > 0 {
+		campaign.ConnectionTypes = arrayToJSON(req.ConnectionTypes)
 	}
 
 	if req.DevicePriceType != nil {

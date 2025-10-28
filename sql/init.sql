@@ -203,6 +203,7 @@ CREATE TABLE orbia_kol_order (
     target_audience VARCHAR(500) NOT NULL COMMENT '目标受众',
     expected_delivery_date DATE NOT NULL COMMENT '期望交付日期',
     additional_requirements TEXT COMMENT '额外要求',
+    conversation_id VARCHAR(64) COMMENT '关联的会话ID（引用orbia_conversation.conversation_id）',
     status ENUM('pending_payment', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'pending_payment' COMMENT '订单状态：pending_payment-待支付，pending-待确认，confirmed-已确认，in_progress-进行中，completed-已完成，cancelled-已取消，refunded-已退款',
     reject_reason TEXT COMMENT '拒绝/取消原因',
     confirmed_at TIMESTAMP NULL COMMENT '确认时间',
@@ -216,6 +217,7 @@ CREATE TABLE orbia_kol_order (
     INDEX idx_team_id (team_id),
     INDEX idx_kol_id (kol_id),
     INDEX idx_plan_id (plan_id),
+    INDEX idx_conversation_id (conversation_id),
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
     INDEX idx_deleted_at (deleted_at),
@@ -433,8 +435,7 @@ DROP TABLE IF EXISTS orbia_conversation_member;
 DROP TABLE IF EXISTS orbia_conversation;
 
 CREATE TABLE orbia_conversation (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
-    conversation_id VARCHAR(64) NOT NULL UNIQUE COMMENT '会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）',
+    conversation_id VARCHAR(64) PRIMARY KEY COMMENT '会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）',
     title VARCHAR(200) COMMENT '会话标题',
     type ENUM('kol_order', 'ad_order', 'general', 'support') NOT NULL DEFAULT 'general' COMMENT '会话类型：kol_order-KOL订单会话，ad_order-广告订单会话，general-普通会话，support-客服会话',
     related_order_type VARCHAR(50) COMMENT '关联订单类型：kol_order, ad_order',
@@ -444,7 +445,6 @@ CREATE TABLE orbia_conversation (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted_at TIMESTAMP NULL COMMENT '软删除时间',
-    INDEX idx_conversation_id (conversation_id),
     INDEX idx_type (type),
     INDEX idx_related_order_type (related_order_type),
     INDEX idx_related_order_id (related_order_id),
@@ -456,26 +456,23 @@ CREATE TABLE orbia_conversation (
 
 -- 会话成员表
 CREATE TABLE orbia_conversation_member (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '成员ID',
-    conversation_id BIGINT NOT NULL COMMENT '会话ID',
+    conversation_id VARCHAR(64) NOT NULL COMMENT '会话ID',
     user_id BIGINT NOT NULL COMMENT '用户ID',
     role ENUM('creator', 'member', 'admin') NOT NULL DEFAULT 'member' COMMENT '成员角色：creator-创建者，member-成员，admin-管理员',
     unread_count INT NOT NULL DEFAULT 0 COMMENT '未读消息数',
     last_read_at TIMESTAMP NULL COMMENT '最后已读时间',
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
-    UNIQUE KEY uk_conversation_user (conversation_id, user_id),
-    INDEX idx_conversation_id (conversation_id),
+    PRIMARY KEY (conversation_id, user_id),
     INDEX idx_user_id (user_id),
     INDEX idx_role (role),
-    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(id) ON DELETE CASCADE,
+    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(conversation_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES orbia_user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会话成员表';
 
 -- 消息表
 CREATE TABLE orbia_message (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '自增ID（内部使用）',
-    message_id VARCHAR(64) NOT NULL UNIQUE COMMENT '消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）',
-    conversation_id BIGINT NOT NULL COMMENT '会话ID',
+    message_id VARCHAR(64) PRIMARY KEY COMMENT '消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）',
+    conversation_id VARCHAR(64) NOT NULL COMMENT '会话ID',
     sender_id BIGINT NOT NULL COMMENT '发送者用户ID',
     message_type ENUM('text', 'image', 'file', 'video', 'audio', 'system') NOT NULL DEFAULT 'text' COMMENT '消息类型：text-文本，image-图片，file-文件，video-视频，audio-音频，system-系统消息',
     content TEXT NOT NULL COMMENT '消息内容（文本内容或文件URL）',
@@ -486,14 +483,13 @@ CREATE TABLE orbia_message (
     created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间（毫秒精度）',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     deleted_at TIMESTAMP NULL COMMENT '软删除时间',
-    INDEX idx_message_id (message_id),
     INDEX idx_conversation_id (conversation_id),
     INDEX idx_sender_id (sender_id),
     INDEX idx_message_type (message_type),
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
     INDEX idx_deleted_at (deleted_at),
-    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(id) ON DELETE CASCADE,
+    FOREIGN KEY (conversation_id) REFERENCES orbia_conversation(conversation_id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES orbia_user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息表';
 
@@ -514,7 +510,7 @@ CREATE TABLE IF NOT EXISTS orbia_campaign (
     operating_system BIGINT COMMENT '操作系统（引用数据字典ID）',
     os_versions TEXT COMMENT '系统版本（JSON数组，多选数据字典ID）',
     device_models TEXT COMMENT '设备品牌（JSON数组，多选数据字典ID）',
-    connection_type BIGINT COMMENT '网络情况（引用数据字典ID）',
+    connection_types TEXT COMMENT '网络情况（JSON数组，多选数据字典ID）',
     device_price_type TINYINT DEFAULT 0 COMMENT '设备价格类型：0-any，1-specific range',
     device_price_min DECIMAL(15,2) COMMENT '设备价格最小值',
     device_price_max DECIMAL(15,2) COMMENT '设备价格最大值',

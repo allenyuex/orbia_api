@@ -25,6 +25,7 @@ type KolOrder struct {
 	TargetAudience         string         `gorm:"column:target_audience;size:500;not null" json:"target_audience"`
 	ExpectedDeliveryDate   string         `gorm:"column:expected_delivery_date;type:date;not null" json:"expected_delivery_date"`
 	AdditionalRequirements *string        `gorm:"column:additional_requirements;type:text" json:"additional_requirements"`
+	ConversationID         *string        `gorm:"column:conversation_id;size:64" json:"conversation_id"`
 	Status                 string         `gorm:"column:status;type:enum('pending','confirmed','in_progress','completed','cancelled','refunded');default:pending;not null" json:"status"`
 	RejectReason           *string        `gorm:"column:reject_reason;type:text" json:"reject_reason"`
 	ConfirmedAt            *time.Time     `gorm:"column:confirmed_at" json:"confirmed_at"`

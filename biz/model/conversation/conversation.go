@@ -349,7 +349,7 @@ func (p *ConversationMember) String() string {
 // 消息信息
 type Message struct {
 	MessageID       string  `thrift:"message_id,1" form:"message_id" json:"message_id" query:"message_id"`
-	ConversationID  int64   `thrift:"conversation_id,2" form:"conversation_id" json:"conversation_id" query:"conversation_id"`
+	ConversationID  string  `thrift:"conversation_id,2" form:"conversation_id" json:"conversation_id" query:"conversation_id"`
 	SenderID        int64   `thrift:"sender_id,3" form:"sender_id" json:"sender_id" query:"sender_id"`
 	SenderNickname  string  `thrift:"sender_nickname,4" form:"sender_nickname" json:"sender_nickname" query:"sender_nickname"`
 	SenderAvatarURL *string `thrift:"sender_avatar_url,5,optional" form:"sender_avatar_url" json:"sender_avatar_url,omitempty" query:"sender_avatar_url"`
@@ -376,7 +376,7 @@ func (p *Message) GetMessageID() (v string) {
 	return p.MessageID
 }
 
-func (p *Message) GetConversationID() (v int64) {
+func (p *Message) GetConversationID() (v string) {
 	return p.ConversationID
 }
 
@@ -499,7 +499,7 @@ func (p *Message) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 2:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -628,8 +628,8 @@ func (p *Message) ReadField1(iprot thrift.TProtocol) error {
 }
 func (p *Message) ReadField2(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
 		_field = v
@@ -838,10 +838,10 @@ WriteFieldEndError:
 }
 
 func (p *Message) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("conversation_id", thrift.I64, 2); err != nil {
+	if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.ConversationID); err != nil {
+	if err := oprot.WriteString(p.ConversationID); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -2336,7 +2336,7 @@ func (p *ConversationItem) String() string {
 
 // 发送消息请求
 type SendMessageReq struct {
-	ConversationID int64 `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
+	ConversationID string `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
 	// text, image, file, video, audio
 	MessageType string  `thrift:"message_type,2" form:"message_type" json:"message_type"`
 	Content     string  `thrift:"content,3" form:"content" json:"content"`
@@ -2352,7 +2352,7 @@ func NewSendMessageReq() *SendMessageReq {
 func (p *SendMessageReq) InitDefault() {
 }
 
-func (p *SendMessageReq) GetConversationID() (v int64) {
+func (p *SendMessageReq) GetConversationID() (v string) {
 	return p.ConversationID
 }
 
@@ -2432,7 +2432,7 @@ func (p *SendMessageReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -2510,8 +2510,8 @@ ReadStructEndError:
 
 func (p *SendMessageReq) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
 		_field = v
@@ -2624,10 +2624,10 @@ WriteStructEndError:
 }
 
 func (p *SendMessageReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("conversation_id", thrift.I64, 1); err != nil {
+	if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.ConversationID); err != nil {
+	if err := oprot.WriteString(p.ConversationID); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -2940,7 +2940,7 @@ func (p *SendMessageResp) String() string {
 
 // 获取消息列表请求
 type GetMessagesReq struct {
-	ConversationID int64 `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
+	ConversationID string `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
 	// 毫秒时间戳，获取此时间之前的消息
 	BeforeTimestamp *int64 `thrift:"before_timestamp,2,optional" form:"before_timestamp" json:"before_timestamp,omitempty"`
 	// 默认返回20条
@@ -2957,7 +2957,7 @@ func (p *GetMessagesReq) InitDefault() {
 	p.Limit = 20
 }
 
-func (p *GetMessagesReq) GetConversationID() (v int64) {
+func (p *GetMessagesReq) GetConversationID() (v string) {
 	return p.ConversationID
 }
 
@@ -3013,7 +3013,7 @@ func (p *GetMessagesReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -3067,8 +3067,8 @@ ReadStructEndError:
 
 func (p *GetMessagesReq) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
 		_field = v
@@ -3136,10 +3136,10 @@ WriteStructEndError:
 }
 
 func (p *GetMessagesReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("conversation_id", thrift.I64, 1); err != nil {
+	if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.ConversationID); err != nil {
+	if err := oprot.WriteString(p.ConversationID); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -3460,7 +3460,7 @@ func (p *GetMessagesResp) String() string {
 
 // 获取会话详情请求
 type GetConversationReq struct {
-	ConversationID int64 `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
+	ConversationID string `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
 }
 
 func NewGetConversationReq() *GetConversationReq {
@@ -3470,7 +3470,7 @@ func NewGetConversationReq() *GetConversationReq {
 func (p *GetConversationReq) InitDefault() {
 }
 
-func (p *GetConversationReq) GetConversationID() (v int64) {
+func (p *GetConversationReq) GetConversationID() (v string) {
 	return p.ConversationID
 }
 
@@ -3498,7 +3498,7 @@ func (p *GetConversationReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -3536,8 +3536,8 @@ ReadStructEndError:
 
 func (p *GetConversationReq) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
 		_field = v
@@ -3575,10 +3575,10 @@ WriteStructEndError:
 }
 
 func (p *GetConversationReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("conversation_id", thrift.I64, 1); err != nil {
+	if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.ConversationID); err != nil {
+	if err := oprot.WriteString(p.ConversationID); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -4337,7 +4337,7 @@ func (p *GetConversationsResp) String() string {
 
 // 标记消息已读请求
 type MarkMessagesReadReq struct {
-	ConversationID int64 `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
+	ConversationID string `thrift:"conversation_id,1" form:"conversation_id" json:"conversation_id"`
 }
 
 func NewMarkMessagesReadReq() *MarkMessagesReadReq {
@@ -4347,7 +4347,7 @@ func NewMarkMessagesReadReq() *MarkMessagesReadReq {
 func (p *MarkMessagesReadReq) InitDefault() {
 }
 
-func (p *MarkMessagesReadReq) GetConversationID() (v int64) {
+func (p *MarkMessagesReadReq) GetConversationID() (v string) {
 	return p.ConversationID
 }
 
@@ -4375,7 +4375,7 @@ func (p *MarkMessagesReadReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -4413,8 +4413,8 @@ ReadStructEndError:
 
 func (p *MarkMessagesReadReq) ReadField1(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
 		_field = v
@@ -4452,10 +4452,10 @@ WriteStructEndError:
 }
 
 func (p *MarkMessagesReadReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("conversation_id", thrift.I64, 1); err != nil {
+	if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.ConversationID); err != nil {
+	if err := oprot.WriteString(p.ConversationID); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {

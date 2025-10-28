@@ -31,6 +31,7 @@ struct KolOrderInfo {
     25: optional string cancelled_at
     26: string created_at
     27: string updated_at
+    28: optional string conversation_id  // 会话ID（用于聊天）
 }
 
 // 创建KOL订单请求

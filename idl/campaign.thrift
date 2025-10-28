@@ -29,7 +29,7 @@ struct CampaignInfo {
     13: optional i64 operating_system  // 引用数据字典ID
     14: optional list<i64> os_versions  // JSON数组的数据字典ID列表
     15: optional list<i64> device_models  // JSON数组的数据字典ID列表
-    16: optional i64 connection_type  // 引用数据字典ID
+    16: optional list<i64> connection_types  // JSON数组的数据字典ID列表
     17: i32 device_price_type  // 0-any, 1-specific range
     18: optional double device_price_min
     19: optional double device_price_max
@@ -65,7 +65,7 @@ struct CreateCampaignReq {
     9: optional i64 operating_system (api.body="operating_system")
     10: optional list<i64> os_versions (api.body="os_versions")
     11: optional list<i64> device_models (api.body="device_models")
-    12: optional i64 connection_type (api.body="connection_type")
+    12: optional list<i64> connection_types (api.body="connection_types")
     13: i32 device_price_type (api.body="device_price_type")
     14: optional double device_price_min (api.body="device_price_min")
     15: optional double device_price_max (api.body="device_price_max")
@@ -105,7 +105,7 @@ struct UpdateCampaignReq {
     10: optional i64 operating_system (api.body="operating_system")
     11: optional list<i64> os_versions (api.body="os_versions")
     12: optional list<i64> device_models (api.body="device_models")
-    13: optional i64 connection_type (api.body="connection_type")
+    13: optional list<i64> connection_types (api.body="connection_types")
     14: optional i32 device_price_type (api.body="device_price_type")
     15: optional double device_price_min (api.body="device_price_min")
     16: optional double device_price_max (api.body="device_price_max")

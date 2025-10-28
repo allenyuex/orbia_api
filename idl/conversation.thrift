@@ -14,7 +14,7 @@ struct ConversationMember {
 // 消息信息
 struct Message {
     1: string message_id
-    2: i64 conversation_id
+    2: string conversation_id
     3: i64 sender_id
     4: string sender_nickname
     5: optional string sender_avatar_url
@@ -58,7 +58,7 @@ struct ConversationItem {
 
 // 发送消息请求
 struct SendMessageReq {
-    1: i64 conversation_id (api.body="conversation_id")
+    1: string conversation_id (api.body="conversation_id")
     2: string message_type (api.body="message_type")  // text, image, file, video, audio
     3: string content (api.body="content")
     4: optional string file_name (api.body="file_name")
@@ -74,7 +74,7 @@ struct SendMessageResp {
 
 // 获取消息列表请求
 struct GetMessagesReq {
-    1: i64 conversation_id (api.body="conversation_id")
+    1: string conversation_id (api.body="conversation_id")
     2: optional i64 before_timestamp (api.body="before_timestamp")  // 毫秒时间戳，获取此时间之前的消息
     3: optional i32 limit = 20 (api.body="limit")  // 默认返回20条
 }
@@ -88,7 +88,7 @@ struct GetMessagesResp {
 
 // 获取会话详情请求
 struct GetConversationReq {
-    1: i64 conversation_id (api.body="conversation_id")
+    1: string conversation_id (api.body="conversation_id")
 }
 
 // 获取会话详情响应
@@ -113,7 +113,7 @@ struct GetConversationsResp {
 
 // 标记消息已读请求
 struct MarkMessagesReadReq {
-    1: i64 conversation_id (api.body="conversation_id")
+    1: string conversation_id (api.body="conversation_id")
 }
 
 // 标记消息已读响应

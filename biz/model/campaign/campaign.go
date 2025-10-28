@@ -406,8 +406,8 @@ type CampaignInfo struct {
 	OsVersions []int64 `thrift:"os_versions,14,optional,list<i64>" form:"os_versions" json:"os_versions,omitempty" query:"os_versions"`
 	// JSON数组的数据字典ID列表
 	DeviceModels []int64 `thrift:"device_models,15,optional,list<i64>" form:"device_models" json:"device_models,omitempty" query:"device_models"`
-	// 引用数据字典ID
-	ConnectionType *int64 `thrift:"connection_type,16,optional" form:"connection_type" json:"connection_type,omitempty" query:"connection_type"`
+	// JSON数组的数据字典ID列表
+	ConnectionTypes []int64 `thrift:"connection_types,16,optional,list<i64>" form:"connection_types" json:"connection_types,omitempty" query:"connection_types"`
 	// 0-any, 1-specific range
 	DevicePriceType  int32    `thrift:"device_price_type,17" form:"device_price_type" json:"device_price_type" query:"device_price_type"`
 	DevicePriceMin   *float64 `thrift:"device_price_min,18,optional" form:"device_price_min" json:"device_price_min,omitempty" query:"device_price_min"`
@@ -544,13 +544,13 @@ func (p *CampaignInfo) GetDeviceModels() (v []int64) {
 	return p.DeviceModels
 }
 
-var CampaignInfo_ConnectionType_DEFAULT int64
+var CampaignInfo_ConnectionTypes_DEFAULT []int64
 
-func (p *CampaignInfo) GetConnectionType() (v int64) {
-	if !p.IsSetConnectionType() {
-		return CampaignInfo_ConnectionType_DEFAULT
+func (p *CampaignInfo) GetConnectionTypes() (v []int64) {
+	if !p.IsSetConnectionTypes() {
+		return CampaignInfo_ConnectionTypes_DEFAULT
 	}
-	return *p.ConnectionType
+	return p.ConnectionTypes
 }
 
 func (p *CampaignInfo) GetDevicePriceType() (v int32) {
@@ -694,7 +694,7 @@ var fieldIDToName_CampaignInfo = map[int16]string{
 	13: "operating_system",
 	14: "os_versions",
 	15: "device_models",
-	16: "connection_type",
+	16: "connection_types",
 	17: "device_price_type",
 	18: "device_price_min",
 	19: "device_price_max",
@@ -749,8 +749,8 @@ func (p *CampaignInfo) IsSetDeviceModels() bool {
 	return p.DeviceModels != nil
 }
 
-func (p *CampaignInfo) IsSetConnectionType() bool {
-	return p.ConnectionType != nil
+func (p *CampaignInfo) IsSetConnectionTypes() bool {
+	return p.ConnectionTypes != nil
 }
 
 func (p *CampaignInfo) IsSetDevicePriceMin() bool {
@@ -929,7 +929,7 @@ func (p *CampaignInfo) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 16:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.LIST {
 				if err = p.ReadField16(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -1339,14 +1339,26 @@ func (p *CampaignInfo) ReadField15(iprot thrift.TProtocol) error {
 	return nil
 }
 func (p *CampaignInfo) ReadField16(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
 		return err
-	} else {
-		_field = &v
 	}
-	p.ConnectionType = _field
+	_field := make([]int64, 0, size)
+	for i := 0; i < size; i++ {
+
+		var _elem int64
+		if v, err := iprot.ReadI64(); err != nil {
+			return err
+		} else {
+			_elem = v
+		}
+
+		_field = append(_field, _elem)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return err
+	}
+	p.ConnectionTypes = _field
 	return nil
 }
 func (p *CampaignInfo) ReadField17(iprot thrift.TProtocol) error {
@@ -2054,11 +2066,19 @@ WriteFieldEndError:
 }
 
 func (p *CampaignInfo) writeField16(oprot thrift.TProtocol) (err error) {
-	if p.IsSetConnectionType() {
-		if err = oprot.WriteFieldBegin("connection_type", thrift.I64, 16); err != nil {
+	if p.IsSetConnectionTypes() {
+		if err = oprot.WriteFieldBegin("connection_types", thrift.LIST, 16); err != nil {
 			goto WriteFieldBeginError
 		}
-		if err := oprot.WriteI64(*p.ConnectionType); err != nil {
+		if err := oprot.WriteListBegin(thrift.I64, len(p.ConnectionTypes)); err != nil {
+			return err
+		}
+		for _, v := range p.ConnectionTypes {
+			if err := oprot.WriteI64(v); err != nil {
+				return err
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
 			return err
 		}
 		if err = oprot.WriteFieldEnd(); err != nil {
@@ -2459,7 +2479,7 @@ type CreateCampaignReq struct {
 	OperatingSystem    *int64   `thrift:"operating_system,9,optional" form:"operating_system" json:"operating_system,omitempty"`
 	OsVersions         []int64  `thrift:"os_versions,10,optional,list<i64>" form:"os_versions" json:"os_versions,omitempty"`
 	DeviceModels       []int64  `thrift:"device_models,11,optional,list<i64>" form:"device_models" json:"device_models,omitempty"`
-	ConnectionType     *int64   `thrift:"connection_type,12,optional" form:"connection_type" json:"connection_type,omitempty"`
+	ConnectionTypes    []int64  `thrift:"connection_types,12,optional,list<i64>" form:"connection_types" json:"connection_types,omitempty"`
 	DevicePriceType    int32    `thrift:"device_price_type,13" form:"device_price_type" json:"device_price_type"`
 	DevicePriceMin     *float64 `thrift:"device_price_min,14,optional" form:"device_price_min" json:"device_price_min,omitempty"`
 	DevicePriceMax     *float64 `thrift:"device_price_max,15,optional" form:"device_price_max" json:"device_price_max,omitempty"`
@@ -2571,13 +2591,13 @@ func (p *CreateCampaignReq) GetDeviceModels() (v []int64) {
 	return p.DeviceModels
 }
 
-var CreateCampaignReq_ConnectionType_DEFAULT int64
+var CreateCampaignReq_ConnectionTypes_DEFAULT []int64
 
-func (p *CreateCampaignReq) GetConnectionType() (v int64) {
-	if !p.IsSetConnectionType() {
-		return CreateCampaignReq_ConnectionType_DEFAULT
+func (p *CreateCampaignReq) GetConnectionTypes() (v []int64) {
+	if !p.IsSetConnectionTypes() {
+		return CreateCampaignReq_ConnectionTypes_DEFAULT
 	}
-	return *p.ConnectionType
+	return p.ConnectionTypes
 }
 
 func (p *CreateCampaignReq) GetDevicePriceType() (v int32) {
@@ -2710,7 +2730,7 @@ var fieldIDToName_CreateCampaignReq = map[int16]string{
 	9:  "operating_system",
 	10: "os_versions",
 	11: "device_models",
-	12: "connection_type",
+	12: "connection_types",
 	13: "device_price_type",
 	14: "device_price_min",
 	15: "device_price_max",
@@ -2762,8 +2782,8 @@ func (p *CreateCampaignReq) IsSetDeviceModels() bool {
 	return p.DeviceModels != nil
 }
 
-func (p *CreateCampaignReq) IsSetConnectionType() bool {
-	return p.ConnectionType != nil
+func (p *CreateCampaignReq) IsSetConnectionTypes() bool {
+	return p.ConnectionTypes != nil
 }
 
 func (p *CreateCampaignReq) IsSetDevicePriceMin() bool {
@@ -2914,7 +2934,7 @@ func (p *CreateCampaignReq) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 12:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.LIST {
 				if err = p.ReadField12(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -3256,14 +3276,26 @@ func (p *CreateCampaignReq) ReadField11(iprot thrift.TProtocol) error {
 	return nil
 }
 func (p *CreateCampaignReq) ReadField12(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
 		return err
-	} else {
-		_field = &v
 	}
-	p.ConnectionType = _field
+	_field := make([]int64, 0, size)
+	for i := 0; i < size; i++ {
+
+		var _elem int64
+		if v, err := iprot.ReadI64(); err != nil {
+			return err
+		} else {
+			_elem = v
+		}
+
+		_field = append(_field, _elem)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return err
+	}
+	p.ConnectionTypes = _field
 	return nil
 }
 func (p *CreateCampaignReq) ReadField13(iprot thrift.TProtocol) error {
@@ -3842,11 +3874,19 @@ WriteFieldEndError:
 }
 
 func (p *CreateCampaignReq) writeField12(oprot thrift.TProtocol) (err error) {
-	if p.IsSetConnectionType() {
-		if err = oprot.WriteFieldBegin("connection_type", thrift.I64, 12); err != nil {
+	if p.IsSetConnectionTypes() {
+		if err = oprot.WriteFieldBegin("connection_types", thrift.LIST, 12); err != nil {
 			goto WriteFieldBeginError
 		}
-		if err := oprot.WriteI64(*p.ConnectionType); err != nil {
+		if err := oprot.WriteListBegin(thrift.I64, len(p.ConnectionTypes)); err != nil {
+			return err
+		}
+		for _, v := range p.ConnectionTypes {
+			if err := oprot.WriteI64(v); err != nil {
+				return err
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
 			return err
 		}
 		if err = oprot.WriteFieldEnd(); err != nil {
@@ -4398,7 +4438,7 @@ type UpdateCampaignReq struct {
 	OperatingSystem    *int64   `thrift:"operating_system,10,optional" form:"operating_system" json:"operating_system,omitempty"`
 	OsVersions         []int64  `thrift:"os_versions,11,optional,list<i64>" form:"os_versions" json:"os_versions,omitempty"`
 	DeviceModels       []int64  `thrift:"device_models,12,optional,list<i64>" form:"device_models" json:"device_models,omitempty"`
-	ConnectionType     *int64   `thrift:"connection_type,13,optional" form:"connection_type" json:"connection_type,omitempty"`
+	ConnectionTypes    []int64  `thrift:"connection_types,13,optional,list<i64>" form:"connection_types" json:"connection_types,omitempty"`
 	DevicePriceType    *int32   `thrift:"device_price_type,14,optional" form:"device_price_type" json:"device_price_type,omitempty"`
 	DevicePriceMin     *float64 `thrift:"device_price_min,15,optional" form:"device_price_min" json:"device_price_min,omitempty"`
 	DevicePriceMax     *float64 `thrift:"device_price_max,16,optional" form:"device_price_max" json:"device_price_max,omitempty"`
@@ -4529,13 +4569,13 @@ func (p *UpdateCampaignReq) GetDeviceModels() (v []int64) {
 	return p.DeviceModels
 }
 
-var UpdateCampaignReq_ConnectionType_DEFAULT int64
+var UpdateCampaignReq_ConnectionTypes_DEFAULT []int64
 
-func (p *UpdateCampaignReq) GetConnectionType() (v int64) {
-	if !p.IsSetConnectionType() {
-		return UpdateCampaignReq_ConnectionType_DEFAULT
+func (p *UpdateCampaignReq) GetConnectionTypes() (v []int64) {
+	if !p.IsSetConnectionTypes() {
+		return UpdateCampaignReq_ConnectionTypes_DEFAULT
 	}
-	return *p.ConnectionType
+	return p.ConnectionTypes
 }
 
 var UpdateCampaignReq_DevicePriceType_DEFAULT int32
@@ -4704,7 +4744,7 @@ var fieldIDToName_UpdateCampaignReq = map[int16]string{
 	10: "operating_system",
 	11: "os_versions",
 	12: "device_models",
-	13: "connection_type",
+	13: "connection_types",
 	14: "device_price_type",
 	15: "device_price_min",
 	16: "device_price_max",
@@ -4768,8 +4808,8 @@ func (p *UpdateCampaignReq) IsSetDeviceModels() bool {
 	return p.DeviceModels != nil
 }
 
-func (p *UpdateCampaignReq) IsSetConnectionType() bool {
-	return p.ConnectionType != nil
+func (p *UpdateCampaignReq) IsSetConnectionTypes() bool {
+	return p.ConnectionTypes != nil
 }
 
 func (p *UpdateCampaignReq) IsSetDevicePriceType() bool {
@@ -4956,7 +4996,7 @@ func (p *UpdateCampaignReq) Read(iprot thrift.TProtocol) (err error) {
 				goto SkipFieldError
 			}
 		case 13:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.LIST {
 				if err = p.ReadField13(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -5309,14 +5349,26 @@ func (p *UpdateCampaignReq) ReadField12(iprot thrift.TProtocol) error {
 	return nil
 }
 func (p *UpdateCampaignReq) ReadField13(iprot thrift.TProtocol) error {
-
-	var _field *int64
-	if v, err := iprot.ReadI64(); err != nil {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
 		return err
-	} else {
-		_field = &v
 	}
-	p.ConnectionType = _field
+	_field := make([]int64, 0, size)
+	for i := 0; i < size; i++ {
+
+		var _elem int64
+		if v, err := iprot.ReadI64(); err != nil {
+			return err
+		} else {
+			_elem = v
+		}
+
+		_field = append(_field, _elem)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return err
+	}
+	p.ConnectionTypes = _field
 	return nil
 }
 func (p *UpdateCampaignReq) ReadField14(iprot thrift.TProtocol) error {
@@ -5922,11 +5974,19 @@ WriteFieldEndError:
 }
 
 func (p *UpdateCampaignReq) writeField13(oprot thrift.TProtocol) (err error) {
-	if p.IsSetConnectionType() {
-		if err = oprot.WriteFieldBegin("connection_type", thrift.I64, 13); err != nil {
+	if p.IsSetConnectionTypes() {
+		if err = oprot.WriteFieldBegin("connection_types", thrift.LIST, 13); err != nil {
 			goto WriteFieldBeginError
 		}
-		if err := oprot.WriteI64(*p.ConnectionType); err != nil {
+		if err := oprot.WriteListBegin(thrift.I64, len(p.ConnectionTypes)); err != nil {
+			return err
+		}
+		for _, v := range p.ConnectionTypes {
+			if err := oprot.WriteI64(v); err != nil {
+				return err
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
 			return err
 		}
 		if err = oprot.WriteFieldEnd(); err != nil {

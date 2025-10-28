@@ -8,8 +8,7 @@ import (
 
 // Conversation 会话模型
 type Conversation struct {
-	ID               int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	ConversationID   string         `gorm:"uniqueIndex;column:conversation_id;size:64;not null" json:"conversation_id"`
+	ConversationID   string         `gorm:"primaryKey;column:conversation_id;size:64" json:"conversation_id"`
 	Title            *string        `gorm:"column:title;size:200" json:"title"`
 	Type             string         `gorm:"column:type;type:enum('kol_order','ad_order','general','support');default:'general';not null" json:"type"`
 	RelatedOrderType *string        `gorm:"column:related_order_type;size:50" json:"related_order_type"`
@@ -28,9 +27,8 @@ func (Conversation) TableName() string {
 
 // ConversationMember 会话成员模型
 type ConversationMember struct {
-	ID             int64      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	ConversationID int64      `gorm:"column:conversation_id;not null;uniqueIndex:uk_conversation_user,priority:1" json:"conversation_id"`
-	UserID         int64      `gorm:"column:user_id;not null;uniqueIndex:uk_conversation_user,priority:2" json:"user_id"`
+	ConversationID string     `gorm:"primaryKey;column:conversation_id;size:64" json:"conversation_id"`
+	UserID         int64      `gorm:"primaryKey;column:user_id" json:"user_id"`
 	Role           string     `gorm:"column:role;type:enum('creator','member','admin');default:'member';not null" json:"role"`
 	UnreadCount    int        `gorm:"column:unread_count;default:0;not null" json:"unread_count"`
 	LastReadAt     *time.Time `gorm:"column:last_read_at" json:"last_read_at"`
@@ -44,9 +42,8 @@ func (ConversationMember) TableName() string {
 
 // Message 消息模型
 type Message struct {
-	ID             int64          `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	MessageID      string         `gorm:"uniqueIndex;column:message_id;size:64;not null" json:"message_id"`
-	ConversationID int64          `gorm:"column:conversation_id;not null;index" json:"conversation_id"`
+	MessageID      string         `gorm:"primaryKey;column:message_id;size:64" json:"message_id"`
+	ConversationID string         `gorm:"column:conversation_id;size:64;not null;index" json:"conversation_id"`
 	SenderID       int64          `gorm:"column:sender_id;not null;index" json:"sender_id"`
 	MessageType    string         `gorm:"column:message_type;type:enum('text','image','file','video','audio','system');default:'text';not null" json:"message_type"`
 	Content        string         `gorm:"column:content;type:text;not null" json:"content"`
@@ -68,7 +65,6 @@ func (Message) TableName() string {
 type ConversationRepository interface {
 	// 会话相关
 	CreateConversation(conversation *Conversation) error
-	GetConversationByID(id int64) (*Conversation, error)
 	GetConversationByConversationID(conversationID string) (*Conversation, error)
 	GetConversationByOrderID(orderType, orderID string) (*Conversation, error)
 	UpdateConversation(conversation *Conversation) error
@@ -76,21 +72,20 @@ type ConversationRepository interface {
 
 	// 会话成员相关
 	AddConversationMember(member *ConversationMember) error
-	GetConversationMembers(conversationID int64) ([]*ConversationMember, error)
-	GetConversationMember(conversationID, userID int64) (*ConversationMember, error)
+	GetConversationMembers(conversationID string) ([]*ConversationMember, error)
+	GetConversationMember(conversationID string, userID int64) (*ConversationMember, error)
 	UpdateConversationMember(member *ConversationMember) error
-	IsConversationMember(conversationID, userID int64) (bool, error)
+	IsConversationMember(conversationID string, userID int64) (bool, error)
 
 	// 消息相关
 	CreateMessage(message *Message) error
-	GetMessageByID(id int64) (*Message, error)
 	GetMessageByMessageID(messageID string) (*Message, error)
-	GetMessages(conversationID int64, beforeTimestamp *int64, limit int) ([]*Message, error)
+	GetMessages(conversationID string, beforeTimestamp *int64, limit int) ([]*Message, error)
 	UpdateMessage(message *Message) error
 
 	// 未读消息相关
-	IncrementUnreadCount(conversationID, userID int64) error
-	ResetUnreadCount(conversationID, userID int64) error
+	IncrementUnreadCount(conversationID string, userID int64) error
+	ResetUnreadCount(conversationID string, userID int64) error
 }
 
 // conversationRepository 会话仓储实现
@@ -106,16 +101,6 @@ func NewConversationRepository(db *gorm.DB) ConversationRepository {
 // CreateConversation 创建会话
 func (r *conversationRepository) CreateConversation(conversation *Conversation) error {
 	return r.db.Create(conversation).Error
-}
-
-// GetConversationByID 根据ID获取会话
-func (r *conversationRepository) GetConversationByID(id int64) (*Conversation, error) {
-	var conversation Conversation
-	err := r.db.Where("id = ?", id).First(&conversation).Error
-	if err != nil {
-		return nil, err
-	}
-	return &conversation, nil
 }
 
 // GetConversationByConversationID 根据会话ID获取会话
@@ -150,7 +135,7 @@ func (r *conversationRepository) GetUserConversations(userID int64, conversation
 
 	// 先通过 conversation_member 表找到用户参与的会话ID
 	query := r.db.Model(&Conversation{}).
-		Joins("JOIN orbia_conversation_member ON orbia_conversation.id = orbia_conversation_member.conversation_id").
+		Joins("JOIN orbia_conversation_member ON orbia_conversation.conversation_id = orbia_conversation_member.conversation_id").
 		Where("orbia_conversation_member.user_id = ?", userID)
 
 	if conversationType != nil && *conversationType != "" {
@@ -181,7 +166,7 @@ func (r *conversationRepository) AddConversationMember(member *ConversationMembe
 }
 
 // GetConversationMembers 获取会话成员列表
-func (r *conversationRepository) GetConversationMembers(conversationID int64) ([]*ConversationMember, error) {
+func (r *conversationRepository) GetConversationMembers(conversationID string) ([]*ConversationMember, error) {
 	var members []*ConversationMember
 	err := r.db.Where("conversation_id = ?", conversationID).Find(&members).Error
 	if err != nil {
@@ -191,7 +176,7 @@ func (r *conversationRepository) GetConversationMembers(conversationID int64) ([
 }
 
 // GetConversationMember 获取会话成员
-func (r *conversationRepository) GetConversationMember(conversationID, userID int64) (*ConversationMember, error) {
+func (r *conversationRepository) GetConversationMember(conversationID string, userID int64) (*ConversationMember, error) {
 	var member ConversationMember
 	err := r.db.Where("conversation_id = ? AND user_id = ?", conversationID, userID).First(&member).Error
 	if err != nil {
@@ -206,7 +191,7 @@ func (r *conversationRepository) UpdateConversationMember(member *ConversationMe
 }
 
 // IsConversationMember 检查用户是否是会话成员
-func (r *conversationRepository) IsConversationMember(conversationID, userID int64) (bool, error) {
+func (r *conversationRepository) IsConversationMember(conversationID string, userID int64) (bool, error) {
 	var count int64
 	err := r.db.Model(&ConversationMember{}).
 		Where("conversation_id = ? AND user_id = ?", conversationID, userID).
@@ -222,16 +207,6 @@ func (r *conversationRepository) CreateMessage(message *Message) error {
 	return r.db.Create(message).Error
 }
 
-// GetMessageByID 根据ID获取消息
-func (r *conversationRepository) GetMessageByID(id int64) (*Message, error) {
-	var message Message
-	err := r.db.Where("id = ?", id).First(&message).Error
-	if err != nil {
-		return nil, err
-	}
-	return &message, nil
-}
-
 // GetMessageByMessageID 根据消息ID获取消息
 func (r *conversationRepository) GetMessageByMessageID(messageID string) (*Message, error) {
 	var message Message
@@ -243,7 +218,7 @@ func (r *conversationRepository) GetMessageByMessageID(messageID string) (*Messa
 }
 
 // GetMessages 获取消息列表
-func (r *conversationRepository) GetMessages(conversationID int64, beforeTimestamp *int64, limit int) ([]*Message, error) {
+func (r *conversationRepository) GetMessages(conversationID string, beforeTimestamp *int64, limit int) ([]*Message, error) {
 	var messages []*Message
 	query := r.db.Where("conversation_id = ?", conversationID)
 
@@ -273,14 +248,14 @@ func (r *conversationRepository) UpdateMessage(message *Message) error {
 }
 
 // IncrementUnreadCount 增加未读消息数
-func (r *conversationRepository) IncrementUnreadCount(conversationID, userID int64) error {
+func (r *conversationRepository) IncrementUnreadCount(conversationID string, userID int64) error {
 	return r.db.Model(&ConversationMember{}).
 		Where("conversation_id = ? AND user_id = ?", conversationID, userID).
 		UpdateColumn("unread_count", gorm.Expr("unread_count + ?", 1)).Error
 }
 
 // ResetUnreadCount 重置未读消息数
-func (r *conversationRepository) ResetUnreadCount(conversationID, userID int64) error {
+func (r *conversationRepository) ResetUnreadCount(conversationID string, userID int64) error {
 	now := time.Now()
 	return r.db.Model(&ConversationMember{}).
 		Where("conversation_id = ? AND user_id = ?", conversationID, userID).

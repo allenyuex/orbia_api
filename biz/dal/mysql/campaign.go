@@ -23,7 +23,7 @@ type Campaign struct {
 	OperatingSystem    *int64         `gorm:"column:operating_system" json:"operating_system"`
 	OSVersions         *string        `gorm:"column:os_versions;type:text" json:"os_versions"`
 	DeviceModels       *string        `gorm:"column:device_models;type:text" json:"device_models"`
-	ConnectionType     *int64         `gorm:"column:connection_type" json:"connection_type"`
+	ConnectionTypes    *string        `gorm:"column:connection_types;type:text" json:"connection_types"`
 	DevicePriceType    int8           `gorm:"column:device_price_type;default:0" json:"device_price_type"`
 	DevicePriceMin     *float64       `gorm:"column:device_price_min;type:decimal(15,2)" json:"device_price_min"`
 	DevicePriceMax     *float64       `gorm:"column:device_price_max;type:decimal(15,2)" json:"device_price_max"`

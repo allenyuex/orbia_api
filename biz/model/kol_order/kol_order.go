@@ -56,6 +56,8 @@ type KolOrderInfo struct {
 	CancelledAt  *string `thrift:"cancelled_at,25,optional" form:"cancelled_at" json:"cancelled_at,omitempty" query:"cancelled_at"`
 	CreatedAt    string  `thrift:"created_at,26" form:"created_at" json:"created_at" query:"created_at"`
 	UpdatedAt    string  `thrift:"updated_at,27" form:"updated_at" json:"updated_at" query:"updated_at"`
+	// 会话ID（用于聊天）
+	ConversationID *string `thrift:"conversation_id,28,optional" form:"conversation_id" json:"conversation_id,omitempty" query:"conversation_id"`
 }
 
 func NewKolOrderInfo() *KolOrderInfo {
@@ -208,6 +210,15 @@ func (p *KolOrderInfo) GetUpdatedAt() (v string) {
 	return p.UpdatedAt
 }
 
+var KolOrderInfo_ConversationID_DEFAULT string
+
+func (p *KolOrderInfo) GetConversationID() (v string) {
+	if !p.IsSetConversationID() {
+		return KolOrderInfo_ConversationID_DEFAULT
+	}
+	return *p.ConversationID
+}
+
 var fieldIDToName_KolOrderInfo = map[int16]string{
 	1:  "order_id",
 	2:  "user_id",
@@ -236,6 +247,7 @@ var fieldIDToName_KolOrderInfo = map[int16]string{
 	25: "cancelled_at",
 	26: "created_at",
 	27: "updated_at",
+	28: "conversation_id",
 }
 
 func (p *KolOrderInfo) IsSetTeamID() bool {
@@ -264,6 +276,10 @@ func (p *KolOrderInfo) IsSetCompletedAt() bool {
 
 func (p *KolOrderInfo) IsSetCancelledAt() bool {
 	return p.CancelledAt != nil
+}
+
+func (p *KolOrderInfo) IsSetConversationID() bool {
+	return p.ConversationID != nil
 }
 
 func (p *KolOrderInfo) Read(iprot thrift.TProtocol) (err error) {
@@ -496,6 +512,14 @@ func (p *KolOrderInfo) Read(iprot thrift.TProtocol) (err error) {
 		case 27:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField27(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 28:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField28(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -827,6 +851,17 @@ func (p *KolOrderInfo) ReadField27(iprot thrift.TProtocol) error {
 	p.UpdatedAt = _field
 	return nil
 }
+func (p *KolOrderInfo) ReadField28(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.ConversationID = _field
+	return nil
+}
 
 func (p *KolOrderInfo) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -940,6 +975,10 @@ func (p *KolOrderInfo) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField27(oprot); err != nil {
 			fieldId = 27
+			goto WriteFieldError
+		}
+		if err = p.writeField28(oprot); err != nil {
+			fieldId = 28
 			goto WriteFieldError
 		}
 	}
@@ -1431,6 +1470,25 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 27 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 27 end error: ", p), err)
+}
+
+func (p *KolOrderInfo) writeField28(oprot thrift.TProtocol) (err error) {
+	if p.IsSetConversationID() {
+		if err = oprot.WriteFieldBegin("conversation_id", thrift.STRING, 28); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.ConversationID); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 28 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 28 end error: ", p), err)
 }
 
 func (p *KolOrderInfo) String() string {

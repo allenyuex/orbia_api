@@ -17,25 +17,25 @@ type ConversationService interface {
 	CreateConversation(conversationType, relatedOrderType, relatedOrderID string, title *string, memberUserIDs []int64) (*mysql.Conversation, error)
 
 	// 发送消息
-	SendMessage(userID, conversationID int64, messageType, content string, fileName *string, fileSize *int64, fileType *string) (*MessageWithSender, error)
+	SendMessage(userID int64, conversationID string, messageType, content string, fileName *string, fileSize *int64, fileType *string) (*MessageWithSender, error)
 
 	// 获取消息列表
-	GetMessages(userID, conversationID int64, beforeTimestamp *int64, limit int) ([]*MessageWithSender, bool, error)
+	GetMessages(userID int64, conversationID string, beforeTimestamp *int64, limit int) ([]*MessageWithSender, bool, error)
 
 	// 获取会话详情
-	GetConversation(userID, conversationID int64) (*ConversationDetail, error)
+	GetConversation(userID int64, conversationID string) (*ConversationDetail, error)
 
 	// 获取用户的会话列表
 	GetConversations(userID int64, conversationType *string, page, pageSize int) ([]*ConversationItem, int64, error)
 
 	// 标记消息已读
-	MarkMessagesRead(userID, conversationID int64) error
+	MarkMessagesRead(userID int64, conversationID string) error
 }
 
 // MessageWithSender 带发送者信息的消息
 type MessageWithSender struct {
 	MessageID       string
-	ConversationID  int64
+	ConversationID  string
 	SenderID        int64
 	SenderNickname  string
 	SenderAvatarURL *string
@@ -127,7 +127,7 @@ func (s *conversationService) CreateConversation(conversationType, relatedOrderT
 		}
 
 		member := &mysql.ConversationMember{
-			ConversationID: conversation.ID,
+			ConversationID: conversation.ConversationID,
 			UserID:         userID,
 			Role:           role,
 			UnreadCount:    0,
@@ -142,7 +142,7 @@ func (s *conversationService) CreateConversation(conversationType, relatedOrderT
 }
 
 // SendMessage 发送消息
-func (s *conversationService) SendMessage(userID, conversationID int64, messageType, content string, fileName *string, fileSize *int64, fileType *string) (*MessageWithSender, error) {
+func (s *conversationService) SendMessage(userID int64, conversationID string, messageType, content string, fileName *string, fileSize *int64, fileType *string) (*MessageWithSender, error) {
 	// 验证用户是否是会话成员
 	isMember, err := s.convRepo.IsConversationMember(conversationID, userID)
 	if err != nil {
@@ -153,7 +153,7 @@ func (s *conversationService) SendMessage(userID, conversationID int64, messageT
 	}
 
 	// 获取会话信息
-	conversation, err := s.convRepo.GetConversationByID(conversationID)
+	conversation, err := s.convRepo.GetConversationByConversationID(conversationID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("conversation not found")
@@ -241,7 +241,7 @@ func (s *conversationService) SendMessage(userID, conversationID int64, messageT
 }
 
 // GetMessages 获取消息列表
-func (s *conversationService) GetMessages(userID, conversationID int64, beforeTimestamp *int64, limit int) ([]*MessageWithSender, bool, error) {
+func (s *conversationService) GetMessages(userID int64, conversationID string, beforeTimestamp *int64, limit int) ([]*MessageWithSender, bool, error) {
 	// 验证用户是否是会话成员
 	isMember, err := s.convRepo.IsConversationMember(conversationID, userID)
 	if err != nil {
@@ -307,7 +307,7 @@ func (s *conversationService) GetMessages(userID, conversationID int64, beforeTi
 }
 
 // GetConversation 获取会话详情
-func (s *conversationService) GetConversation(userID, conversationID int64) (*ConversationDetail, error) {
+func (s *conversationService) GetConversation(userID int64, conversationID string) (*ConversationDetail, error) {
 	// 验证用户是否是会话成员
 	isMember, err := s.convRepo.IsConversationMember(conversationID, userID)
 	if err != nil {
@@ -318,7 +318,7 @@ func (s *conversationService) GetConversation(userID, conversationID int64) (*Co
 	}
 
 	// 获取会话信息
-	conversation, err := s.convRepo.GetConversationByID(conversationID)
+	conversation, err := s.convRepo.GetConversationByConversationID(conversationID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("conversation not found")
@@ -392,7 +392,7 @@ func (s *conversationService) GetConversations(userID int64, conversationType *s
 	result := make([]*ConversationItem, 0, len(conversations))
 	for _, conv := range conversations {
 		// 获取会话成员
-		members, err := s.convRepo.GetConversationMembers(conv.ID)
+		members, err := s.convRepo.GetConversationMembers(conv.ConversationID)
 		if err != nil {
 			continue
 		}
@@ -428,7 +428,7 @@ func (s *conversationService) GetConversations(userID int64, conversationType *s
 
 		// 获取最后一条消息
 		var lastMessage *MessageWithSender
-		messages, err := s.convRepo.GetMessages(conv.ID, nil, 1)
+		messages, err := s.convRepo.GetMessages(conv.ConversationID, nil, 1)
 		if err == nil && len(messages) > 0 {
 			msg := messages[0]
 			sender, err := s.userRepo.GetUserByID(msg.SenderID)
@@ -476,7 +476,7 @@ func (s *conversationService) GetConversations(userID int64, conversationType *s
 }
 
 // MarkMessagesRead 标记消息已读
-func (s *conversationService) MarkMessagesRead(userID, conversationID int64) error {
+func (s *conversationService) MarkMessagesRead(userID int64, conversationID string) error {
 	// 验证用户是否是会话成员
 	isMember, err := s.convRepo.IsConversationMember(conversationID, userID)
 	if err != nil {

@@ -65,7 +65,7 @@ func CreateCampaign(ctx context.Context, c *app.RequestContext) {
 		OperatingSystem:    req.OperatingSystem,
 		OSVersions:         req.OsVersions,
 		DeviceModels:       req.DeviceModels,
-		ConnectionType:     req.ConnectionType,
+		ConnectionTypes:    req.ConnectionTypes,
 		DevicePriceType:    int8(req.DevicePriceType),
 		DevicePriceMin:     req.DevicePriceMin,
 		DevicePriceMax:     req.DevicePriceMax,
@@ -133,7 +133,7 @@ func UpdateCampaign(ctx context.Context, c *app.RequestContext) {
 		OperatingSystem:    req.OperatingSystem,
 		OSVersions:         req.OsVersions,
 		DeviceModels:       req.DeviceModels,
-		ConnectionType:     req.ConnectionType,
+		ConnectionTypes:    req.ConnectionTypes,
 		Website:            req.Website,
 		IOSDownloadURL:     req.IosDownloadURL,
 		AndroidDownloadURL: req.AndroidDownloadURL,
@@ -490,8 +490,10 @@ func convertToCampaignInfo(campaign *mysql.Campaign, attachments []*mysql.Campai
 		info.DeviceModels = deviceModels
 	}
 
-	if campaign.ConnectionType != nil {
-		info.ConnectionType = campaign.ConnectionType
+	if campaign.ConnectionTypes != nil && *campaign.ConnectionTypes != "" {
+		var connectionTypes []int64
+		json.Unmarshal([]byte(*campaign.ConnectionTypes), &connectionTypes)
+		info.ConnectionTypes = connectionTypes
 	}
 
 	if campaign.DevicePriceMin != nil {
@@ -533,12 +535,16 @@ func convertToCampaignInfo(campaign *mysql.Campaign, attachments []*mysql.Campai
 	// 转换附件
 	attachmentInfos := make([]*campaignModel.CampaignAttachment, 0, len(attachments))
 	for _, attachment := range attachments {
+		var fileSize int64
+		if attachment.FileSize != nil {
+			fileSize = *attachment.FileSize
+		}
 		attachmentInfos = append(attachmentInfos, &campaignModel.CampaignAttachment{
 			ID:        attachment.ID,
 			FileURL:   attachment.FileURL,
 			FileName:  attachment.FileName,
 			FileType:  attachment.FileType,
-			FileSize:  *attachment.FileSize,
+			FileSize:  fileSize,
 			CreatedAt: attachment.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
