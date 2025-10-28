@@ -1,0 +1,126 @@
+# Orbia API 生产环境配置文件
+
+# 服务配置
+server:
+  host: 0.0.0.0
+  port: 8888
+  read_timeout: 30s
+  write_timeout: 30s
+
+# 数据库配置
+database:
+  mysql:
+    host: ${MYSQL_HOST:127.0.0.1}
+    port: ${MYSQL_PORT:3306}
+    database: ${MYSQL_DATABASE:orbia}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    charset: utf8mb4
+    parse_time: true
+    loc: Local
+    max_idle_conns: 10
+    max_open_conns: 100
+    conn_max_lifetime: 3600
+
+# Redis 配置
+redis:
+  host: ${REDIS_HOST:127.0.0.1}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  db: 0
+  pool_size: 10
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:please_change_this_secret_in_production}
+  expire_hours: 24
+
+# 日志配置
+log:
+  level: info
+  file_path: ./logs/app.log
+  max_size: 100
+  max_backups: 7
+  max_age: 30
+
+# Cloudflare R2 配置
+r2:
+  endpoint: ${R2_ENDPOINT:}
+  access_key: ${R2_ACCESS_KEY:}
+  secret_key: ${R2_SECRET_KEY:}
+  bucket: ${R2_BUCKET:orbia}
+  public_url: ${R2_PUBLIC_URL:}
+  upload_token_expire_minutes: 30  # 上传token过期时间（分钟）
+  max_file_size: 10485760          # 默认最大文件大小（10MB）
+  
+  # 按文件扩展名配置
+  allowed_extensions:
+    # 图片类型
+    .jpg:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .jpeg:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .png:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    .gif:
+      max_size: 5242880   # 5MB
+      default_path: "images"
+    .webp:
+      max_size: 10485760  # 10MB
+      default_path: "images"
+    
+    # 文档类型
+    .pdf:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .doc:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .docx:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .xls:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .xlsx:
+      max_size: 20971520  # 20MB
+      default_path: "documents"
+    .ppt:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .pptx:
+      max_size: 52428800  # 50MB
+      default_path: "documents"
+    .txt:
+      max_size: 1048576   # 1MB
+      default_path: "documents"
+    
+    # 视频类型
+    .mp4:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
+    .mov:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
+    .avi:
+      max_size: 104857600  # 100MB
+      default_path: "videos"
+
+# SMTP 邮件配置
+smtp:
+  server: ${SMTP_SERVER:mail.smtp2go.com}
+  port: ${SMTP_PORT:2525}
+  username: ${SMTP_USERNAME:}
+  password: ${SMTP_PASSWORD:}
+  email: ${SMTP_EMAIL:}
+  from_name: ${SMTP_FROM_NAME:Orbia App}
+
+# 验证码配置
+verification_code:
+  expire_minutes: 10  # 验证码过期时间（分钟）
+  length: 6           # 验证码长度
+
+
