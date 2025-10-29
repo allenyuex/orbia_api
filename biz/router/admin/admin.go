@@ -28,6 +28,10 @@ func Register(r *server.Hertz) {
 				_admin.POST("/teams", append(_getallteamsMw(), admin.GetAllTeams)...)
 				_admin.POST("/users", append(_getallusersMw(), admin.GetAllUsers)...)
 				{
+					_campaign := _admin.Group("/campaign", _campaignMw()...)
+					_campaign.POST("/consume", append(_addcampaignconsumeMw(), admin.AddCampaignConsume)...)
+				}
+				{
 					_kol := _admin.Group("/kol", _kolMw()...)
 					_kol.POST("/review", append(_adminreviewkolMw(), admin.AdminReviewKol)...)
 				}

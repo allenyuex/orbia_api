@@ -90,3 +90,13 @@ func _getuserwalletMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _campaignMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _addcampaignconsumeMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

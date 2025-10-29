@@ -23,7 +23,9 @@ func InitAdminService() {
 	teamRepo := mysql.NewTeamRepository(mysql.DB)
 	orderRepo := mysql.NewOrderRepository(mysql.DB)
 	walletRepo := mysql.NewWalletRepository(mysql.DB)
-	adminSvc = adminService.NewAdminService(userRepo, kolRepo, teamRepo, orderRepo, walletRepo)
+	campaignRepo := mysql.NewCampaignRepository(mysql.DB)
+	txRepo := mysql.NewTransactionRepository(mysql.DB)
+	adminSvc = adminService.NewAdminService(userRepo, kolRepo, teamRepo, orderRepo, walletRepo, campaignRepo, txRepo, mysql.DB)
 }
 
 // GetAllUsers .
@@ -230,6 +232,32 @@ func GetUserWallet(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp, err := adminSvc.GetUserWallet(ctx, serviceReq)
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.BuildErrorResp(500, err.Error()))
+		return
+	}
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// AddCampaignConsume .
+// @router /api/v1/admin/campaign/consume [POST]
+func AddCampaignConsume(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req admin.AddCampaignConsumeReq
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	serviceReq := &admin.AddCampaignConsumeReq{
+		CampaignID: req.CampaignID,
+		Amount:     req.Amount,
+		Remark:     req.Remark,
+	}
+
+	resp, err := adminSvc.AddCampaignConsume(ctx, serviceReq)
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.BuildErrorResp(500, err.Error()))
 		return

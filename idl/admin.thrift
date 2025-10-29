@@ -201,6 +201,21 @@ struct GetUserWalletResp {
     2: optional UserWalletInfo wallet
 }
 
+// ==================== Campaign消费管理 ====================
+
+// 管理员给Campaign添加消费账单请求
+struct AddCampaignConsumeReq {
+    1: string campaign_id (api.body="campaign_id")
+    2: double amount (api.body="amount") // 消费金额（美元）
+    3: optional string remark (api.body="remark") // 备注说明
+}
+
+// 管理员给Campaign添加消费账单响应
+struct AddCampaignConsumeResp {
+    1: common.BaseResp base_resp
+    2: optional string transaction_id // 交易ID
+}
+
 // 管理员服务
 service AdminService {
     // 用户管理
@@ -220,5 +235,8 @@ service AdminService {
     
     // 钱包管理
     GetUserWalletResp GetUserWallet(1: GetUserWalletReq req) (api.post="/api/v1/admin/user/:user_id/wallet")
+    
+    // Campaign消费管理
+    AddCampaignConsumeResp AddCampaignConsume(1: AddCampaignConsumeReq req) (api.post="/api/v1/admin/campaign/consume")
 }
 

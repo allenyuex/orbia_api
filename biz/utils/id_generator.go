@@ -153,6 +153,12 @@ func GenerateCampaignID() string {
 	return fmt.Sprintf("CAMPAIGN_%d_%d", timestamp, id%100000)
 }
 
+// GenerateTransactionID 生成交易ID（格式：TXN{snowflake_id}）
+func GenerateTransactionID() string {
+	id, _ := GetDefaultGenerator().NextID()
+	return fmt.Sprintf("TXN%d", id)
+}
+
 // GenerateID 生成通用ID字符串
 func GenerateID() (string, error) {
 	return GetDefaultGenerator().NextIDString()

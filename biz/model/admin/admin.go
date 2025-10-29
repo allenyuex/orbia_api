@@ -7257,6 +7257,458 @@ func (p *GetUserWalletResp) String() string {
 
 }
 
+// ==================== Campaign消费管理 ====================
+// 管理员给Campaign添加消费账单请求
+type AddCampaignConsumeReq struct {
+	CampaignID string `thrift:"campaign_id,1" form:"campaign_id" json:"campaign_id"`
+	// 消费金额（美元）
+	Amount float64 `thrift:"amount,2" form:"amount" json:"amount"`
+	// 备注说明
+	Remark *string `thrift:"remark,3,optional" form:"remark" json:"remark,omitempty"`
+}
+
+func NewAddCampaignConsumeReq() *AddCampaignConsumeReq {
+	return &AddCampaignConsumeReq{}
+}
+
+func (p *AddCampaignConsumeReq) InitDefault() {
+}
+
+func (p *AddCampaignConsumeReq) GetCampaignID() (v string) {
+	return p.CampaignID
+}
+
+func (p *AddCampaignConsumeReq) GetAmount() (v float64) {
+	return p.Amount
+}
+
+var AddCampaignConsumeReq_Remark_DEFAULT string
+
+func (p *AddCampaignConsumeReq) GetRemark() (v string) {
+	if !p.IsSetRemark() {
+		return AddCampaignConsumeReq_Remark_DEFAULT
+	}
+	return *p.Remark
+}
+
+var fieldIDToName_AddCampaignConsumeReq = map[int16]string{
+	1: "campaign_id",
+	2: "amount",
+	3: "remark",
+}
+
+func (p *AddCampaignConsumeReq) IsSetRemark() bool {
+	return p.Remark != nil
+}
+
+func (p *AddCampaignConsumeReq) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.DOUBLE {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_AddCampaignConsumeReq[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeReq) ReadField1(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.CampaignID = _field
+	return nil
+}
+func (p *AddCampaignConsumeReq) ReadField2(iprot thrift.TProtocol) error {
+
+	var _field float64
+	if v, err := iprot.ReadDouble(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.Amount = _field
+	return nil
+}
+func (p *AddCampaignConsumeReq) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.Remark = _field
+	return nil
+}
+
+func (p *AddCampaignConsumeReq) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("AddCampaignConsumeReq"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeReq) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("campaign_id", thrift.STRING, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.CampaignID); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeReq) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("amount", thrift.DOUBLE, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteDouble(p.Amount); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeReq) writeField3(oprot thrift.TProtocol) (err error) {
+	if p.IsSetRemark() {
+		if err = oprot.WriteFieldBegin("remark", thrift.STRING, 3); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.Remark); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AddCampaignConsumeReq(%+v)", *p)
+
+}
+
+// 管理员给Campaign添加消费账单响应
+type AddCampaignConsumeResp struct {
+	BaseResp *common.BaseResp `thrift:"base_resp,1" form:"base_resp" json:"base_resp" query:"base_resp"`
+	// 交易ID
+	TransactionID *string `thrift:"transaction_id,2,optional" form:"transaction_id" json:"transaction_id,omitempty" query:"transaction_id"`
+}
+
+func NewAddCampaignConsumeResp() *AddCampaignConsumeResp {
+	return &AddCampaignConsumeResp{}
+}
+
+func (p *AddCampaignConsumeResp) InitDefault() {
+}
+
+var AddCampaignConsumeResp_BaseResp_DEFAULT *common.BaseResp
+
+func (p *AddCampaignConsumeResp) GetBaseResp() (v *common.BaseResp) {
+	if !p.IsSetBaseResp() {
+		return AddCampaignConsumeResp_BaseResp_DEFAULT
+	}
+	return p.BaseResp
+}
+
+var AddCampaignConsumeResp_TransactionID_DEFAULT string
+
+func (p *AddCampaignConsumeResp) GetTransactionID() (v string) {
+	if !p.IsSetTransactionID() {
+		return AddCampaignConsumeResp_TransactionID_DEFAULT
+	}
+	return *p.TransactionID
+}
+
+var fieldIDToName_AddCampaignConsumeResp = map[int16]string{
+	1: "base_resp",
+	2: "transaction_id",
+}
+
+func (p *AddCampaignConsumeResp) IsSetBaseResp() bool {
+	return p.BaseResp != nil
+}
+
+func (p *AddCampaignConsumeResp) IsSetTransactionID() bool {
+	return p.TransactionID != nil
+}
+
+func (p *AddCampaignConsumeResp) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_AddCampaignConsumeResp[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeResp) ReadField1(iprot thrift.TProtocol) error {
+	_field := common.NewBaseResp()
+	if err := _field.Read(iprot); err != nil {
+		return err
+	}
+	p.BaseResp = _field
+	return nil
+}
+func (p *AddCampaignConsumeResp) ReadField2(iprot thrift.TProtocol) error {
+
+	var _field *string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = &v
+	}
+	p.TransactionID = _field
+	return nil
+}
+
+func (p *AddCampaignConsumeResp) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("AddCampaignConsumeResp"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeResp) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("base_resp", thrift.STRUCT, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.BaseResp.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeResp) writeField2(oprot thrift.TProtocol) (err error) {
+	if p.IsSetTransactionID() {
+		if err = oprot.WriteFieldBegin("transaction_id", thrift.STRING, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteString(*p.TransactionID); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *AddCampaignConsumeResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AddCampaignConsumeResp(%+v)", *p)
+
+}
+
 // 管理员服务
 type AdminService interface {
 	// 用户管理
@@ -7275,6 +7727,8 @@ type AdminService interface {
 	GetAllOrders(ctx context.Context, req *GetAllOrdersReq) (r *GetAllOrdersResp, err error)
 	// 钱包管理
 	GetUserWallet(ctx context.Context, req *GetUserWalletReq) (r *GetUserWalletResp, err error)
+	// Campaign消费管理
+	AddCampaignConsume(ctx context.Context, req *AddCampaignConsumeReq) (r *AddCampaignConsumeResp, err error)
 }
 
 type AdminServiceClient struct {
@@ -7375,6 +7829,15 @@ func (p *AdminServiceClient) GetUserWallet(ctx context.Context, req *GetUserWall
 	}
 	return _result.GetSuccess(), nil
 }
+func (p *AdminServiceClient) AddCampaignConsume(ctx context.Context, req *AddCampaignConsumeReq) (r *AddCampaignConsumeResp, err error) {
+	var _args AdminServiceAddCampaignConsumeArgs
+	_args.Req = req
+	var _result AdminServiceAddCampaignConsumeResult
+	if err = p.Client_().Call(ctx, "AddCampaignConsume", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
 
 type AdminServiceProcessor struct {
 	processorMap map[string]thrift.TProcessorFunction
@@ -7404,6 +7867,7 @@ func NewAdminServiceProcessor(handler AdminService) *AdminServiceProcessor {
 	self.AddToProcessorMap("GetTeamMembers", &adminServiceProcessorGetTeamMembers{handler: handler})
 	self.AddToProcessorMap("GetAllOrders", &adminServiceProcessorGetAllOrders{handler: handler})
 	self.AddToProcessorMap("GetUserWallet", &adminServiceProcessorGetUserWallet{handler: handler})
+	self.AddToProcessorMap("AddCampaignConsume", &adminServiceProcessorAddCampaignConsume{handler: handler})
 	return self
 }
 func (p *AdminServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -7791,6 +8255,54 @@ func (p *adminServiceProcessorGetUserWallet) Process(ctx context.Context, seqId 
 		result.Success = retval
 	}
 	if err2 = oprot.WriteMessageBegin("GetUserWallet", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
+type adminServiceProcessorAddCampaignConsume struct {
+	handler AdminService
+}
+
+func (p *adminServiceProcessorAddCampaignConsume) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := AdminServiceAddCampaignConsumeArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("AddCampaignConsume", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	var err2 error
+	result := AdminServiceAddCampaignConsumeResult{}
+	var retval *AddCampaignConsumeResp
+	if retval, err2 = p.handler.AddCampaignConsume(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing AddCampaignConsume: "+err2.Error())
+		oprot.WriteMessageBegin("AddCampaignConsume", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = retval
+	}
+	if err2 = oprot.WriteMessageBegin("AddCampaignConsume", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -10157,5 +10669,299 @@ func (p *AdminServiceGetUserWalletResult) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("AdminServiceGetUserWalletResult(%+v)", *p)
+
+}
+
+type AdminServiceAddCampaignConsumeArgs struct {
+	Req *AddCampaignConsumeReq `thrift:"req,1"`
+}
+
+func NewAdminServiceAddCampaignConsumeArgs() *AdminServiceAddCampaignConsumeArgs {
+	return &AdminServiceAddCampaignConsumeArgs{}
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) InitDefault() {
+}
+
+var AdminServiceAddCampaignConsumeArgs_Req_DEFAULT *AddCampaignConsumeReq
+
+func (p *AdminServiceAddCampaignConsumeArgs) GetReq() (v *AddCampaignConsumeReq) {
+	if !p.IsSetReq() {
+		return AdminServiceAddCampaignConsumeArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+var fieldIDToName_AdminServiceAddCampaignConsumeArgs = map[int16]string{
+	1: "req",
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_AdminServiceAddCampaignConsumeArgs[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) ReadField1(iprot thrift.TProtocol) error {
+	_field := NewAddCampaignConsumeReq()
+	if err := _field.Read(iprot); err != nil {
+		return err
+	}
+	p.Req = _field
+	return nil
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("AddCampaignConsume_args"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.Req.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AdminServiceAddCampaignConsumeArgs(%+v)", *p)
+
+}
+
+type AdminServiceAddCampaignConsumeResult struct {
+	Success *AddCampaignConsumeResp `thrift:"success,0,optional"`
+}
+
+func NewAdminServiceAddCampaignConsumeResult() *AdminServiceAddCampaignConsumeResult {
+	return &AdminServiceAddCampaignConsumeResult{}
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) InitDefault() {
+}
+
+var AdminServiceAddCampaignConsumeResult_Success_DEFAULT *AddCampaignConsumeResp
+
+func (p *AdminServiceAddCampaignConsumeResult) GetSuccess() (v *AddCampaignConsumeResp) {
+	if !p.IsSetSuccess() {
+		return AdminServiceAddCampaignConsumeResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+var fieldIDToName_AdminServiceAddCampaignConsumeResult = map[int16]string{
+	0: "success",
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField0(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_AdminServiceAddCampaignConsumeResult[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) ReadField0(iprot thrift.TProtocol) error {
+	_field := NewAddCampaignConsumeResp()
+	if err := _field.Read(iprot); err != nil {
+		return err
+	}
+	p.Success = _field
+	return nil
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("AddCampaignConsume_result"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField0(oprot); err != nil {
+			fieldId = 0
+			goto WriteFieldError
+		}
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := p.Success.Write(oprot); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
+}
+
+func (p *AdminServiceAddCampaignConsumeResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AdminServiceAddCampaignConsumeResult(%+v)", *p)
 
 }

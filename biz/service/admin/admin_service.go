@@ -3,24 +3,30 @@ package admin
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"orbia_api/biz/consts"
+	"orbia_api/biz/dal/model"
 	"orbia_api/biz/dal/mysql"
-	"orbia_api/biz/model/admin"
+	adminmodel "orbia_api/biz/model/admin"
 	"orbia_api/biz/model/common"
 	"orbia_api/biz/utils"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"gorm.io/gorm"
 )
 
 // AdminService 管理员服务
 type AdminService struct {
-	userRepo   mysql.UserRepository
-	kolRepo    mysql.KolRepository
-	teamRepo   mysql.TeamRepository
-	orderRepo  mysql.OrderRepository
-	walletRepo mysql.WalletRepository
+	userRepo     mysql.UserRepository
+	kolRepo      mysql.KolRepository
+	teamRepo     mysql.TeamRepository
+	orderRepo    mysql.OrderRepository
+	walletRepo   mysql.WalletRepository
+	campaignRepo mysql.CampaignRepository
+	txRepo       mysql.TransactionRepository
+	db           *gorm.DB
 }
 
 // NewAdminService 创建管理员服务实例
@@ -30,18 +36,24 @@ func NewAdminService(
 	teamRepo mysql.TeamRepository,
 	orderRepo mysql.OrderRepository,
 	walletRepo mysql.WalletRepository,
+	campaignRepo mysql.CampaignRepository,
+	txRepo mysql.TransactionRepository,
+	db *gorm.DB,
 ) *AdminService {
 	return &AdminService{
-		userRepo:   userRepo,
-		kolRepo:    kolRepo,
-		teamRepo:   teamRepo,
-		orderRepo:  orderRepo,
-		walletRepo: walletRepo,
+		userRepo:     userRepo,
+		kolRepo:      kolRepo,
+		teamRepo:     teamRepo,
+		orderRepo:    orderRepo,
+		walletRepo:   walletRepo,
+		campaignRepo: campaignRepo,
+		txRepo:       txRepo,
+		db:           db,
 	}
 }
 
 // GetAllUsers 获取所有用户列表
-func (s *AdminService) GetAllUsers(ctx context.Context, req *admin.GetAllUsersReq) (*admin.GetAllUsersResp, error) {
+func (s *AdminService) GetAllUsers(ctx context.Context, req *adminmodel.GetAllUsersReq) (*adminmodel.GetAllUsersResp, error) {
 	// 标准化分页参数
 	params := utils.NormalizePaginationValue(req.Page, req.PageSize)
 	offset := int((params.Page - 1) * params.PageSize)
@@ -69,9 +81,9 @@ func (s *AdminService) GetAllUsers(ctx context.Context, req *admin.GetAllUsersRe
 	}
 
 	// 构建响应
-	userList := make([]*admin.UserListItem, 0, len(users))
+	userList := make([]*adminmodel.UserListItem, 0, len(users))
 	for _, user := range users {
-		item := &admin.UserListItem{
+		item := &adminmodel.UserListItem{
 			ID:        user.ID,
 			Role:      user.Role,
 			Status:    user.Status,
@@ -100,7 +112,7 @@ func (s *AdminService) GetAllUsers(ctx context.Context, req *admin.GetAllUsersRe
 
 	pageInfo := utils.BuildPageResp(params, total)
 
-	return &admin.GetAllUsersResp{
+	return &adminmodel.GetAllUsersResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -111,7 +123,7 @@ func (s *AdminService) GetAllUsers(ctx context.Context, req *admin.GetAllUsersRe
 }
 
 // SetUserStatus 设置用户状态
-func (s *AdminService) SetUserStatus(ctx context.Context, req *admin.SetUserStatusReq) (*admin.SetUserStatusResp, error) {
+func (s *AdminService) SetUserStatus(ctx context.Context, req *adminmodel.SetUserStatusReq) (*adminmodel.SetUserStatusResp, error) {
 	// 验证状态值
 	if req.Status != "normal" && req.Status != "disabled" && req.Status != "deleted" {
 		return nil, errors.New("invalid status value")
@@ -135,7 +147,7 @@ func (s *AdminService) SetUserStatus(ctx context.Context, req *admin.SetUserStat
 		return nil, err
 	}
 
-	return &admin.SetUserStatusResp{
+	return &adminmodel.SetUserStatusResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -144,7 +156,7 @@ func (s *AdminService) SetUserStatus(ctx context.Context, req *admin.SetUserStat
 }
 
 // GetAllKols 获取所有KOL列表
-func (s *AdminService) GetAllKols(ctx context.Context, req *admin.GetAllKolsReq) (*admin.GetAllKolsResp, error) {
+func (s *AdminService) GetAllKols(ctx context.Context, req *adminmodel.GetAllKolsReq) (*adminmodel.GetAllKolsResp, error) {
 	// 标准化分页参数
 	params := utils.NormalizePaginationValue(req.Page, req.PageSize)
 	offset := int((params.Page - 1) * params.PageSize)
@@ -177,12 +189,12 @@ func (s *AdminService) GetAllKols(ctx context.Context, req *admin.GetAllKolsReq)
 	}
 
 	// 构建响应
-	kolList := make([]*admin.KolListItem, 0, len(kols))
+	kolList := make([]*adminmodel.KolListItem, 0, len(kols))
 	for _, kol := range kols {
 		// 获取统计数据
 		stats, _ := s.kolRepo.GetKolStats(kol.ID)
 
-		item := &admin.KolListItem{
+		item := &adminmodel.KolListItem{
 			ID:          kol.ID,
 			UserID:      kol.UserID,
 			DisplayName: getStringValue(kol.DisplayName),
@@ -203,7 +215,7 @@ func (s *AdminService) GetAllKols(ctx context.Context, req *admin.GetAllKolsReq)
 
 	pageInfo := utils.BuildPageResp(params, total)
 
-	return &admin.GetAllKolsResp{
+	return &adminmodel.GetAllKolsResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -214,7 +226,7 @@ func (s *AdminService) GetAllKols(ctx context.Context, req *admin.GetAllKolsReq)
 }
 
 // AdminReviewKol 管理员审核KOL
-func (s *AdminService) AdminReviewKol(ctx context.Context, req *admin.AdminReviewKolReq) (*admin.AdminReviewKolResp, error) {
+func (s *AdminService) AdminReviewKol(ctx context.Context, req *adminmodel.AdminReviewKolReq) (*adminmodel.AdminReviewKolResp, error) {
 	// 验证状态值
 	if req.Status != "approved" && req.Status != "rejected" {
 		return nil, errors.New("invalid status value")
@@ -242,7 +254,7 @@ func (s *AdminService) AdminReviewKol(ctx context.Context, req *admin.AdminRevie
 		return nil, err
 	}
 
-	return &admin.AdminReviewKolResp{
+	return &adminmodel.AdminReviewKolResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -251,7 +263,7 @@ func (s *AdminService) AdminReviewKol(ctx context.Context, req *admin.AdminRevie
 }
 
 // GetAllTeams 获取所有团队列表
-func (s *AdminService) GetAllTeams(ctx context.Context, req *admin.GetAllTeamsReq) (*admin.GetAllTeamsResp, error) {
+func (s *AdminService) GetAllTeams(ctx context.Context, req *adminmodel.GetAllTeamsReq) (*adminmodel.GetAllTeamsResp, error) {
 	// 标准化分页参数
 	params := utils.NormalizePaginationValue(req.Page, req.PageSize)
 	offset := int((params.Page - 1) * params.PageSize)
@@ -269,7 +281,7 @@ func (s *AdminService) GetAllTeams(ctx context.Context, req *admin.GetAllTeamsRe
 	}
 
 	// 构建响应
-	teamList := make([]*admin.TeamListItem, 0, len(teams))
+	teamList := make([]*adminmodel.TeamListItem, 0, len(teams))
 	for _, team := range teams {
 		// 获取成员数量
 		memberCount, _ := s.teamRepo.GetTeamMemberCount(team.ID)
@@ -277,7 +289,7 @@ func (s *AdminService) GetAllTeams(ctx context.Context, req *admin.GetAllTeamsRe
 		// 获取创建者信息
 		creator, _ := s.userRepo.GetUserByID(team.CreatorID)
 
-		item := &admin.TeamListItem{
+		item := &adminmodel.TeamListItem{
 			ID:          team.ID,
 			Name:        team.Name,
 			CreatorID:   team.CreatorID,
@@ -298,7 +310,7 @@ func (s *AdminService) GetAllTeams(ctx context.Context, req *admin.GetAllTeamsRe
 
 	pageInfo := utils.BuildPageResp(params, total)
 
-	return &admin.GetAllTeamsResp{
+	return &adminmodel.GetAllTeamsResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -309,7 +321,7 @@ func (s *AdminService) GetAllTeams(ctx context.Context, req *admin.GetAllTeamsRe
 }
 
 // GetTeamMembers 获取特定团队的所有用户
-func (s *AdminService) GetTeamMembers(ctx context.Context, req *admin.GetTeamMembersReq) (*admin.GetTeamMembersResp, error) {
+func (s *AdminService) GetTeamMembers(ctx context.Context, req *adminmodel.GetTeamMembersReq) (*adminmodel.GetTeamMembersResp, error) {
 	// 验证团队是否存在
 	_, err := s.teamRepo.GetTeamByID(req.TeamID)
 	if err != nil {
@@ -329,7 +341,7 @@ func (s *AdminService) GetTeamMembers(ctx context.Context, req *admin.GetTeamMem
 	}
 
 	// 构建响应
-	memberList := make([]*admin.TeamMemberItem, 0, len(members))
+	memberList := make([]*adminmodel.TeamMemberItem, 0, len(members))
 	for _, member := range members {
 		// 获取用户信息
 		user, err := s.userRepo.GetUserByID(member.UserID)
@@ -337,7 +349,7 @@ func (s *AdminService) GetTeamMembers(ctx context.Context, req *admin.GetTeamMem
 			continue
 		}
 
-		item := &admin.TeamMemberItem{
+		item := &adminmodel.TeamMemberItem{
 			UserID:   member.UserID,
 			Role:     member.Role,
 			JoinedAt: member.JoinedAt.Format("2006-01-02 15:04:05"),
@@ -358,7 +370,7 @@ func (s *AdminService) GetTeamMembers(ctx context.Context, req *admin.GetTeamMem
 
 	pageInfo := utils.BuildPageResp(params, total)
 
-	return &admin.GetTeamMembersResp{
+	return &adminmodel.GetTeamMembersResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -369,7 +381,7 @@ func (s *AdminService) GetTeamMembers(ctx context.Context, req *admin.GetTeamMem
 }
 
 // GetAllOrders 获取所有订单列表
-func (s *AdminService) GetAllOrders(ctx context.Context, req *admin.GetAllOrdersReq) (*admin.GetAllOrdersResp, error) {
+func (s *AdminService) GetAllOrders(ctx context.Context, req *adminmodel.GetAllOrdersReq) (*adminmodel.GetAllOrdersResp, error) {
 	// 标准化分页参数
 	params := utils.NormalizePaginationValue(req.Page, req.PageSize)
 	offset := int((params.Page - 1) * params.PageSize)
@@ -392,12 +404,12 @@ func (s *AdminService) GetAllOrders(ctx context.Context, req *admin.GetAllOrders
 	}
 
 	// 构建响应
-	orderList := make([]*admin.OrderListItem, 0, len(orders))
+	orderList := make([]*adminmodel.OrderListItem, 0, len(orders))
 	for _, order := range orders {
 		// 获取用户信息
 		user, _ := s.userRepo.GetUserByID(order.UserID)
 
-		item := &admin.OrderListItem{
+		item := &adminmodel.OrderListItem{
 			OrderID:   order.OrderID,
 			UserID:    order.UserID,
 			KolID:     order.KolID,
@@ -430,7 +442,7 @@ func (s *AdminService) GetAllOrders(ctx context.Context, req *admin.GetAllOrders
 
 	pageInfo := utils.BuildPageResp(params, total)
 
-	return &admin.GetAllOrdersResp{
+	return &adminmodel.GetAllOrdersResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -441,7 +453,7 @@ func (s *AdminService) GetAllOrders(ctx context.Context, req *admin.GetAllOrders
 }
 
 // GetUserWallet 获取特定用户的钱包信息
-func (s *AdminService) GetUserWallet(ctx context.Context, req *admin.GetUserWalletReq) (*admin.GetUserWalletResp, error) {
+func (s *AdminService) GetUserWallet(ctx context.Context, req *adminmodel.GetUserWalletReq) (*adminmodel.GetUserWalletResp, error) {
 	// 获取用户信息
 	user, err := s.userRepo.GetUserByID(req.UserID)
 	if err != nil {
@@ -456,7 +468,7 @@ func (s *AdminService) GetUserWallet(ctx context.Context, req *admin.GetUserWall
 		return nil, errors.New("wallet not found")
 	}
 
-	walletInfo := &admin.UserWalletInfo{
+	walletInfo := &adminmodel.UserWalletInfo{
 		UserID:        user.ID,
 		Balance:       wallet.Balance,
 		FrozenBalance: wallet.FrozenBalance,
@@ -473,7 +485,7 @@ func (s *AdminService) GetUserWallet(ctx context.Context, req *admin.GetUserWall
 		walletInfo.UserEmail = user.Email
 	}
 
-	return &admin.GetUserWalletResp{
+	return &adminmodel.GetUserWalletResp{
 		BaseResp: &common.BaseResp{
 			Code:    0,
 			Message: "success",
@@ -488,4 +500,115 @@ func getStringValue(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+// AddCampaignConsume 管理员给Campaign添加消费账单
+func (s *AdminService) AddCampaignConsume(ctx context.Context, req *adminmodel.AddCampaignConsumeReq) (*adminmodel.AddCampaignConsumeResp, error) {
+	// 1. 验证金额
+	if req.Amount <= 0 {
+		return nil, errors.New("amount must be greater than 0")
+	}
+
+	// 2. 获取 Campaign 信息
+	campaign, err := s.campaignRepo.GetCampaignByCampaignID(req.CampaignID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("campaign not found")
+		}
+		hlog.Errorf("Failed to get campaign: %v", err)
+		return nil, fmt.Errorf("failed to get campaign: %v", err)
+	}
+
+	// 3. 获取 Campaign 创建用户的钱包
+	wallet, err := s.walletRepo.GetWalletByUserID(campaign.UserID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user wallet not found")
+		}
+		hlog.Errorf("Failed to get wallet: %v", err)
+		return nil, fmt.Errorf("failed to get wallet: %v", err)
+	}
+
+	// 4. 检查余额是否足够
+	if wallet.Balance < req.Amount {
+		return nil, fmt.Errorf("insufficient balance: current balance %.2f, required %.2f", wallet.Balance, req.Amount)
+	}
+
+	// 5. 开始事务
+	var transactionID string
+	err = s.db.Transaction(func(tx *gorm.DB) error {
+		// 5.1 扣除用户钱包余额
+		balanceDelta := -req.Amount // 负数表示扣款
+		if err := s.walletRepo.UpdateBalance(tx, campaign.UserID, balanceDelta, 0); err != nil {
+			hlog.Errorf("Failed to update wallet balance: %v", err)
+			return fmt.Errorf("failed to update wallet balance: %v", err)
+		}
+
+		// 5.2 更新累计消费金额
+		err := tx.Model(&model.OrbiaWallet{}).
+			Where("user_id = ?", campaign.UserID).
+			Update("total_consume", gorm.Expr("total_consume + ?", req.Amount)).Error
+		if err != nil {
+			hlog.Errorf("Failed to update total_consume: %v", err)
+			return fmt.Errorf("failed to update total_consume: %v", err)
+		}
+
+		// 5.3 获取更新后的钱包信息
+		updatedWallet, err := s.walletRepo.GetWalletByUserID(campaign.UserID)
+		if err != nil {
+			hlog.Errorf("Failed to get updated wallet: %v", err)
+			return fmt.Errorf("failed to get updated wallet: %v", err)
+		}
+
+		// 5.4 创建交易记录
+		transactionID = utils.GenerateTransactionID()
+		now := time.Now()
+
+		remark := ""
+		if req.Remark != nil {
+			remark = *req.Remark
+		}
+
+		transaction := &model.OrbiaTransaction{
+			TransactionID:    transactionID,
+			UserID:           campaign.UserID,
+			Type:             "consume",
+			Amount:           req.Amount,
+			BalanceBefore:    wallet.Balance,
+			BalanceAfter:     updatedWallet.Balance,
+			Status:           "completed",
+			RelatedOrderType: stringPtr("campaign"),
+			RelatedOrderID:   &req.CampaignID,
+			Remark:           stringPtr(remark),
+			CompletedAt:      &now,
+		}
+
+		if err := s.txRepo.CreateTransaction(tx, transaction); err != nil {
+			hlog.Errorf("Failed to create transaction: %v", err)
+			return fmt.Errorf("failed to create transaction: %v", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		hlog.Errorf("Transaction failed: %v", err)
+		return nil, err
+	}
+
+	return &adminmodel.AddCampaignConsumeResp{
+		BaseResp: &common.BaseResp{
+			Code:    0,
+			Message: "success",
+		},
+		TransactionID: &transactionID,
+	}, nil
+}
+
+// stringPtr 辅助函数：将字符串转换为指针
+func stringPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
