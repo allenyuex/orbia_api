@@ -12,9 +12,8 @@ const TableNameOrbiaConversationMember = "orbia_conversation_member"
 
 // OrbiaConversationMember 会话成员表
 type OrbiaConversationMember struct {
-	ID             int64      `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:成员ID" json:"id"`                                                         // 成员ID
-	ConversationID int64      `gorm:"column:conversation_id;type:bigint;not null;comment:会话ID" json:"conversation_id"`                                                    // 会话ID
-	UserID         int64      `gorm:"column:user_id;type:bigint;not null;comment:用户ID" json:"user_id"`                                                                    // 用户ID
+	ConversationID string     `gorm:"column:conversation_id;type:varchar(64);primaryKey;comment:会话ID" json:"conversation_id"`                                             // 会话ID
+	UserID         int64      `gorm:"column:user_id;type:bigint;primaryKey;comment:用户ID" json:"user_id"`                                                                  // 用户ID
 	Role           string     `gorm:"column:role;type:enum('creator','member','admin');not null;default:member;comment:成员角色：creator-创建者，member-成员，admin-管理员" json:"role"` // 成员角色：creator-创建者，member-成员，admin-管理员
 	UnreadCount    int32      `gorm:"column:unread_count;type:int;not null;comment:未读消息数" json:"unread_count"`                                                            // 未读消息数
 	LastReadAt     *time.Time `gorm:"column:last_read_at;type:timestamp;comment:最后已读时间" json:"last_read_at"`                                                              // 最后已读时间

@@ -19,13 +19,15 @@ CREATE TABLE IF NOT EXISTS orbia_user (
     current_team_id BIGINT COMMENT '当前团队ID',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted_at TIMESTAMP NULL COMMENT '软删除时间',
     INDEX idx_wallet_address (wallet_address),
     INDEX idx_email (email),
     INDEX idx_role (role),
     INDEX idx_status (status),
     INDEX idx_kol_id (kol_id),
     INDEX idx_current_team_id (current_team_id),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 团队表
@@ -136,13 +138,13 @@ CREATE TABLE IF NOT EXISTS orbia_kol_tag (
 CREATE TABLE IF NOT EXISTS orbia_kol_stats (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
     kol_id BIGINT NOT NULL UNIQUE COMMENT 'KOL ID',
-    total_followers BIGINT DEFAULT 0 COMMENT '全社交网站粉丝总数',
-    tiktok_followers BIGINT DEFAULT 0 COMMENT 'TikTok粉丝数',
-    youtube_subscribers BIGINT DEFAULT 0 COMMENT 'Youtube订阅数',
-    x_followers BIGINT DEFAULT 0 COMMENT 'X粉丝数',
-    discord_members BIGINT DEFAULT 0 COMMENT 'Discord成员数',
-    tiktok_avg_views BIGINT DEFAULT 0 COMMENT 'TikTok视频平均观看数',
-    engagement_rate DECIMAL(10, 2) DEFAULT 0 COMMENT '订阅指数（Engagement Rate）',
+    total_followers BIGINT COMMENT '全社交网站粉丝总数',
+    tiktok_followers BIGINT COMMENT 'TikTok粉丝数',
+    youtube_subscribers BIGINT COMMENT 'Youtube订阅数',
+    x_followers BIGINT COMMENT 'X粉丝数',
+    discord_members BIGINT COMMENT 'Discord成员数',
+    tiktok_avg_views BIGINT COMMENT 'TikTok视频平均观看数',
+    engagement_rate DECIMAL(10, 2) DEFAULT 0.00 COMMENT '订阅指数（Engagement Rate）',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_kol_id (kol_id),

@@ -14,8 +14,7 @@ const TableNameOrbiaConversation = "orbia_conversation"
 
 // OrbiaConversation 会话表
 type OrbiaConversation struct {
-	ID               int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:自增ID（内部使用）" json:"id"`                                                                                                // 自增ID（内部使用）
-	ConversationID   string         `gorm:"column:conversation_id;type:varchar(64);not null;comment:会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）" json:"conversation_id"`                                                       // 会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）
+	ConversationID   string         `gorm:"column:conversation_id;type:varchar(64);primaryKey;comment:会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）" json:"conversation_id"`                                                     // 会话ID（业务唯一ID，格式：CONV_{timestamp}_{random}）
 	Title            *string        `gorm:"column:title;type:varchar(200);comment:会话标题" json:"title"`                                                                                                                        // 会话标题
 	Type             string         `gorm:"column:type;type:enum('kol_order','ad_order','general','support');not null;default:general;comment:会话类型：kol_order-KOL订单会话，ad_order-广告订单会话，general-普通会话，support-客服会话" json:"type"` // 会话类型：kol_order-KOL订单会话，ad_order-广告订单会话，general-普通会话，support-客服会话
 	RelatedOrderType *string        `gorm:"column:related_order_type;type:varchar(50);comment:关联订单类型：kol_order, ad_order" json:"related_order_type"`                                                                         // 关联订单类型：kol_order, ad_order

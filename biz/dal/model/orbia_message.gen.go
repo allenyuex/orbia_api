@@ -14,9 +14,8 @@ const TableNameOrbiaMessage = "orbia_message"
 
 // OrbiaMessage 消息表
 type OrbiaMessage struct {
-	ID             int64          `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:自增ID（内部使用）" json:"id"`                                                                                                            // 自增ID（内部使用）
-	MessageID      string         `gorm:"column:message_id;type:varchar(64);not null;comment:消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）" json:"message_id"`                                                                              // 消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）
-	ConversationID int64          `gorm:"column:conversation_id;type:bigint;not null;comment:会话ID" json:"conversation_id"`                                                                                                             // 会话ID
+	MessageID      string         `gorm:"column:message_id;type:varchar(64);primaryKey;comment:消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）" json:"message_id"`                                                                            // 消息ID（业务唯一ID，格式：MSG_{timestamp}_{random}）
+	ConversationID string         `gorm:"column:conversation_id;type:varchar(64);not null;comment:会话ID" json:"conversation_id"`                                                                                                        // 会话ID
 	SenderID       int64          `gorm:"column:sender_id;type:bigint;not null;comment:发送者用户ID" json:"sender_id"`                                                                                                                      // 发送者用户ID
 	MessageType    string         `gorm:"column:message_type;type:enum('text','image','file','video','audio','system');not null;default:text;comment:消息类型：text-文本，image-图片，file-文件，video-视频，audio-音频，system-系统消息" json:"message_type"` // 消息类型：text-文本，image-图片，file-文件，video-视频，audio-音频，system-系统消息
 	Content        string         `gorm:"column:content;type:text;not null;comment:消息内容（文本内容或文件URL）" json:"content"`                                                                                                                   // 消息内容（文本内容或文件URL）
