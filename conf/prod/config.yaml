@@ -10,7 +10,7 @@ server:
 # 数据库配置
 database:
   mysql:
-    host: 127.0.0.1
+    host: 1Panel-mysql-Ymq0
     port: 3306
     database: orbia
     username: root
